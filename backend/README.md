@@ -14,7 +14,6 @@ For scripting purposes, we also assume that the BASH function `linera_spawn` is 
 From the root of Linera repository, this can be achieved as follows:
 
 ```bash
-export PATH="$PWD/target/debug:$PATH"
 source /dev/stdin <<<"$(linera net helper 2>/dev/null)"
 ```
 
@@ -61,16 +60,34 @@ node service.
 
 ```bash
 APP_ID=$(linera -w1 --wait-for-outgoing-messages \
-  project publish-and-create examples/game-of-life-challenge gol_challenge $CHAIN_1 \
+  project publish-and-create backend gol_challenge $CHAIN_1 \
     --json-argument "null")
-
-linera -w1 service --port 8080 &
-sleep 1
 ```
 
 ### Creating a new puzzle
 
-TODO
+```bash
+cargo run --bin gol -- create-puzzles
+
+BLOB_ID=$(linera -w1 publish-data-blob "02_beehive_pattern.bcs")
+```
+
+```bash
+linera -w1 service --port 8080 &
+sleep 1
+```
+
+```gql,uri=http://localhost:8080/chains/$CHAIN_1/applications/$APP_ID
+query {
+    printPuzzle(puzzleId: "$BLOB_ID")
+}
+```
+
+```gql,uri=http://localhost:8080/chains/$CHAIN_1/applications/$APP_ID
+query {
+    puzzle(puzzleId: "$BLOB_ID") { title, summary }
+}
+```
 
 ### Submitting a solution to a puzzle
 
