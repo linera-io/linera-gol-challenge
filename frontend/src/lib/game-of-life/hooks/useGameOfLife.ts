@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Board, BoardConfig } from "../domain/entities/Board";
+import { Board } from "../domain/entities/Board";
 import { GameEngine } from "../application/GameEngine";
 
 export interface UseGameOfLifeOptions {

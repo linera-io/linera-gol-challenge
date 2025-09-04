@@ -1,9 +1,8 @@
-import React from 'react';
-import { Card, CardHeader, CardBody } from '@heroui/card';
-import { Badge } from '@heroui/badge';
-import { Button } from '@heroui/button';
-import { CheckCircle, AlertCircle, Target, Zap } from 'lucide-react';
-import { PuzzleInfo as PuzzleData } from '@/lib/game-of-life/hooks/usePuzzleGame';
+import { Card, CardHeader, CardBody } from "@heroui/card";
+import { Badge } from "@heroui/badge";
+import { Button } from "@heroui/button";
+import { CheckCircle, AlertCircle, Target, Zap } from "lucide-react";
+import { PuzzleInfo as PuzzleData } from "@/lib/game-of-life/hooks/usePuzzleGame";
 
 interface PuzzleInfoProps {
   puzzle: PuzzleData | null;
@@ -16,9 +15,9 @@ interface PuzzleInfoProps {
 }
 
 const difficultyConfig = {
-  Easy: { color: 'success' as const, icon: '🌱' },
-  Medium: { color: 'warning' as const, icon: '🔥' },
-  Hard: { color: 'danger' as const, icon: '💀' }
+  Easy: { color: "success" as const, icon: "🌱" },
+  Medium: { color: "warning" as const, icon: "🔥" },
+  Hard: { color: "danger" as const, icon: "💀" },
 };
 
 export function PuzzleInfo({
@@ -28,7 +27,7 @@ export function PuzzleInfo({
   isValidating,
   isSubmitting,
   onSubmit,
-  onClear
+  onClear,
 }: PuzzleInfoProps) {
   if (!puzzle) {
     return (
@@ -57,18 +56,10 @@ export function PuzzleInfo({
                 {puzzle.title}
               </h3>
               <div className="flex items-center gap-2 mt-2">
-                <Badge 
-                  color={config.color} 
-                  variant="flat"
-                  size="sm"
-                >
+                <Badge color={config.color} variant="flat" size="sm">
                   {config.icon} {difficulty}
                 </Badge>
-                <Badge 
-                  variant="flat"
-                  size="sm"
-                  className="bg-gray-100"
-                >
+                <Badge variant="flat" size="sm" className="bg-gray-100">
                   {puzzle.size}×{puzzle.size} Grid
                 </Badge>
               </div>
@@ -91,8 +82,8 @@ export function PuzzleInfo({
               <span className="text-sm font-medium text-gray-600">
                 Current Generation:
               </span>
-              <Badge 
-                color={generation === 0 ? "success" : "warning"} 
+              <Badge
+                color={generation === 0 ? "success" : "warning"}
                 variant="solid"
                 size="lg"
               >
@@ -120,11 +111,13 @@ export function PuzzleInfo({
 
             {/* Validation Result */}
             {validationResult && (
-              <div className={`p-4 rounded-lg border ${
-                validationResult.isValid 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-red-50 border-red-200'
-              }`}>
+              <div
+                className={`p-4 rounded-lg border ${
+                  validationResult.isValid
+                    ? "bg-green-50 border-green-200"
+                    : "bg-red-50 border-red-200"
+                }`}
+              >
                 <div className="flex items-start gap-3">
                   {validationResult.isValid ? (
                     <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
@@ -132,9 +125,13 @@ export function PuzzleInfo({
                     <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <p className={`font-medium ${
-                      validationResult.isValid ? 'text-green-800' : 'text-red-800'
-                    }`}>
+                    <p
+                      className={`font-medium ${
+                        validationResult.isValid
+                          ? "text-green-800"
+                          : "text-red-800"
+                      }`}
+                    >
                       {validationResult.message}
                     </p>
                     {validationResult.isValid && (
