@@ -1,4 +1,4 @@
 packages:
   - .
-  - ../linera-protocol/linera-web
-  - ../linera-protocol/linera-web/signer
+  - ../../linera-protocol/linera-web
+  - ../../linera-protocol/linera-web/signer

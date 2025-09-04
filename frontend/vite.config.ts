@@ -22,7 +22,7 @@ export default defineConfig({
   ],
   server: {
     fs: {
-      allow: [".."],
+      allow: ["..", "../../linera-protocol"],
     },
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',

@@ -8,7 +8,7 @@ The project requires a specific directory structure with the Linera protocol rep
 
 ```
 root/
-  linera-gol/          (this repository)
+  gol-challenge/          (this repository)
   linera-protocol/     (Linera SDK repository)
 ```
 
@@ -32,11 +32,11 @@ Navigate to the Linera protocol packages and install dependencies:
 
 ```bash
 # Install @linera/client dependencies
-cd ../linera-protocol/linera-web/packages/linera-client
+cd ../../linera-protocol/linera-web/packages/linera-client
 pnpm install
 
 # Install @linera/signer dependencies
-cd ../linera-signer
+cd ../../linera-protocol/linera-web/signer
 pnpm install
 ```
 
@@ -45,7 +45,7 @@ pnpm install
 Return to this project and install its dependencies:
 
 ```bash
-cd ../../../../linera-gol
+cd ../../../../gol-challenge
 pnpm install
 ```
 
