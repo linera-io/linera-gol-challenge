@@ -34,6 +34,9 @@ enum Commands {
     PrintBoard {
         /// Path to the board file to print
         path: PathBuf,
+        /// Whether to use JSON for the printing
+        #[arg(long)]
+        json: bool,
     },
     /// Check if a board solves a puzzle
     CheckSolution {
@@ -55,8 +58,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::PrintPuzzle { path } => {
             print_puzzle(&path)?;
         }
-        Commands::PrintBoard { path } => {
-            print_board(&path)?;
+        Commands::PrintBoard { path, json } => {
+            print_board(&path, json)?;
         }
         Commands::CheckSolution { puzzle, board } => {
             check_solution(&puzzle, &board)?;
@@ -71,6 +74,7 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
     fs::create_dir_all(output_dir)?;
 
     // Generate all static pattern puzzles
+    #[allow(clippy::type_complexity)]
     let puzzles: Vec<(
         &str,
         fn() -> Result<Puzzle, Box<dyn std::error::Error>>,
@@ -87,7 +91,7 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
         let puzzle = puzzle_creator()?;
         let solution = solution_creator(&puzzle)?;
 
-        let puzzle_path = output_dir.join(format!("{}.bcs", name));
+        let puzzle_path = output_dir.join(format!("{}_puzzle.bcs", name));
         let solution_path = output_dir.join(format!("{}_solution.bcs", name));
 
         let puzzle_bytes = bcs::to_bytes(&puzzle)?;
@@ -404,11 +408,15 @@ fn print_puzzle(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn print_board(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn print_board(path: &PathBuf, json: bool) -> Result<(), Box<dyn std::error::Error>> {
     let board_bytes = fs::read(path)?;
     let board: Board = bcs::from_bytes(&board_bytes)?;
-    println!("Board:");
-    println!("{:#}", board);
+    if json {
+        println!("{}", serde_json::to_string_pretty(&board)?);
+    } else {
+        println!("Board:");
+        println!("{:#}", board);
+    }
     Ok(())
 }
 

@@ -69,8 +69,13 @@ APP_ID=$(linera -w1 --wait-for-outgoing-messages \
 ```bash
 cargo run --bin gol -- create-puzzles
 
-BLOB_ID=$(linera -w1 publish-data-blob "02_beehive_pattern.bcs")
+BLOB_ID=$(linera -w1 publish-data-blob "02_beehive_pattern_puzzle.bcs")
 ```
+
+### Testing the GraphQL APIs
+
+In this section, we are using the GraphQL service of the native client to show examples of
+GraphQL queries. Note that Web frontends have their own GraphQL endpoint.
 
 ```bash
 linera -w1 service --port 8080 &
@@ -89,6 +94,11 @@ query {
 }
 ```
 
-### Submitting a solution to a puzzle
-
-TODO
+```gql,uri=http://localhost:8080/chains/$CHAIN_1/applications/$APP_ID
+mutation {
+    submitSolution(puzzleId: "$BLOB_ID", board: {
+        size: 7,
+        liveCells: [{x: 1, y: 2}, {x: 2, y: 1}, {x: 2, y: 3}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 4, y: 2}]
+    })
+}
+```
