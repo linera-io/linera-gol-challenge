@@ -80,8 +80,16 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
         fn() -> Result<Puzzle, Box<dyn std::error::Error>>,
         fn(&Puzzle) -> Result<Board, Box<dyn std::error::Error>>,
     )> = vec![
-        ("01_block_pattern", create_block_puzzle, create_block_solution),
-        ("02_beehive_pattern", create_beehive_puzzle, create_beehive_solution),
+        (
+            "01_block_pattern",
+            create_block_puzzle,
+            create_block_solution,
+        ),
+        (
+            "02_beehive_pattern",
+            create_beehive_puzzle,
+            create_beehive_solution,
+        ),
         ("03_loaf_pattern", create_loaf_puzzle, create_loaf_solution),
         ("04_boat_pattern", create_boat_puzzle, create_boat_solution),
         ("05_tub_pattern", create_tub_puzzle, create_tub_solution),
@@ -186,25 +194,41 @@ fn create_beehive_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         minimal_steps: 1,
         maximal_steps: 5,
         is_strict: false,
-        initial_conditions: vec![
-            Condition::TestRectangle {
-                x_range: 0..7,
-                y_range: 0..7,
-                min_live_count: 6,
-                max_live_count: 10,
-            },
-        ],
+        initial_conditions: vec![Condition::TestRectangle {
+            x_range: 0..7,
+            y_range: 0..7,
+            min_live_count: 6,
+            max_live_count: 10,
+        }],
         final_conditions: vec![
             // Beehive pattern: hexagonal shape
             //  ●●
             // ●  ●
             //  ●●
-            Condition::TestPosition { position: Position { x: 2, y: 1 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 3, y: 1 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 1, y: 2 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 4, y: 2 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 2, y: 3 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 3, y: 3 }, is_live: true },
+            Condition::TestPosition {
+                position: Position { x: 2, y: 1 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 3, y: 1 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 1, y: 2 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 4, y: 2 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 2, y: 3 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 3, y: 3 },
+                is_live: true,
+            },
             // Ensure exactly 6 cells
             Condition::TestRectangle {
                 x_range: 0..7,
@@ -243,27 +267,46 @@ fn create_loaf_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         minimal_steps: 1,
         maximal_steps: 5,
         is_strict: false,
-        initial_conditions: vec![
-            Condition::TestRectangle {
-                x_range: 0..8,
-                y_range: 0..8,
-                min_live_count: 7,
-                max_live_count: 10,
-            },
-        ],
+        initial_conditions: vec![Condition::TestRectangle {
+            x_range: 0..8,
+            y_range: 0..8,
+            min_live_count: 7,
+            max_live_count: 10,
+        }],
         final_conditions: vec![
             // Loaf pattern:
             //  ●●
             // ●  ●
             //  ● ●
             //   ●
-            Condition::TestPosition { position: Position { x: 2, y: 1 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 3, y: 1 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 1, y: 2 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 4, y: 2 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 2, y: 3 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 4, y: 3 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 3, y: 4 }, is_live: true },
+            Condition::TestPosition {
+                position: Position { x: 2, y: 1 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 3, y: 1 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 1, y: 2 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 4, y: 2 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 2, y: 3 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 4, y: 3 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 3, y: 4 },
+                is_live: true,
+            },
             // Ensure exactly 7 cells (I miscounted - loaf has 7 cells)
             Condition::TestRectangle {
                 x_range: 0..8,
@@ -303,24 +346,37 @@ fn create_boat_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         minimal_steps: 1,
         maximal_steps: 5,
         is_strict: false,
-        initial_conditions: vec![
-            Condition::TestRectangle {
-                x_range: 0..6,
-                y_range: 0..6,
-                min_live_count: 5,
-                max_live_count: 8,
-            },
-        ],
+        initial_conditions: vec![Condition::TestRectangle {
+            x_range: 0..6,
+            y_range: 0..6,
+            min_live_count: 5,
+            max_live_count: 8,
+        }],
         final_conditions: vec![
             // Boat pattern:
             // ●●
             // ● ●
             //  ●
-            Condition::TestPosition { position: Position { x: 1, y: 1 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 2, y: 1 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 1, y: 2 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 3, y: 2 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 2, y: 3 }, is_live: true },
+            Condition::TestPosition {
+                position: Position { x: 1, y: 1 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 2, y: 1 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 1, y: 2 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 3, y: 2 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 2, y: 3 },
+                is_live: true,
+            },
             // Ensure exactly 5 cells
             Condition::TestRectangle {
                 x_range: 0..6,
@@ -358,23 +414,33 @@ fn create_tub_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         minimal_steps: 1,
         maximal_steps: 5,
         is_strict: false,
-        initial_conditions: vec![
-            Condition::TestRectangle {
-                x_range: 0..5,
-                y_range: 0..5,
-                min_live_count: 4,
-                max_live_count: 7,
-            },
-        ],
+        initial_conditions: vec![Condition::TestRectangle {
+            x_range: 0..5,
+            y_range: 0..5,
+            min_live_count: 4,
+            max_live_count: 7,
+        }],
         final_conditions: vec![
             // Tub pattern:
             //  ●
             // ● ●
             //  ●
-            Condition::TestPosition { position: Position { x: 2, y: 1 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 1, y: 2 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 3, y: 2 }, is_live: true },
-            Condition::TestPosition { position: Position { x: 2, y: 3 }, is_live: true },
+            Condition::TestPosition {
+                position: Position { x: 2, y: 1 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 1, y: 2 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 3, y: 2 },
+                is_live: true,
+            },
+            Condition::TestPosition {
+                position: Position { x: 2, y: 3 },
+                is_live: true,
+            },
             // Ensure exactly 4 cells
             Condition::TestRectangle {
                 x_range: 0..5,
