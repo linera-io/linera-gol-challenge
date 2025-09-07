@@ -36,9 +36,9 @@ export class LineraService {
 
   // Game of Life app Id
   private static readonly GOL_APP_ID =
-    "626ad6169f5037afbb55d0307fcc0ef30d30aa5fbaba6884c76adc14b4e8fff3";
-  // Update to new testnet-conway faucet
-  private static readonly FAUCET_URL = "http://localhost:8079/";
+    "cc918f81c841b28498ca0c6c3c1c131b9d8f1257c40639de984aac3212edaab8";
+  // Testnet-conway faucet
+  private static readonly FAUCET_URL = "https://faucet.testnet-conway.linera.net/";
 
   private constructor() {}
 

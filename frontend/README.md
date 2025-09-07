@@ -32,7 +32,7 @@ Navigate to the Linera protocol packages and install dependencies:
 
 ```bash
 # Install @linera/client dependencies
-cd ../../linera-protocol/linera-web/packages/linera-client
+cd ../../linera-protocol/linera-web
 pnpm install
 
 # Install @linera/signer dependencies
