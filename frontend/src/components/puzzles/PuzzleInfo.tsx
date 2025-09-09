@@ -1,7 +1,7 @@
-import { Card, CardHeader, CardBody } from "@heroui/card";
-import { Badge } from "@heroui/badge";
+import { Card, CardBody } from "@heroui/card";
+import { Chip } from "@heroui/chip";
 import { Button } from "@heroui/button";
-import { CheckCircle, AlertCircle, Target, Zap } from "lucide-react";
+import { CheckCircle, AlertCircle, Target } from "lucide-react";
 import { PuzzleInfo as PuzzleData } from "@/lib/game-of-life/hooks/usePuzzleGame";
 
 interface PuzzleInfoProps {
@@ -14,20 +14,12 @@ interface PuzzleInfoProps {
   onClear: () => void;
 }
 
-const difficultyConfig = {
-  Easy: { color: "success" as const, icon: "🌱" },
-  Medium: { color: "warning" as const, icon: "🔥" },
-  Hard: { color: "danger" as const, icon: "💀" },
-};
-
 export function PuzzleInfo({
   puzzle,
   generation,
   validationResult,
-  isValidating,
   isSubmitting,
   onSubmit,
-  onClear,
 }: PuzzleInfoProps) {
   if (!puzzle) {
     return (
@@ -43,70 +35,64 @@ export function PuzzleInfo({
   const canValidate = generation === 0;
   // Ensure we have a valid difficulty, default to Easy
   const difficulty = puzzle.difficulty || "Easy";
-  const config = difficultyConfig[difficulty] || difficultyConfig.Easy;
+  console.log("[GOL] Difficulty:", difficulty);
 
   return (
     <div className="space-y-4">
       {/* Puzzle Header Card */}
       <Card className="bg-white shadow-lg">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between w-full">
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-gray-900">
+        <CardBody className="p-6">
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
                 {puzzle.title}
               </h3>
-              <div className="flex items-center gap-2 mt-2">
-                <Badge color={config.color} variant="flat" size="sm">
-                  {config.icon} {difficulty}
-                </Badge>
-                <Badge variant="flat" size="sm" className="bg-gray-100">
-                  {puzzle.size}×{puzzle.size} Grid
-                </Badge>
-              </div>
+              <Chip 
+                variant="flat" 
+                size="sm"
+                className={
+                  difficulty === "Easy" 
+                    ? "bg-green-100 text-green-700" 
+                    : difficulty === "Medium"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-red-100 text-red-700"
+                }
+              >
+                Difficulty {difficulty}
+              </Chip>
             </div>
+            <p className="text-gray-500 text-sm leading-relaxed">
+              {puzzle.summary}
+            </p>
           </div>
-        </CardHeader>
-        <CardBody className="pt-2">
-          <p className="text-gray-700 text-sm leading-relaxed">
-            {puzzle.summary}
-          </p>
         </CardBody>
       </Card>
 
       {/* Game Progress Card */}
       <Card className="bg-white shadow-lg">
-        <CardBody>
+        <CardBody className="p-6">
           <div className="space-y-4">
-            {/* Steps Display */}
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-600">
-                Current Generation:
+            {/* Current Generation Display */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <span className="text-gray-700 font-medium">
+                Current generation
               </span>
-              <Badge
-                color={generation === 0 ? "success" : "warning"}
-                variant="solid"
-                size="lg"
-              >
+              <span className="text-2xl font-bold text-linera-primary">
                 {generation}
-              </Badge>
+              </span>
             </div>
 
             {/* Instructions */}
             {generation !== 0 && (
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-sm text-amber-800 flex items-center gap-2">
-                  <AlertCircle size={16} />
-                  Reset to generation 0 to validate
-                </p>
-              </div>
+              <p className="text-sm text-gray-500">
+                Reset to generation 0 before submitting your solution.
+              </p>
             )}
 
             {generation === 0 && !validationResult && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  💡 Place your cells and click submit when ready
-                </p>
-              </div>
+              <p className="text-sm text-gray-500">
+                Place your cells and press submit when ready.
+              </p>
             )}
 
             {/* Validation Result */}
@@ -134,36 +120,19 @@ export function PuzzleInfo({
                     >
                       {validationResult.message}
                     </p>
-                    {validationResult.isValid && (
-                      <p className="text-sm text-green-700 mt-1">
-                        You can now submit your solution!
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
             )}
 
             <Button
-              color="success"
               onPress={onSubmit}
               isLoading={isSubmitting}
               isDisabled={!canValidate}
-              className="w-full font-medium"
+              className="w-full font-medium bg-linera-primary hover:bg-linera-primary-dark text-white"
               size="lg"
-              startContent={<Zap size={18} />}
             >
               Submit Solution
-            </Button>
-
-            <Button
-              color="danger"
-              variant="light"
-              onPress={onClear}
-              isDisabled={isValidating || isSubmitting}
-              className="w-full"
-            >
-              Clear Board
             </Button>
           </div>
         </CardBody>

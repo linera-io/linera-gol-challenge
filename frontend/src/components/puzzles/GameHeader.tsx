@@ -1,12 +1,12 @@
-import { Grid3x3 } from "lucide-react";
+import { Gamepad2 } from "lucide-react";
 
 export function GameHeader() {
   return (
     <header className="bg-white shadow-sm border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-center">
           <div className="flex items-center space-x-2">
-            <Grid3x3 className="h-5 w-5 text-linera-primary" />
+            <Gamepad2 className="h-5 w-5 text-linera-primary" />
             <h1 className="text-lg font-semibold text-gray-900">
               Conway's Game of Life
             </h1>
