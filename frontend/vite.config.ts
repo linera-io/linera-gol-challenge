@@ -4,44 +4,46 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  base: "",
   plugins: [
     react(),
     tsconfigPaths(),
     tailwindcss(),
-    {
-      name: 'configure-response-headers',
-      configureServer: (server) => {
-        server.middlewares.use((_req, res, next) => {
-          res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-          res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
-          res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-          next();
-        });
-      },
-    },
+    // {
+    //   name: 'configure-response-headers',
+    //   configureServer: (server) => {
+    //     server.middlewares.use((_req, res, next) => {
+    //       // More permissive CORS headers for Dynamic SDK
+    //       res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    //       res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    //       // Remove Cross-Origin-Resource-Policy to allow Dynamic SDK resources
+    //       res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    //       next();
+    //     });
+    //   },
+    // },
   ],
   server: {
     fs: {
       allow: ["..", "../../linera-protocol"],
     },
     headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'credentialless',
-      'Cross-Origin-Resource-Policy': 'cross-origin',
+      "Cross-Origin-Embedder-Policy": "credentialless",
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Resource-Policy": "cross-origin",
+    },
+  },
+  esbuild: {
+    supported: {
+      "top-level-await": true,
     },
   },
   optimizeDeps: {
     exclude: ["@linera/client"],
   },
-  assetsInclude: ["**/*.wasm"],
   build: {
-    target: "esnext",
     rollupOptions: {
-      input: {
-        index: 'index.html',
-        linera: '@linera/client',
-      },
-      preserveEntrySignatures: 'strict',
+      external: ["@linera/client"],
     },
   },
 });

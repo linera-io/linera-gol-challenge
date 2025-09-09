@@ -1,6 +1,6 @@
-import * as linera from "@linera/client";
-import { PrivateKey } from "@linera/signer";
-import { ethers } from "ethers";
+import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
+import { lineraAdapter } from "../lib/linera-adapter";
+import { GOL_APP_ID } from "../constants";
 
 export interface LineraBoard {
   size: number;
@@ -55,16 +55,10 @@ export interface WalletInfo {
 
 export class LineraService {
   private static instance: LineraService | null = null;
-  private client: linera.Client | null = null;
-  private backend: linera.Application | null = null;
+  private dynamicWallet: DynamicWallet | null = null;
   private initialized = false;
+  private isInitializing = false;
   private walletInfo: WalletInfo | null = null;
-
-  // Game of Life app Id
-  private static readonly GOL_APP_ID =
-    "cc918f81c841b28498ca0c6c3c1c131b9d8f1257c40639de984aac3212edaab8";
-  // Testnet-conway faucet
-  private static readonly FAUCET_URL = "https://faucet.testnet-conway.linera.net/";
 
   private constructor() {}
 
@@ -75,108 +69,42 @@ export class LineraService {
     return this.instance;
   }
 
-  async initialize(): Promise<void> {
+  async initialize(dynamicWallet: DynamicWallet): Promise<void> {
     if (this.initialized) return;
+    if (this.isInitializing) return;
+
+    this.isInitializing = true;
 
     try {
-      console.log("Initializing Linera service...");
+      console.log("Initializing Linera service with Dynamic wallet...");
+      
+      this.dynamicWallet = dynamicWallet;
 
-      // Initialize Linera WebAssembly
-      await linera.default();
-
-      // TODO: Try to read existing wallet from browser storage
-      let wallet;
-      // TODO: Support connecting to an already existing signer.
-      const randomWallet = ethers.Wallet.createRandom();
-      if (!randomWallet.mnemonic) {
-        throw new Error("Failed to generate mnemonic");
-      }
-      let signer = PrivateKey.fromMnemonic(randomWallet.mnemonic.phrase);
-      const owner = await signer.address();
-
-      // if (!wallet) {
-      console.log("No wallet found, creating new wallet from faucet...");
-
-      // Create faucet and get new wallet
-      const faucet = new linera.Faucet(LineraService.FAUCET_URL);
-      wallet = await faucet.createWallet();
-      const chainId = await faucet.claimChain(wallet, owner);
-
-      // Create client with wallet and signer
-      this.client = new linera.Client(wallet, signer);
-
-      // Store wallet info
-      localStorage.setItem("linera_chain_id", chainId);
-      localStorage.setItem("linera_wallet_created", new Date().toISOString());
+      const provider = await lineraAdapter.connect(dynamicWallet);
+      
+      await lineraAdapter.setApplication(GOL_APP_ID);
 
       this.walletInfo = {
-        chainId,
+        chainId: provider.chainId,
         createdAt: new Date().toISOString(),
       };
-
-      console.log("Wallet created successfully. Chain ID:", chainId);
-      // } else {
-      //   console.log("Found existing wallet");
-
-      //   // Create client with existing wallet IMPORTANT: await is needed here because new Client returns a promise
-      //   this.client = await new linera.Client(wallet, signer);
-
-      //   // Get stored wallet info
-      //   const storedChainId = localStorage.getItem("linera_chain_id");
-      //   const storedCreatedAt = localStorage.getItem("linera_wallet_created");
-
-      //   if (storedChainId) {
-      //     this.walletInfo = {
-      //       chainId: storedChainId,
-      //       createdAt: storedCreatedAt || new Date().toISOString(),
-      //     };
-      //   }
-      // }
-
-      console.log("Got client", await this.client);
-      this.backend = await (await this.client)
-        .frontend()
-        .application(LineraService.GOL_APP_ID);
-      console.log("Got backend", this.backend);
 
       this.initialized = true;
       console.log("Linera service initialized successfully");
     } catch (error) {
       console.error("Failed to initialize Linera service:", error);
       throw error;
+    } finally {
+      this.isInitializing = false;
     }
   }
 
   async checkWallet(): Promise<WalletInfo | null> {
-    try {
-      await linera.default();
-      // TODO: Bring back once recovering wallets from
-      // the storage is implemented.
-      // const wallet = await linera.Wallet.read();
-
-      // if (!wallet) {
-      //   return null;
-      // }
-
-      const storedChainId = localStorage.getItem("linera_chain_id");
-      const createdAt = localStorage.getItem("linera_wallet_created");
-
-      if (!storedChainId || !createdAt) {
-        return null;
-      }
-
-      return {
-        chainId: storedChainId,
-        createdAt: createdAt,
-      };
-    } catch (error) {
-      console.error("Failed to check wallet:", error);
-      return null;
-    }
+    return this.walletInfo;
   }
 
   private async ensureInitialized(): Promise<void> {
-    if (!this.initialized || !this.client || !this.backend) {
+    if (!this.initialized || !lineraAdapter.isApplicationSet()) {
       throw new Error("Linera service not initialized");
     }
   }
@@ -193,8 +121,7 @@ export class LineraService {
       variables: { board },
     };
 
-    const response = await this.backend!.query(JSON.stringify(query));
-    const result = JSON.parse(response);
+    const result = await lineraAdapter.queryApplication<any>(query);
 
     if (result.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
@@ -224,8 +151,7 @@ export class LineraService {
       variables: { board, steps },
     };
 
-    const response = await this.backend!.query(JSON.stringify(query));
-    const result = JSON.parse(response);
+    const result = await lineraAdapter.queryApplication<any>(query);
 
     if (result.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
@@ -252,8 +178,7 @@ export class LineraService {
       variables: { board, puzzleId },
     };
 
-    const response = await this.backend!.query(JSON.stringify(query));
-    const result = JSON.parse(response);
+    const result = await lineraAdapter.queryApplication<any>(query);
 
     if (result.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
@@ -280,8 +205,7 @@ export class LineraService {
         variables: { puzzleId, board },
       };
 
-      const response = await this.backend!.query(JSON.stringify(mutation));
-      const result = JSON.parse(response);
+      const result = await lineraAdapter.queryApplication<any>(mutation);
 
       if (result.errors) {
         throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
@@ -296,9 +220,6 @@ export class LineraService {
 
   async getPuzzle(puzzleId: string): Promise<Puzzle | null> {
     await this.ensureInitialized();
-    if (!this.backend) {
-      throw new Error("Backend not initialized");
-    }
 
     try {
       const query = {
@@ -319,9 +240,8 @@ export class LineraService {
         variables: { puzzleId },
       };
 
-      const response = await this.backend.query(JSON.stringify(query));
-      console.log("[GOL] Got response from getPuzzle", response);
-      const result = JSON.parse(response);
+      const result = await lineraAdapter.queryApplication<any>(query);
+      console.log("[GOL] Got response from getPuzzle", result);
 
       if (result.errors) {
         throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
@@ -362,10 +282,17 @@ export class LineraService {
     }
   }
 
-  onNotification(callback: (notification: any) => void): void {
-    if (this.client) {
-      this.client.onNotification(callback);
-    }
+  onNotification(_callback: (notification: any) => void): void {
+    // Notifications not supported with Dynamic wallet yet
+    console.warn("Notifications not yet supported with Dynamic wallet");
+  }
+
+  async disconnect(): Promise<void> {
+    lineraAdapter.reset();
+    this.initialized = false;
+    this.isInitializing = false;
+    this.dynamicWallet = null;
+    this.walletInfo = null;
   }
 
   // Convert between our game format and Linera format

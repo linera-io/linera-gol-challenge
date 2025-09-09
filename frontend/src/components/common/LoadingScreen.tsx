@@ -1,60 +1,90 @@
-import { Card, CardBody } from "@heroui/card";
-import { Spinner } from "@heroui/spinner";
+import { Loader2, Wallet, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@heroui/button";
 
-export function LoadingScreen() {
+interface LoadingScreenProps {
+  message?: string;
+  showConnectButton?: boolean;
+  onConnect?: () => void;
+  error?: string | null;
+  onRetry?: () => void;
+}
+
+export function LoadingScreen({ 
+  message = "Loading Game of Life...",
+  showConnectButton = false,
+  onConnect,
+  error,
+  onRetry
+}: LoadingScreenProps) {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <Card className="max-w-md w-full bg-white shadow-xl">
-        <CardBody className="p-8">
-          <div className="flex flex-col items-center space-y-6">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Conway's Game of Life
-              </h1>
-              <p className="text-sm text-gray-600">
-                Powered by{" "}
-                <span className="text-linera-primary font-semibold">
-                  Linera
-                </span>
-              </p>
-            </div>
-
-            {/* Loading Spinner */}
-            <div className="relative">
-              <Spinner
-                size="lg"
-                color="danger"
-                classNames={{
-                  circle1: "border-b-linera-primary",
-                  circle2: "border-b-linera-primary-light",
-                }}
-              />
-            </div>
-
-            <div className="text-center space-y-2">
-              <p className="text-gray-700 font-medium">
-                Initializing Blockchain Wallet
-              </p>
-              <p className="text-sm text-gray-500">
-                This may take a few moments...
-              </p>
-            </div>
-
-            <div className="absolute inset-0 opacity-5 pointer-events-none">
-              <div
-                className="w-full h-full"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(to right, #DE2A02 1px, transparent 1px),
-                    linear-gradient(to bottom, #DE2A02 1px, transparent 1px)
-                  `,
-                  backgroundSize: "20px 20px",
-                }}
-              />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="text-center space-y-6 p-8">
+        {/* Logo/Icon */}
+        <div className="flex justify-center mb-8">
+          <div className="w-20 h-20 bg-linera-primary rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="grid grid-cols-3 gap-1">
+              {[...Array(9)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-2 h-2 rounded-sm ${
+                    [1, 3, 4, 5, 7].includes(i) ? "bg-white" : "bg-white/30"
+                  }`}
+                />
+              ))}
             </div>
           </div>
-        </CardBody>
-      </Card>
+        </div>
+
+        {/* Title */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Conway's Game of Life
+          </h1>
+          <p className="text-gray-500">
+            Powered by <span className="text-linera-primary font-medium">Linera</span>
+          </p>
+        </div>
+
+        {/* Loading or Error State */}
+        {error ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-center gap-2 text-red-600">
+              <AlertCircle size={20} />
+              <p className="text-sm">{error}</p>
+            </div>
+            {onRetry && (
+              <Button
+                variant="flat"
+                onPress={onRetry}
+                startContent={<RefreshCw size={16} />}
+                className="bg-linera-primary text-white hover:bg-linera-primary-dark"
+              >
+                Retry Connection
+              </Button>
+            )}
+          </div>
+        ) : showConnectButton ? (
+          <div className="space-y-4">
+            <p className="text-gray-600">{message}</p>
+            <Button
+              size="lg"
+              variant="flat"
+              onPress={onConnect}
+              startContent={<Wallet size={20} />}
+              className="bg-linera-primary text-white hover:bg-linera-primary-dark px-8"
+            >
+              Connect Wallet
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-center gap-3">
+              <Loader2 className="w-6 h-6 text-linera-primary animate-spin" />
+              <p className="text-gray-600">{message}</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

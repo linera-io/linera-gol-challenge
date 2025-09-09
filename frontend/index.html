@@ -1,11 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Linera Game of Life</title>
-    
+
+    <!-- Content Security Policy for Dynamic -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="frame-src https://app.dynamicauth.com 'self';"
+    />
+    <script src="/js/dynamic-iframe-shim.js"></script>
     <script type="importmap">
       {
         "imports": {

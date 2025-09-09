@@ -67,7 +67,8 @@ export function usePuzzleGame() {
       setShowPuzzleList(false);
       game.clear();
       
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.puzzle(puzzleId) });
+      // Set the puzzle data in the query cache
+      queryClient.setQueryData(QUERY_KEYS.puzzle(puzzleId), puzzle);
     },
     onError: (error) => {
       console.error('Failed to load puzzle:', error);
