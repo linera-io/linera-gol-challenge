@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useCallback, memo } from "react";
+import { Condition } from "@/lib/linera/services/LineraService";
 
 interface GameBoardCanvasProps {
   width: number;
@@ -8,6 +9,8 @@ interface GameBoardCanvasProps {
   cells: Map<string, boolean>;
   onCellClick: (x: number, y: number) => void;
   cellSize?: number;
+  initialConditions?: Condition[];
+  finalConditions?: Condition[];
 }
 
 export const GameBoardCanvas = memo(function GameBoardCanvas({
@@ -16,6 +19,8 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
   cells,
   onCellClick,
   cellSize = 20,
+  initialConditions,
+  finalConditions,
 }: GameBoardCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -48,6 +53,101 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
       ctx.stroke();
     }
 
+    // Draw condition overlays
+    if (initialConditions || finalConditions) {
+      ctx.save();
+      
+      // Draw initial conditions
+      if (initialConditions) {
+        initialConditions.forEach(condition => {
+          if ('TestPosition' in condition) {
+            const { position, is_live } = condition.TestPosition;
+            if (position.x >= 0 && position.x < width && position.y >= 0 && position.y < height) {
+              ctx.fillStyle = is_live 
+                ? 'rgba(34, 197, 94, 0.3)' // Green for must be alive
+                : 'rgba(34, 197, 94, 0.15)'; // Lighter green for must be dead
+              ctx.fillRect(
+                position.x * cellSize + 1,
+                position.y * cellSize + 1,
+                cellSize - 2,
+                cellSize - 2
+              );
+            }
+          } else if ('TestRectangle' in condition) {
+            const { x_range, y_range } = condition.TestRectangle;
+            
+            // Draw rectangle area
+            ctx.strokeStyle = 'rgba(34, 197, 94, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(
+              x_range.start * cellSize,
+              y_range.start * cellSize,
+              (x_range.end - x_range.start) * cellSize,
+              (y_range.end - y_range.start) * cellSize
+            );
+            
+            // Fill with very light color
+            ctx.fillStyle = 'rgba(34, 197, 94, 0.06)';
+            ctx.fillRect(
+              x_range.start * cellSize,
+              y_range.start * cellSize,
+              (x_range.end - x_range.start) * cellSize,
+              (y_range.end - y_range.start) * cellSize
+            );
+            
+            ctx.setLineDash([]);
+          }
+        });
+      }
+      
+      // Draw final conditions
+      if (finalConditions) {
+        finalConditions.forEach(condition => {
+          if ('TestPosition' in condition) {
+            const { position, is_live } = condition.TestPosition;
+            if (position.x >= 0 && position.x < width && position.y >= 0 && position.y < height) {
+              ctx.fillStyle = is_live 
+                ? 'rgba(59, 130, 246, 0.3)' // Blue for must be alive
+                : 'rgba(59, 130, 246, 0.15)'; // Lighter blue for must be dead
+              ctx.fillRect(
+                position.x * cellSize + 1,
+                position.y * cellSize + 1,
+                cellSize - 2,
+                cellSize - 2
+              );
+            }
+          } else if ('TestRectangle' in condition) {
+            const { x_range, y_range } = condition.TestRectangle;
+            
+            // Draw rectangle area
+            ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(
+              x_range.start * cellSize,
+              y_range.start * cellSize,
+              (x_range.end - x_range.start) * cellSize,
+              (y_range.end - y_range.start) * cellSize
+            );
+            
+            // Fill with very light color
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.06)';
+            ctx.fillRect(
+              x_range.start * cellSize,
+              y_range.start * cellSize,
+              (x_range.end - x_range.start) * cellSize,
+              (y_range.end - y_range.start) * cellSize
+            );
+            
+            ctx.setLineDash([]);
+          }
+        });
+      }
+      
+      ctx.restore();
+    }
+
     // Linera primary color for alive cells
     ctx.fillStyle = "#DE2A02";
     ctx.shadowColor = "rgba(222, 42, 2, 0.2)";
@@ -66,7 +166,7 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
     });
 
     ctx.shadowBlur = 0;
-  }, [width, height, cells, cellSize]);
+  }, [width, height, cells, cellSize, initialConditions, finalConditions]);
 
   useEffect(() => {
     draw();

@@ -35,7 +35,6 @@ export function PuzzleInfo({
   const canValidate = generation === 0;
   // Ensure we have a valid difficulty, default to Easy
   const difficulty = puzzle.difficulty || "Easy";
-  console.log("[GOL] Difficulty:", difficulty);
 
   return (
     <div className="space-y-4">

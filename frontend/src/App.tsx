@@ -1,10 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
-import clsx from 'clsx';
-import { Providers } from './providers';
-import { fontSans } from './config/fonts';
-import { PuzzleGame } from './components/puzzles/PuzzleGame';
-import { LoadingScreen } from './components/common/LoadingScreen';
-import { useLineraInitialization } from './lib/linera/hooks/useLineraQueries';
+import { Routes, Route } from "react-router-dom";
+import clsx from "clsx";
+import { Providers } from "./providers";
+import { fontSans } from "./config/fonts";
+import { PuzzleGame } from "./components/puzzles/PuzzleGame";
+import { LoadingScreen } from "./components/common/LoadingScreen";
+import { useLineraInitialization } from "./lib/linera/hooks/useLineraQueries";
 
 function AppContent() {
   const { data: isInitialized, isLoading } = useLineraInitialization();
@@ -24,7 +24,7 @@ function App() {
   return (
     <div
       className={clsx(
-        "min-h-screen text-gray-900 bg-white font-sans antialiased",
+        "min-h-screen text-gray-900 bg-white font-sans antialiased h-auto",
         fontSans.variable
       )}
     >

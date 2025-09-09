@@ -7,6 +7,30 @@ export interface LineraBoard {
   liveCells: Array<{ x: number; y: number }>;
 }
 
+// Condition types matching the backend structure
+export interface Position {
+  x: number;
+  y: number;
+}
+
+export interface TestPositionCondition {
+  TestPosition: {
+    position: Position;
+    is_live: boolean;
+  };
+}
+
+export interface TestRectangleCondition {
+  TestRectangle: {
+    x_range: { start: number; end: number };
+    y_range: { start: number; end: number };
+    min_live_count: number;
+    max_live_count: number;
+  };
+}
+
+export type Condition = TestPositionCondition | TestRectangleCondition;
+
 export interface Puzzle {
   id: string;
   title: string;
@@ -15,6 +39,8 @@ export interface Puzzle {
   size: number;
   minimalSteps: number;
   maximalSteps: number;
+  initialConditions?: Condition[];
+  finalConditions?: Condition[];
 }
 
 export interface ValidationResult {
@@ -285,6 +311,8 @@ export class LineraService {
               size
               minimalSteps
               maximalSteps
+              initialConditions
+              finalConditions
             }
           }
         `,
@@ -325,6 +353,8 @@ export class LineraService {
         size: puzzleData.size || 7,
         minimalSteps: puzzleData.minimalSteps || 0,
         maximalSteps: puzzleData.maximalSteps || 100,
+        initialConditions: puzzleData.initialConditions || [],
+        finalConditions: puzzleData.finalConditions || [],
       };
     } catch (error) {
       console.error("Failed to get puzzle:", error);

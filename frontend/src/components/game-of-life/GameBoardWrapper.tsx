@@ -2,6 +2,7 @@
 
 import { GameBoard } from "./GameBoard";
 import { GameBoardCanvas } from "./GameBoardCanvas";
+import { Condition } from "@/lib/linera/services/LineraService";
 
 interface GameBoardWrapperProps {
   width: number;
@@ -9,6 +10,8 @@ interface GameBoardWrapperProps {
   cells: Map<string, boolean>;
   onCellClick: (x: number, y: number) => void;
   cellSize?: number;
+  initialConditions?: Condition[];
+  finalConditions?: Condition[];
 }
 
 const CANVAS_THRESHOLD = 50;

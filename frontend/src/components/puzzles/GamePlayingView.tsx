@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { ArrowLeft, Info, Grid3x3, Play, RotateCcw, Check } from "lucide-react";
+import { ArrowLeft, Info, Grid3x3, Play, Check } from "lucide-react";
 import { GameBoardWrapper } from "@/components/game-of-life/GameBoardWrapper";
 import { PuzzleInfo } from "./PuzzleInfo";
 import { GameControls } from "./GameControls";
@@ -47,6 +48,14 @@ export function GamePlayingView({
   onClear,
   onSubmit,
 }: GamePlayingViewProps) {
+  const [showInitialConditions, setShowInitialConditions] = useState(false);
+  const [showFinalConditions, setShowFinalConditions] = useState(false);
+  
+  const hasConditions = !!(
+    (puzzle?.initialConditions && puzzle.initialConditions.length > 0) ||
+    (puzzle?.finalConditions && puzzle.finalConditions.length > 0)
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -143,6 +152,8 @@ export function GamePlayingView({
                         30,
                         Math.min(60, 500 / (puzzle?.size || PUZZLE_BOARD_SIZE))
                       )}
+                      initialConditions={showInitialConditions ? puzzle?.initialConditions : undefined}
+                      finalConditions={showFinalConditions ? puzzle?.finalConditions : undefined}
                     />
                   </div>
                 </div>
@@ -155,6 +166,11 @@ export function GamePlayingView({
                   onNext={onNext}
                   onPrevious={onPrevious}
                   onClear={onClear}
+                  showHints={showInitialConditions}
+                  showGoals={showFinalConditions}
+                  onToggleHints={() => setShowInitialConditions(!showInitialConditions)}
+                  onToggleGoals={() => setShowFinalConditions(!showFinalConditions)}
+                  hasConditions={hasConditions}
                 />
               </div>
             </CardBody>

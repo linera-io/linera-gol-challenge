@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LineraService, LineraBoard } from '@/lib/linera/services/LineraService';
+import { LineraService, LineraBoard, Condition } from '@/lib/linera/services/LineraService';
 import { PUZZLE_BOARD_SIZE } from '../data/puzzles';
 import { useGameOfLife } from './useGameOfLife';
 import { useLineraInitialization } from '@/lib/linera/hooks/useLineraQueries';
@@ -13,6 +13,8 @@ export interface PuzzleInfo {
   size: number;
   minimalSteps: number;
   maximalSteps: number;
+  initialConditions?: Condition[];
+  finalConditions?: Condition[];
 }
 
 const QUERY_KEYS = {
