@@ -74,30 +74,16 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
     fs::create_dir_all(output_dir)?;
 
     // Generate all static pattern puzzles
-    #[allow(clippy::type_complexity)]
-    let puzzles: Vec<(
-        &str,
-        fn() -> Result<Puzzle, Box<dyn std::error::Error>>,
-        fn(&Puzzle) -> Result<Board, Box<dyn std::error::Error>>,
-    )> = vec![
-        (
-            "01_block_pattern",
-            create_block_puzzle,
-            create_block_solution,
-        ),
-        (
-            "02_beehive_pattern",
-            create_beehive_puzzle,
-            create_beehive_solution,
-        ),
-        ("03_loaf_pattern", create_loaf_puzzle, create_loaf_solution),
-        ("04_boat_pattern", create_boat_puzzle, create_boat_solution),
-        ("05_tub_pattern", create_tub_puzzle, create_tub_solution),
+    let puzzles: Vec<(&str, fn() -> (Puzzle, Board))> = vec![
+        ("01_block_pattern", create_block_puzzle_and_solution),
+        ("02_beehive_pattern", create_beehive_puzzle_and_solution),
+        ("03_loaf_pattern", create_loaf_puzzle_and_solution),
+        ("04_boat_pattern", create_boat_puzzle_and_solution),
+        ("05_tub_pattern", create_tub_puzzle_and_solution),
     ];
 
-    for (name, puzzle_creator, solution_creator) in puzzles {
-        let puzzle = puzzle_creator()?;
-        let solution = solution_creator(&puzzle)?;
+    for (name, puzzle_and_solution_creator) in puzzles {
+        let (puzzle, solution) = puzzle_and_solution_creator();
 
         let puzzle_path = output_dir.join(format!("{}_puzzle.bcs", name));
         let solution_path = output_dir.join(format!("{}_solution.bcs", name));
@@ -120,9 +106,7 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
     Ok(())
 }
 
-fn create_block_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
-    // Create a puzzle where the goal is to form a 2x2 block in the center
-
+fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
     // Define the target pattern (2x2 block in center)
     let target_board = Board::with_live_cells(
         6,
@@ -155,26 +139,11 @@ fn create_block_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
-    Ok(puzzle)
+    // Solution is the target pattern itself (stable)
+    (puzzle, target_board)
 }
 
-fn create_block_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error::Error>> {
-    // Create a solution: start with a block pattern that's already stable
-    let live_cells = vec![
-        Position { x: 2, y: 2 },
-        Position { x: 2, y: 3 },
-        Position { x: 3, y: 2 },
-        Position { x: 3, y: 3 },
-    ];
-
-    let board = Board::with_live_cells(puzzle.size, live_cells);
-
-    Ok(board)
-}
-
-fn create_beehive_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
-    // Create a puzzle where the goal is to form a beehive pattern
-
+fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
     // Define the target pattern (beehive: hexagonal shape)
     //  ●●
     // ●  ●
@@ -209,27 +178,11 @@ fn create_beehive_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
-    Ok(puzzle)
+    // Solution is the target pattern itself (stable)
+    (puzzle, target_board)
 }
 
-fn create_beehive_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error::Error>> {
-    let live_cells = vec![
-        Position { x: 2, y: 1 },
-        Position { x: 3, y: 1 },
-        Position { x: 1, y: 2 },
-        Position { x: 4, y: 2 },
-        Position { x: 2, y: 3 },
-        Position { x: 3, y: 3 },
-    ];
-
-    let board = Board::with_live_cells(puzzle.size, live_cells);
-
-    Ok(board)
-}
-
-fn create_loaf_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
-    // Create a puzzle where the goal is to form a loaf pattern
-
+fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
     // Define the target pattern (loaf: bread loaf shape)
     //  ●●
     // ●  ●
@@ -266,28 +219,11 @@ fn create_loaf_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
-    Ok(puzzle)
+    // Solution is the target pattern itself (stable)
+    (puzzle, target_board)
 }
 
-fn create_loaf_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error::Error>> {
-    let live_cells = vec![
-        Position { x: 2, y: 1 },
-        Position { x: 3, y: 1 },
-        Position { x: 1, y: 2 },
-        Position { x: 4, y: 2 },
-        Position { x: 2, y: 3 },
-        Position { x: 4, y: 3 },
-        Position { x: 3, y: 4 },
-    ];
-
-    let board = Board::with_live_cells(puzzle.size, live_cells);
-
-    Ok(board)
-}
-
-fn create_boat_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
-    // Create a puzzle where the goal is to form a boat pattern
-
+fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
     // Define the target pattern (boat shape)
     // ●●
     // ● ●
@@ -321,26 +257,11 @@ fn create_boat_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
-    Ok(puzzle)
+    // Solution is the target pattern itself (stable)
+    (puzzle, target_board)
 }
 
-fn create_boat_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error::Error>> {
-    let live_cells = vec![
-        Position { x: 1, y: 1 },
-        Position { x: 2, y: 1 },
-        Position { x: 1, y: 2 },
-        Position { x: 3, y: 2 },
-        Position { x: 2, y: 3 },
-    ];
-
-    let board = Board::with_live_cells(puzzle.size, live_cells);
-
-    Ok(board)
-}
-
-fn create_tub_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
-    // Create a puzzle where the goal is to form a tub pattern
-
+fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
     // Define the target pattern (tub: hollow square)
     //  ●
     // ● ●
@@ -373,20 +294,8 @@ fn create_tub_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
-    Ok(puzzle)
-}
-
-fn create_tub_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error::Error>> {
-    let live_cells = vec![
-        Position { x: 2, y: 1 },
-        Position { x: 1, y: 2 },
-        Position { x: 3, y: 2 },
-        Position { x: 2, y: 3 },
-    ];
-
-    let board = Board::with_live_cells(puzzle.size, live_cells);
-
-    Ok(board)
+    // Solution is the target pattern itself (stable)
+    (puzzle, target_board)
 }
 
 fn print_puzzle(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
