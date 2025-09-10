@@ -797,6 +797,33 @@ impl Board {
         self.to_direct_board().check_conditions(conditions)
     }
 
+    /// Generate conditions that force all live cells to be exactly the same.
+    /// Returns a Vec<Condition> that ensures:
+    /// 1. Each live cell position is forced to be alive
+    /// 2. The total number of live cells is exactly preserved
+    pub fn to_exactly_matching_conditions(&self) -> Vec<Condition> {
+        let mut conditions = Vec::new();
+
+        // Add position conditions for each live cell
+        for &position in &self.live_cells {
+            conditions.push(Condition::TestPosition {
+                position,
+                is_live: true,
+            });
+        }
+
+        // Add a rectangle condition covering the entire board to enforce exact count
+        let live_count = self.live_cells.len() as u32;
+        conditions.push(Condition::TestRectangle {
+            x_range: 0..self.size,
+            y_range: 0..self.size,
+            min_live_count: live_count,
+            max_live_count: live_count,
+        });
+
+        conditions
+    }
+
     /// Check that the board satisfies the given puzzle.
     pub fn check_puzzle(&self, puzzle: &Puzzle) -> Result<u16, InvalidSolution> {
         if puzzle.minimal_steps > puzzle.maximal_steps {
@@ -1979,6 +2006,110 @@ Final:
 ···
 "#
         );
+    }
+
+    #[test]
+    fn test_to_exactly_matching_conditions() {
+        // Test with a simple board with 3 live cells
+        let mut board = Board::new(5);
+        board.live_cells.extend([
+            Position { x: 1, y: 1 },
+            Position { x: 2, y: 2 },
+            Position { x: 3, y: 0 },
+        ]);
+
+        let conditions = board.to_exactly_matching_conditions();
+
+        // Should have 4 conditions: 3 position conditions + 1 rectangle condition
+        assert_eq!(conditions.len(), 4);
+
+        // Check position conditions for each live cell
+        let mut position_conditions = 0;
+        let mut rectangle_conditions = 0;
+
+        for condition in &conditions {
+            match condition {
+                Condition::TestPosition { position, is_live } => {
+                    assert!(*is_live);
+                    assert!(board.live_cells.contains(position));
+                    position_conditions += 1;
+                }
+                Condition::TestRectangle {
+                    x_range,
+                    y_range,
+                    min_live_count,
+                    max_live_count,
+                } => {
+                    assert_eq!(x_range.start, 0);
+                    assert_eq!(x_range.end, 5);
+                    assert_eq!(y_range.start, 0);
+                    assert_eq!(y_range.end, 5);
+                    assert_eq!(*min_live_count, 3);
+                    assert_eq!(*max_live_count, 3);
+                    rectangle_conditions += 1;
+                }
+            }
+        }
+
+        assert_eq!(position_conditions, 3);
+        assert_eq!(rectangle_conditions, 1);
+
+        // Test that the original board satisfies its own conditions
+        assert!(board.check_conditions(&conditions).is_ok());
+
+        // Test that a board with an extra live cell fails
+        let mut board_extra = board.clone();
+        board_extra.live_cells.insert(Position { x: 4, y: 4 });
+        assert!(board_extra.check_conditions(&conditions).is_err());
+
+        // Test that a board with a missing live cell fails
+        let mut board_missing = board.clone();
+        board_missing.live_cells.remove(&Position { x: 1, y: 1 });
+        assert!(board_missing.check_conditions(&conditions).is_err());
+
+        // Test that a board with different live cells but same count fails
+        let mut board_different = Board::new(5);
+        board_different.live_cells.extend([
+            Position { x: 0, y: 0 },
+            Position { x: 1, y: 0 },
+            Position { x: 2, y: 0 },
+        ]);
+        assert!(board_different.check_conditions(&conditions).is_err());
+    }
+
+    #[test]
+    fn test_to_exactly_matching_conditions_empty_board() {
+        // Test with an empty board
+        let board = Board::new(3);
+        let conditions = board.to_exactly_matching_conditions();
+
+        // Should have only 1 condition: the rectangle condition with count 0
+        assert_eq!(conditions.len(), 1);
+
+        match &conditions[0] {
+            Condition::TestRectangle {
+                x_range,
+                y_range,
+                min_live_count,
+                max_live_count,
+            } => {
+                assert_eq!(x_range.start, 0);
+                assert_eq!(x_range.end, 3);
+                assert_eq!(y_range.start, 0);
+                assert_eq!(y_range.end, 3);
+                assert_eq!(*min_live_count, 0);
+                assert_eq!(*max_live_count, 0);
+            }
+            _ => panic!("Expected rectangle condition for empty board"),
+        }
+
+        // Test that the empty board satisfies its own conditions
+        assert!(board.check_conditions(&conditions).is_ok());
+
+        // Test that a board with any live cell fails
+        let mut board_with_cell = board.clone();
+        board_with_cell.live_cells.insert(Position { x: 1, y: 1 });
+        assert!(board_with_cell.check_conditions(&conditions).is_err());
     }
 
     #[test]
