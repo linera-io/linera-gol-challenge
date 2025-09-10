@@ -122,6 +122,18 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
 
 fn create_block_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
     // Create a puzzle where the goal is to form a 2x2 block in the center
+
+    // Define the target pattern (2x2 block in center)
+    let target_board = Board::with_live_cells(
+        6,
+        vec![
+            Position { x: 2, y: 2 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 2 },
+            Position { x: 3, y: 3 },
+        ],
+    );
+
     let puzzle = Puzzle {
         title: "Block Formation".to_string(),
         summary: "Create a stable 2x2 block pattern in the center of the board".to_string(),
@@ -139,32 +151,8 @@ fn create_block_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
                 max_live_count: 8,
             },
         ],
-        final_conditions: vec![
-            // Must have exactly 4 cells in the center 2x2 block
-            Condition::TestPosition {
-                position: Position { x: 2, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 2, y: 3 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 3, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 3, y: 3 },
-                is_live: true,
-            },
-            // Ensure no other cells are alive (the block should be stable)
-            Condition::TestRectangle {
-                x_range: 0..6,
-                y_range: 0..6,
-                min_live_count: 4,
-                max_live_count: 4,
-            },
-        ],
+        // Final conditions: exactly match the target pattern
+        final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
     Ok(puzzle)
@@ -186,6 +174,23 @@ fn create_block_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error::E
 
 fn create_beehive_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
     // Create a puzzle where the goal is to form a beehive pattern
+
+    // Define the target pattern (beehive: hexagonal shape)
+    //  ●●
+    // ●  ●
+    //  ●●
+    let target_board = Board::with_live_cells(
+        7,
+        vec![
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 1 },
+            Position { x: 1, y: 2 },
+            Position { x: 4, y: 2 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 3 },
+        ],
+    );
+
     let puzzle = Puzzle {
         title: "Beehive Formation".to_string(),
         summary: "Create a stable beehive pattern (6-cell hexagonal shape)".to_string(),
@@ -200,43 +205,8 @@ fn create_beehive_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
             min_live_count: 6,
             max_live_count: 10,
         }],
-        final_conditions: vec![
-            // Beehive pattern: hexagonal shape
-            //  ●●
-            // ●  ●
-            //  ●●
-            Condition::TestPosition {
-                position: Position { x: 2, y: 1 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 3, y: 1 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 1, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 4, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 2, y: 3 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 3, y: 3 },
-                is_live: true,
-            },
-            // Ensure exactly 6 cells
-            Condition::TestRectangle {
-                x_range: 0..7,
-                y_range: 0..7,
-                min_live_count: 6,
-                max_live_count: 6,
-            },
-        ],
+        // Final conditions: exactly match the target pattern
+        final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
     Ok(puzzle)
@@ -259,9 +229,28 @@ fn create_beehive_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error:
 
 fn create_loaf_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
     // Create a puzzle where the goal is to form a loaf pattern
+
+    // Define the target pattern (loaf: bread loaf shape)
+    //  ●●
+    // ●  ●
+    //  ● ●
+    //   ●
+    let target_board = Board::with_live_cells(
+        8,
+        vec![
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 1 },
+            Position { x: 1, y: 2 },
+            Position { x: 4, y: 2 },
+            Position { x: 2, y: 3 },
+            Position { x: 4, y: 3 },
+            Position { x: 3, y: 4 },
+        ],
+    );
+
     let puzzle = Puzzle {
         title: "Loaf Formation".to_string(),
-        summary: "Create a stable loaf pattern (8-cell bread loaf shape)".to_string(),
+        summary: "Create a stable loaf pattern (7-cell bread loaf shape)".to_string(),
         difficulty: Difficulty::Medium,
         size: 8,
         minimal_steps: 1,
@@ -273,48 +262,8 @@ fn create_loaf_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
             min_live_count: 7,
             max_live_count: 10,
         }],
-        final_conditions: vec![
-            // Loaf pattern:
-            //  ●●
-            // ●  ●
-            //  ● ●
-            //   ●
-            Condition::TestPosition {
-                position: Position { x: 2, y: 1 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 3, y: 1 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 1, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 4, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 2, y: 3 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 4, y: 3 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 3, y: 4 },
-                is_live: true,
-            },
-            // Ensure exactly 7 cells (I miscounted - loaf has 7 cells)
-            Condition::TestRectangle {
-                x_range: 0..8,
-                y_range: 0..8,
-                min_live_count: 7,
-                max_live_count: 7,
-            },
-        ],
+        // Final conditions: exactly match the target pattern
+        final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
     Ok(puzzle)
@@ -338,6 +287,22 @@ fn create_loaf_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error::Er
 
 fn create_boat_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
     // Create a puzzle where the goal is to form a boat pattern
+
+    // Define the target pattern (boat shape)
+    // ●●
+    // ● ●
+    //  ●
+    let target_board = Board::with_live_cells(
+        6,
+        vec![
+            Position { x: 1, y: 1 },
+            Position { x: 2, y: 1 },
+            Position { x: 1, y: 2 },
+            Position { x: 3, y: 2 },
+            Position { x: 2, y: 3 },
+        ],
+    );
+
     let puzzle = Puzzle {
         title: "Boat Formation".to_string(),
         summary: "Create a stable boat pattern (5-cell boat shape)".to_string(),
@@ -352,39 +317,8 @@ fn create_boat_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
             min_live_count: 5,
             max_live_count: 8,
         }],
-        final_conditions: vec![
-            // Boat pattern:
-            // ●●
-            // ● ●
-            //  ●
-            Condition::TestPosition {
-                position: Position { x: 1, y: 1 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 2, y: 1 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 1, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 3, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 2, y: 3 },
-                is_live: true,
-            },
-            // Ensure exactly 5 cells
-            Condition::TestRectangle {
-                x_range: 0..6,
-                y_range: 0..6,
-                min_live_count: 5,
-                max_live_count: 5,
-            },
-        ],
+        // Final conditions: exactly match the target pattern
+        final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
     Ok(puzzle)
@@ -406,6 +340,21 @@ fn create_boat_solution(puzzle: &Puzzle) -> Result<Board, Box<dyn std::error::Er
 
 fn create_tub_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
     // Create a puzzle where the goal is to form a tub pattern
+
+    // Define the target pattern (tub: hollow square)
+    //  ●
+    // ● ●
+    //  ●
+    let target_board = Board::with_live_cells(
+        5,
+        vec![
+            Position { x: 2, y: 1 },
+            Position { x: 1, y: 2 },
+            Position { x: 3, y: 2 },
+            Position { x: 2, y: 3 },
+        ],
+    );
+
     let puzzle = Puzzle {
         title: "Tub Formation".to_string(),
         summary: "Create a stable tub pattern (4-cell hollow square)".to_string(),
@@ -420,35 +369,8 @@ fn create_tub_puzzle() -> Result<Puzzle, Box<dyn std::error::Error>> {
             min_live_count: 4,
             max_live_count: 7,
         }],
-        final_conditions: vec![
-            // Tub pattern:
-            //  ●
-            // ● ●
-            //  ●
-            Condition::TestPosition {
-                position: Position { x: 2, y: 1 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 1, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 3, y: 2 },
-                is_live: true,
-            },
-            Condition::TestPosition {
-                position: Position { x: 2, y: 3 },
-                is_live: true,
-            },
-            // Ensure exactly 4 cells
-            Condition::TestRectangle {
-                x_range: 0..5,
-                y_range: 0..5,
-                min_live_count: 4,
-                max_live_count: 4,
-            },
-        ],
+        // Final conditions: exactly match the target pattern
+        final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
     Ok(puzzle)
