@@ -613,19 +613,19 @@ impl DirectPuzzle {
     fn get_rectangle_char(&self, index: usize) -> char {
         // Use different colored/styled characters for different rectangles (0-15)
         match index % 16 {
-            0 => '▢',  // White square
-            1 => '▣',  // Black square with white border
-            2 => '▤',  // Square with horizontal stripes
-            3 => '▥',  // Square with vertical stripes
-            4 => '▦',  // Square with orthogonal crosshatch
-            5 => '▧',  // Square with upper-left to lower-right diagonal
-            6 => '▨',  // Square with upper-right to lower-left diagonal
-            7 => '▩',  // Square with diagonal crosshatch
-            8 => '◢',  // Black lower-right triangle
-            9 => '◣',  // Black lower-left triangle
-            10 => '◤', // Black upper-left triangle
-            11 => '◥', // Black upper-right triangle
-            12 => '◦', // White bullet
+            0 => '◦',  // White bullet
+            1 => '▢',  // White square
+            2 => '▣',  // Black square with white border
+            3 => '▤',  // Square with horizontal stripes
+            4 => '▥',  // Square with vertical stripes
+            5 => '▦',  // Square with orthogonal crosshatch
+            6 => '▧',  // Square with upper-left to lower-right diagonal
+            7 => '▨',  // Square with upper-right to lower-left diagonal
+            8 => '▩',  // Square with diagonal crosshatch
+            9 => '◢',  // Black lower-right triangle
+            10 => '◣', // Black lower-left triangle
+            11 => '◤', // Black upper-left triangle
+            12 => '◥', // Black upper-right triangle
             13 => '◯', // Large circle
             14 => '◊', // White diamond
             15 => '◈', // White diamond containing small black diamond
@@ -897,22 +897,24 @@ impl Puzzle {
         let mut final_rectangles = Vec::new();
 
         // Process initial conditions
-        for (index, condition) in self.initial_conditions.iter().enumerate() {
+        let mut rectangle_index = 0;
+        for condition in &self.initial_conditions {
             self.apply_condition_to_constraints(
                 &mut initial_constraints,
                 &mut initial_rectangles,
                 condition,
-                index,
+                &mut rectangle_index,
             );
         }
 
         // Process final conditions
-        for (index, condition) in self.final_conditions.iter().enumerate() {
+        let mut rectangle_index = 0;
+        for condition in &self.final_conditions {
             self.apply_condition_to_constraints(
                 &mut final_constraints,
                 &mut final_rectangles,
                 condition,
-                index,
+                &mut rectangle_index,
             );
         }
 
@@ -936,7 +938,7 @@ impl Puzzle {
         constraints: &mut BTreeMap<u16, BTreeMap<u16, BTreeSet<CellConstraint>>>,
         rectangles: &mut Vec<RectangleConstraintInfo>,
         condition: &Condition,
-        index: usize,
+        rectangle_index: &mut usize,
     ) {
         match condition {
             Condition::TestPosition { position, is_live } => {
@@ -959,6 +961,8 @@ impl Puzzle {
                 max_live_count,
             } => {
                 // Store rectangle metadata for legend
+                let index = *rectangle_index;
+                *rectangle_index += 1;
                 rectangles.push(RectangleConstraintInfo {
                     index,
                     x_range: x_range.clone(),
@@ -1912,13 +1916,13 @@ Steps: exactly 1
 Mode: Strict
 
 Initial:
-●·▤▤
-·▣▣▤
-·▣▣·
+●·▢▢
+·◦◦▢
+·◦◦·
 ····
 Legend:
-  ▣ [1-2, 1-2] 2-4 live cells
-  ▤ [2-3, 0-1] 1-2 live cells
+  ◦ [1-2, 1-2] 2-4 live cells
+  ▢ [2-3, 0-1] 1-2 live cells
 Final:
 ····
 ····
@@ -1961,7 +1965,7 @@ Final:
         assert!(constraints.is_some());
         let constraint_set = constraints.unwrap();
         assert!(constraint_set.contains(&CellConstraint::MustBeAlive));
-        assert!(constraint_set.contains(&CellConstraint::RectangleArea { index: 1 }));
+        assert!(constraint_set.contains(&CellConstraint::RectangleArea { index: 0 }));
 
         // Position constraint should take precedence in display (should show ●, not rectangle symbol)
         assert_eq!(
@@ -1976,7 +1980,7 @@ Final:
         let constraint_set = constraints.unwrap();
         assert!(!constraint_set.contains(&CellConstraint::MustBeAlive));
         assert!(!constraint_set.contains(&CellConstraint::MustBeDead));
-        assert!(constraint_set.contains(&CellConstraint::RectangleArea { index: 1 }));
+        assert!(constraint_set.contains(&CellConstraint::RectangleArea { index: 0 }));
 
         // Should return None for backward compatibility (no position constraint)
         assert_eq!(
@@ -1995,11 +1999,11 @@ Difficulty: Hard
 Steps: exactly 1
 
 Initial:
-▣▣▣
-▣●▣
-▣▣▣
+◦◦◦
+◦●◦
+◦◦◦
 Legend:
-  ▣ [0-2, 0-2] 3-5 live cells
+  ◦ [0-2, 0-2] 3-5 live cells
 Final:
 ···
 ···

@@ -599,12 +599,12 @@ advanceBoardOnce(board: {size: 3, liveCells: [ {x: 1, y: 1}, {x: 1, y: 0}, {x: 1
         assert!(puzzle_string.contains("Final:"));
         assert!(puzzle_string.contains("Legend:"));
 
-        // Should contain the position constraint (●) and rectangle constraint (▣)
+        // Should contain the position constraint (●) and rectangle constraint (◦)
         assert!(puzzle_string.contains("●"));
-        assert!(puzzle_string.contains("▣"));
+        assert!(puzzle_string.contains("◦"));
         assert!(puzzle_string.contains("✕"));
 
         // Should contain the legend information
-        assert!(puzzle_string.contains("▣ [0-1, 0-1] 1-3 live cells"));
+        assert!(puzzle_string.contains("◦ [0-1, 0-1] 1-3 live cells"));
     }
 }
