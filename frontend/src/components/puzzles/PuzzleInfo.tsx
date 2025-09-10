@@ -32,8 +32,6 @@ export function PuzzleInfo({
     );
   }
 
-  const canValidate = generation === 0;
-  // Ensure we have a valid difficulty, default to Easy
   const difficulty = puzzle.difficulty || "Easy";
 
   return (
@@ -46,15 +44,15 @@ export function PuzzleInfo({
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 {puzzle.title}
               </h3>
-              <Chip 
-                variant="flat" 
+              <Chip
+                variant="flat"
                 size="sm"
                 className={
-                  difficulty === "Easy" 
-                    ? "bg-green-100 text-green-700" 
+                  difficulty === "Easy"
+                    ? "bg-green-100 text-green-700"
                     : difficulty === "Medium"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-red-100 text-red-700"
                 }
               >
                 Difficulty {difficulty}
@@ -127,7 +125,6 @@ export function PuzzleInfo({
             <Button
               onPress={onSubmit}
               isLoading={isSubmitting}
-              isDisabled={!canValidate}
               className="w-full font-medium bg-linera-primary hover:bg-linera-primary-dark text-white"
               size="lg"
             >

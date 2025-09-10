@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useCallback, memo } from "react";
 import { Condition } from "@/lib/linera/services/LineraService";
+import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
 
 interface GameBoardCanvasProps {
   width: number;
@@ -35,9 +36,12 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Adjust grid line width based on cell size for better visibility
+    const lineWidth = cellSize < 15 ? 0.5 : 1;
+    
     // Light gray grid lines
     ctx.strokeStyle = "#E5E7EB";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = lineWidth;
 
     for (let x = 0; x <= width; x++) {
       ctx.beginPath();
@@ -76,9 +80,9 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
           } else if ('TestRectangle' in condition) {
             const { x_range, y_range } = condition.TestRectangle;
             
-            // Draw rectangle area
+            // Draw rectangle area - adjust line width for small cells
             ctx.strokeStyle = 'rgba(34, 197, 94, 0.5)';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = cellSize < 15 ? 1 : 2;
             ctx.setLineDash([5, 5]);
             ctx.strokeRect(
               x_range.start * cellSize,
@@ -120,9 +124,9 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
           } else if ('TestRectangle' in condition) {
             const { x_range, y_range } = condition.TestRectangle;
             
-            // Draw rectangle area
+            // Draw rectangle area - adjust line width for small cells
             ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = cellSize < 15 ? 1 : 2;
             ctx.setLineDash([5, 5]);
             ctx.strokeRect(
               x_range.start * cellSize,
@@ -149,9 +153,16 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
     }
 
     // Linera primary color for alive cells
-    ctx.fillStyle = "#DE2A02";
-    ctx.shadowColor = "rgba(222, 42, 2, 0.2)";
-    ctx.shadowBlur = 4;
+    ctx.fillStyle = BOARD_CONFIG.CELL_COLOR;
+    
+    // Adjust shadow based on cell size for better performance and visibility
+    if (cellSize > 15) {
+      ctx.shadowColor = "rgba(222, 42, 2, 0.2)";
+      ctx.shadowBlur = 4;
+    } else {
+      // Disable shadow for small cells to improve performance
+      ctx.shadowBlur = 0;
+    }
 
     cells.forEach((_, key) => {
       const [x, y] = key.split(",").map(Number);
