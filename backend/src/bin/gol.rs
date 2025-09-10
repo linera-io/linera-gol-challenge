@@ -124,7 +124,7 @@ fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
         difficulty: Difficulty::Easy,
         size: 6,
         minimal_steps: 1,
-        maximal_steps: 5,
+        maximal_steps: 1,
         is_strict: false,
         initial_conditions: vec![
             // Allow any initial configuration with 4-8 live cells
@@ -166,7 +166,7 @@ fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
         difficulty: Difficulty::Easy,
         size: 7,
         minimal_steps: 1,
-        maximal_steps: 5,
+        maximal_steps: 1,
         is_strict: false,
         initial_conditions: vec![Condition::TestRectangle {
             x_range: 0..7,
@@ -204,10 +204,10 @@ fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Loaf Formation".to_string(),
         summary: "Create a stable loaf pattern (7-cell bread loaf shape)".to_string(),
-        difficulty: Difficulty::Medium,
+        difficulty: Difficulty::Easy,
         size: 8,
         minimal_steps: 1,
-        maximal_steps: 5,
+        maximal_steps: 1,
         is_strict: false,
         initial_conditions: vec![Condition::TestRectangle {
             x_range: 0..8,
@@ -245,7 +245,7 @@ fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
         difficulty: Difficulty::Easy,
         size: 6,
         minimal_steps: 1,
-        maximal_steps: 5,
+        maximal_steps: 1,
         is_strict: false,
         initial_conditions: vec![Condition::TestRectangle {
             x_range: 0..6,
@@ -282,7 +282,7 @@ fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
         difficulty: Difficulty::Easy,
         size: 5,
         minimal_steps: 1,
-        maximal_steps: 5,
+        maximal_steps: 1,
         is_strict: false,
         initial_conditions: vec![Condition::TestRectangle {
             x_range: 0..5,
