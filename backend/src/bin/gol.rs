@@ -81,6 +81,8 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
         ("04_boat_pattern", create_boat_puzzle_and_solution),
         ("05_tub_pattern", create_tub_puzzle_and_solution),
         ("06_blinker_pattern", create_blinker_puzzle_and_solution),
+        ("07_beacon_pattern", create_beacon_puzzle_and_solution),
+        ("08_clock_pattern", create_clock_puzzle_and_solution),
     ];
 
     for (name, puzzle_and_solution_creator) in puzzles {
@@ -315,7 +317,8 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
 
     let puzzle = Puzzle {
         title: "Blinker Formation".to_string(),
-        summary: "Create a blinker oscillator pattern (3-cell vertical line that oscillates)".to_string(),
+        summary: "Create a blinker oscillator pattern (3-cell vertical line that oscillates)"
+            .to_string(),
         difficulty: Difficulty::Easy,
         size: 5,
         minimal_steps: 1,
@@ -333,6 +336,89 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
 
     // Solution is the target pattern itself advanced by 1 (oscillator of period 2)
     (puzzle, target_board.advance_once())
+}
+
+fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
+    // Define the target pattern (beacon: two 2x2 blocks that blink diagonally)
+    // ●●··
+    // ●●··
+    // ··●●
+    // ··●●
+    let target_board = Board::with_live_cells(
+        6,
+        vec![
+            Position { x: 1, y: 1 },
+            Position { x: 2, y: 1 },
+            Position { x: 1, y: 2 },
+            Position { x: 2, y: 2 },
+            Position { x: 3, y: 3 },
+            Position { x: 4, y: 3 },
+            Position { x: 3, y: 4 },
+            Position { x: 4, y: 4 },
+        ],
+    );
+
+    let puzzle = Puzzle {
+        title: "Beacon Formation".to_string(),
+        summary: "Create a beacon oscillator pattern (two 2x2 blocks that blink diagonally)"
+            .to_string(),
+        difficulty: Difficulty::Easy,
+        size: 6,
+        minimal_steps: 1,
+        maximal_steps: 1,
+        is_strict: false,
+        initial_conditions: vec![Condition::TestRectangle {
+            x_range: 0..6,
+            y_range: 0..6,
+            min_live_count: 6,
+            max_live_count: 8,
+        }],
+        // Final conditions: exactly match the target pattern
+        final_conditions: target_board.to_exactly_matching_conditions(),
+    };
+
+    // Solution is the target pattern itself advanced by 1 (oscillator of period 2)
+    (puzzle, target_board.advance_once())
+}
+
+fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
+    // Define the target pattern (clock: period-4 oscillator in one of its phases)
+    // ··●·
+    // ●·●
+    // ·●·●
+    // ·●··
+    let target_board = Board::with_live_cells(
+        6,
+        vec![
+            Position { x: 3, y: 1 },
+            Position { x: 1, y: 2 },
+            Position { x: 3, y: 2 },
+            Position { x: 2, y: 3 },
+            Position { x: 4, y: 3 },
+            Position { x: 2, y: 4 },
+        ],
+    );
+
+    let puzzle = Puzzle {
+        title: "Clock Formation".to_string(),
+        summary: "Create a clock oscillator pattern (period-4 oscillator)".to_string(),
+        difficulty: Difficulty::Easy,
+        size: 6,
+        minimal_steps: 1,
+        maximal_steps: 1,
+        is_strict: false,
+        initial_conditions: vec![Condition::TestRectangle {
+            x_range: 0..6,
+            y_range: 0..6,
+            min_live_count: 6,
+            max_live_count: 10,
+        }],
+        // Final conditions: exactly match the target pattern
+        final_conditions: target_board.to_exactly_matching_conditions(),
+    };
+
+    // Solution is the target pattern itself advanced by 3 steps (period-4 oscillator completes full cycle)
+    (puzzle, target_board.advance(3))
 }
 
 fn print_puzzle(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
