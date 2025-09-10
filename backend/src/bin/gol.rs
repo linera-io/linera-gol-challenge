@@ -83,6 +83,7 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
         ("06_blinker_pattern", create_blinker_puzzle_and_solution),
         ("07_beacon_pattern", create_beacon_puzzle_and_solution),
         ("08_clock_pattern", create_clock_puzzle_and_solution),
+        ("20_robot_face", create_robot_face_puzzle_and_solution),
     ];
 
     for (name, puzzle_and_solution_creator) in puzzles {
@@ -419,6 +420,66 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
 
     // Solution is the target pattern itself advanced by 3 steps (period-4 oscillator completes full cycle)
     (puzzle, target_board.advance(3))
+}
+
+fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 60;
+    let offset = size / 2 - 2;
+    // Define the initial board.
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            Position {
+                x: offset + 0,
+                y: offset + 0,
+            },
+            Position {
+                x: offset + 1,
+                y: offset + 0,
+            },
+            Position {
+                x: offset + 2,
+                y: offset + 0,
+            },
+            Position {
+                x: offset + 0,
+                y: offset + 1,
+            },
+            Position {
+                x: offset + 2,
+                y: offset + 1,
+            },
+            Position {
+                x: offset + 0,
+                y: offset + 2,
+            },
+            Position {
+                x: offset + 2,
+                y: offset + 2,
+            },
+        ],
+    );
+    let mut initial_conditions = initial_board.to_exactly_matching_conditions();
+    // Drop a point to force a lucky guess.
+    initial_conditions.remove(3);
+
+    // Define the final board.
+    let final_board = initial_board.advance(180);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let puzzle = Puzzle {
+        title: "Robot face".to_string(),
+        summary: "Create a robot-like face from very few cells".to_string(),
+        difficulty: Difficulty::Medium,
+        size,
+        minimal_steps: 170,
+        maximal_steps: 200,
+        is_strict: false,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
 }
 
 fn print_puzzle(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
