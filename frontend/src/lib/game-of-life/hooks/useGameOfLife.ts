@@ -38,21 +38,21 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
 
   const toggleCell = useCallback(
     (x: number, y: number) => {
-      // Save initial state before first cell placement at generation 0
-      if (generation === 0 && !board.hasInitialState()) {
-        board.saveState();
-      }
       board.toggleCell(x, y);
       updateCells();
     },
-    [board, generation, updateCells]
+    [board, updateCells]
   );
 
   const next = useCallback(() => {
+    // Save current state before generating next one (only if it's the first generation)
+    if (generation === 0 && !board.hasInitialState()) {
+      board.saveState();
+    }
     engine.nextGeneration();
     setGeneration((g) => g + 1);
     updateCells();
-  }, [engine, updateCells]);
+  }, [engine, generation, board, updateCells]);
 
   const previous = useCallback(() => {
     if (board.canUndo()) {

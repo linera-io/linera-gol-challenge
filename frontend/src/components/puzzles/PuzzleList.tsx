@@ -96,9 +96,6 @@ export function PuzzleList({
                           >
                             {config.icon} {difficulty}
                           </span>
-                          <span className="text-xs text-gray-500">
-                            {puzzle.category}
-                          </span>
                         </div>
                       </div>
 

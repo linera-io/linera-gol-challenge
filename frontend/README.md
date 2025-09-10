@@ -86,7 +86,6 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     title: "Beehive Formation",
     summary: "Create a stable beehive pattern (6-cell hexagonal shape)",
     difficulty: "Easy",
-    category: "Still Life",
   },
 ];
 ```

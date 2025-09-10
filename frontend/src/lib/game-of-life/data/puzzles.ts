@@ -6,7 +6,6 @@ export interface PuzzleMetadata {
   title: string;
   summary: string;
   difficulty: "Easy" | "Medium" | "Hard";
-  category: string;
 }
 
 export const KNOWN_PUZZLES: PuzzleMetadata[] = [
@@ -15,26 +14,23 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     title: "Beehive Formation",
     summary: "Create a stable beehive pattern (6-cell hexagonal shape)",
     difficulty: "Easy",
-    category: "Still Life",
   },
   {
     id: "1f33e8395acce7b5f38f070d1a86cab39efad8bc3ce5f9bfc61068ad9cdee474",
     title: "Block Pattern",
     summary: "Create a stable block pattern (2x2 square)",
     difficulty: "Easy",
-    category: "Still Life",
   },
   {
     id: "f2e811992609f8664b63933ea1c41e440d832cf644836cf5a2d58e8f5d15264e",
     title: "Boat Pattern",
     summary: "Create a stable boat pattern",
     difficulty: "Easy",
-    category: "Still Life",
   },
   // Additional puzzles can be added here as they are published to the chain
 ];
 
-// Default board size for all puzzles
+// Default board size for all puzzles but this will be overridden by the puzzle size from the chain once it loads
 export const PUZZLE_BOARD_SIZE = 7;
 
 // Helper to get puzzle by ID
@@ -47,9 +43,4 @@ export function getPuzzlesByDifficulty(
   difficulty: "Easy" | "Medium" | "Hard"
 ): PuzzleMetadata[] {
   return KNOWN_PUZZLES.filter((puzzle) => puzzle.difficulty === difficulty);
-}
-
-// Helper to get puzzles by category
-export function getPuzzlesByCategory(category: string): PuzzleMetadata[] {
-  return KNOWN_PUZZLES.filter((puzzle) => puzzle.category === category);
 }
