@@ -282,6 +282,73 @@ export class LineraService {
     }
   }
 
+  async isPuzzleCompleted(puzzleId: string): Promise<boolean> {
+    await this.ensureInitialized();
+
+    try {
+      const query = {
+        query: `
+          query CheckSolution($puzzleId: String!) {
+            solutions {
+              entry(key: $puzzleId) {
+                board {
+                  size
+                }
+                timestamp
+              }
+            }
+          }
+        `,
+        variables: { puzzleId },
+      };
+
+      const result = await lineraAdapter.queryApplication<any>(query);
+      console.log("[GOL] Check puzzle completion response", result);
+
+      if (result.errors) {
+        // If there's an error, the solution doesn't exist
+        return false;
+      }
+
+      // If we have a solution entry, the puzzle is completed
+      return result.data?.solutions?.entry !== null;
+    } catch (error) {
+      console.error("Failed to check puzzle completion:", error);
+      return false;
+    }
+  }
+
+  async getCompletedPuzzleIds(): Promise<string[]> {
+    await this.ensureInitialized();
+
+    try {
+      const query = {
+        query: `
+          query GetCompletedPuzzles {
+            solutions {
+              keys
+            }
+          }
+        `,
+        variables: {},
+      };
+
+      const result = await lineraAdapter.queryApplication<any>(query);
+      console.log("[GOL] Got completed puzzle IDs", result);
+
+      if (result.errors) {
+        console.error("GraphQL errors:", result.errors);
+        return [];
+      }
+
+      // The keys field returns an array of DataBlobHash (puzzle IDs)
+      return result.data?.solutions?.keys || [];
+    } catch (error) {
+      console.error("Failed to get completed puzzle IDs:", error);
+      return [];
+    }
+  }
+
   onNotification(_callback: (notification: any) => void): void {
     // Notifications not supported with Dynamic wallet yet
     console.warn("Notifications not yet supported with Dynamic wallet");

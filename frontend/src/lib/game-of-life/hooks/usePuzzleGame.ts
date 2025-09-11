@@ -167,6 +167,8 @@ export function usePuzzleGame() {
         isValid: true,
         message: 'Solution submitted successfully!'
       });
+      // Invalidate queries to refresh completion status from blockchain
+      queryClient.invalidateQueries({ queryKey: ['completedPuzzles'] });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.puzzle(currentPuzzleId || '') });
     },
     onError: (error) => {
