@@ -5,24 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   base: "",
-  plugins: [
-    react(),
-    tsconfigPaths(),
-    tailwindcss(),
-    // {
-    //   name: 'configure-response-headers',
-    //   configureServer: (server) => {
-    //     server.middlewares.use((_req, res, next) => {
-    //       // More permissive CORS headers for Dynamic SDK
-    //       res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-    //       res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
-    //       // Remove Cross-Origin-Resource-Policy to allow Dynamic SDK resources
-    //       res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    //       next();
-    //     });
-    //   },
-    // },
-  ],
+  plugins: [react(), tsconfigPaths()],
   server: {
     fs: {
       allow: ["..", "../../linera-protocol"],

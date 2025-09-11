@@ -38,21 +38,23 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
 
   const toggleCell = useCallback(
     (x: number, y: number) => {
+      // If we're at generation 0 and no history exists, save the initial empty state
+      if (generation === 0 && !board.hasInitialState()) {
+        board.saveState();
+      }
       board.toggleCell(x, y);
       updateCells();
     },
-    [board, updateCells]
+    [board, updateCells, generation]
   );
 
   const next = useCallback(() => {
-    // Save current state before generating next one (only if it's the first generation)
-    if (generation === 0 && !board.hasInitialState()) {
-      board.saveState();
-    }
+    // Save current state before generating next one
+    board.saveState();
     engine.nextGeneration();
     setGeneration((g) => g + 1);
     updateCells();
-  }, [engine, generation, board, updateCells]);
+  }, [engine, board, updateCells]);
 
   const previous = useCallback(() => {
     if (board.canUndo()) {
@@ -78,21 +80,27 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
 
   const loadPattern = useCallback(
     (pattern: boolean[][], x: number, y: number) => {
+      // Save initial state before loading pattern
+      if (!board.hasInitialState()) {
+        board.saveState();
+      }
       engine.loadPattern(pattern, x, y);
+      board.saveState(); // Save the loaded pattern as a new state
       updateCells();
     },
-    [engine, updateCells]
+    [engine, board, updateCells]
   );
 
   const generateRandom = useCallback(
     (density: number = 0.3) => {
       setIsPlaying(false);
       engine.generateRandomPattern(density);
+      board.saveState(); // Save the generated pattern as initial state
       setGeneration(0);
       updateCells();
       forceUpdate({});
     },
-    [engine, updateCells]
+    [engine, board, updateCells]
   );
 
   useEffect(() => {
