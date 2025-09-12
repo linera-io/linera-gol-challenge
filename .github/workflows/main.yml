@@ -1,0 +1,61 @@
+name: Main
+
+on:
+  push:
+    branches: [ main ]
+    # Always run on commits
+
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+
+      - name: 'Install Rust toolchain'
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: 'Install Protoc'
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Install Linera CLI'
+        run: cargo install linera-storage-service@0.15.1 linera-service@0.15.1
+
+      - name: 'Check formatting'
+        run: cargo fmt -- --check
+
+      - name: 'Compile Wasm app'
+        run: cargo build --release --target wasm32-unknown-unknown
+
+      - name: 'Run tests'
+        run: cargo test
+
+      - name: 'Generate puzzles'
+        run: cargo run --bin gol -- create-puzzles
+
+      - name: 'Check README'
+        run: linera extract-script-from-markdown backend/README.md | bash -ex
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: 'Install prettier'
+        run: npm install -g prettier
+
+      - name: 'Check formatting'
+        run: prettier --check frontend
