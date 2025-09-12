@@ -37,10 +37,11 @@ export function usePuzzleGame() {
   });
 
   const puzzleSize = currentPuzzle?.size;
+  const boardSize = puzzleSize || 0;
 
   const game = useGameOfLife({
-    width: puzzleSize || 0,
-    height: puzzleSize || 0,
+    width: boardSize,
+    height: boardSize,
     infinite: false,
     initialSpeed: 5,
   });
@@ -68,10 +69,10 @@ export function usePuzzleGame() {
     });
 
     return {
-      size: puzzleSize || 0,
+      size: boardSize,
       liveCells,
     };
-  }, [game.cells, puzzleSize]);
+  }, [game.cells, boardSize]);
 
   const loadLineraBoard = useCallback(
     (board: { size: number; liveCells: Array<{ x: number; y: number }> }) => {

@@ -10,16 +10,25 @@ export interface UseGameOfLifeOptions {
 }
 
 export function useGameOfLife(options: UseGameOfLifeOptions) {
-  const [board] = useState(
-    () =>
-      new Board({
-        width: options.width,
-        height: options.height,
-        infinite: options.infinite || false,
-      })
-  );
-
-  const [engine] = useState(() => new GameEngine(board));
+  // Create board and engine with proper dimensions, recreating when dimensions change
+  const boardRef = useRef<Board | null>(null);
+  const engineRef = useRef<GameEngine | null>(null);
+  
+  // Initialize or update board when dimensions change
+  if (!boardRef.current || 
+      boardRef.current.config.width !== options.width || 
+      boardRef.current.config.height !== options.height) {
+    boardRef.current = new Board({
+      width: options.width,
+      height: options.height,
+      infinite: options.infinite || false,
+    });
+    engineRef.current = new GameEngine(boardRef.current);
+  }
+  
+  const board = boardRef.current;
+  const engine = engineRef.current;
+  
   const [generation, setGeneration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(options.initialSpeed || 100);
@@ -49,6 +58,7 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
   );
 
   const next = useCallback(() => {
+    if (!engine || !board) return;
     // Save current state before generating next one
     board.saveState();
     engine.nextGeneration();
@@ -80,6 +90,7 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
 
   const loadPattern = useCallback(
     (pattern: boolean[][], x: number, y: number) => {
+      if (!engine || !board) return;
       // Save initial state before loading pattern
       if (!board.hasInitialState()) {
         board.saveState();
@@ -93,6 +104,7 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
 
   const generateRandom = useCallback(
     (density: number = 0.3) => {
+      if (!engine || !board) return;
       setIsPlaying(false);
       engine.generateRandomPattern(density);
       board.saveState(); // Save the generated pattern as initial state
@@ -120,6 +132,15 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
     };
   }, [isPlaying, speed, next]);
 
+  // Reset game when dimensions change
+  useEffect(() => {
+    if (options.width > 0 && options.height > 0) {
+      setGeneration(0);
+      setIsPlaying(false);
+      updateCells();
+    }
+  }, [options.width, options.height]);
+  
   useEffect(() => {
     updateCells();
   }, []);
