@@ -6,6 +6,7 @@
 
 use std::{collections::HashMap, fs, io::Write, path::PathBuf};
 
+use async_graphql::InputType as _;
 use clap::{Parser, Subcommand};
 use gol_challenge::game::{Board, Condition, Difficulty, Position, Puzzle};
 
@@ -141,13 +142,16 @@ fn generate_metadata(
     writeln!(file)?;
 
     // Write TypeScript interface
-    writeln!(file, "export interface PuzzleMetadata {{")?;
-    writeln!(file, "  id: string;")?;
-    writeln!(file, "  title: string;")?;
-    writeln!(file, "  summary: string;")?;
-    writeln!(file, "  difficulty: \"Easy\" | \"Medium\" | \"Hard\";")?;
-    writeln!(file, "  size: number;")?;
-    writeln!(file, "}}")?;
+    writeln!(
+        file,
+        "import {{ PuzzleMetadata, DifficultyLevel }} from \"@/lib/types/puzzle.types\";"
+    )?;
+    writeln!(file)?;
+    writeln!(file, "// Re-export for backward compatibility")?;
+    writeln!(
+        file,
+        "export type {{ PuzzleMetadata }} from \"@/lib/types/puzzle.types\";"
+    )?;
     writeln!(file)?;
 
     // Write puzzle array
@@ -166,7 +170,11 @@ fn generate_metadata(
         writeln!(file, "    id: \"{}\",", puzzle_id)?;
         writeln!(file, "    title: \"{}\",", puzzle.title)?;
         writeln!(file, "    summary: \"{}\",", puzzle.summary)?;
-        writeln!(file, "    difficulty: \"{:?}\",", puzzle.difficulty)?;
+        writeln!(
+            file,
+            "    difficulty: \"{}\",",
+            puzzle.difficulty.to_value()
+        )?;
         writeln!(file, "    size: {},", puzzle.size)?;
         writeln!(file, "  }},")?;
     }
@@ -188,9 +196,10 @@ fn generate_metadata(
     writeln!(file)?;
 
     writeln!(file, "// Helper to get puzzles by difficulty")?;
-    writeln!(file, "export function getPuzzlesByDifficulty(")?;
-    writeln!(file, "  difficulty: \"Easy\" | \"Medium\" | \"Hard\"")?;
-    writeln!(file, "): PuzzleMetadata[] {{")?;
+    writeln!(
+        file,
+        "export function getPuzzlesByDifficulty(difficulty: DifficultyLevel): PuzzleMetadata[] {{"
+    )?;
     writeln!(
         file,
         "  return KNOWN_PUZZLES.filter((puzzle) => puzzle.difficulty === difficulty);"
