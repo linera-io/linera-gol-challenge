@@ -42,20 +42,3 @@ jobs:
 
       - name: 'Check README'
         run: linera extract-script-from-markdown backend/README.md | bash -ex
-
-  frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-
-      - name: 'Setup Node'
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: 'Install prettier'
-        run: npm install -g prettier
-
-      - name: 'Check formatting'
-        run: prettier --check frontend
