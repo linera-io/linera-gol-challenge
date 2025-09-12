@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, memo } from "react";
+import React, { useCallback, useMemo, memo } from "react";
 import { motion } from "framer-motion";
+import { Condition } from "@/lib/linera/services/LineraService";
 
 interface GameBoardProps {
   width: number;
@@ -9,6 +10,134 @@ interface GameBoardProps {
   cells: Map<string, boolean>;
   onCellClick: (x: number, y: number) => void;
   cellSize?: number;
+  initialConditions?: Condition[];
+  finalConditions?: Condition[];
+}
+
+interface RectangleInfo {
+  x_range: { start: number; end: number };
+  y_range: { start: number; end: number };
+  min_live_count: number;
+  max_live_count: number;
+}
+
+// Helper function to extract rectangle conditions
+function extractRectangleCondition(conditions: Condition[] | undefined): RectangleInfo | null {
+  if (!conditions) return null;
+  
+  for (const condition of conditions) {
+    if ('TestRectangle' in condition) {
+      return condition.TestRectangle;
+    }
+  }
+  return null;
+}
+
+// Helper function to check if two rectangles cover the same area
+function rectanglesOverlap(rect1: RectangleInfo | null, rect2: RectangleInfo | null): boolean {
+  if (!rect1 || !rect2) return false;
+  
+  return rect1.x_range.start === rect2.x_range.start &&
+         rect1.x_range.end === rect2.x_range.end &&
+         rect1.y_range.start === rect2.y_range.start &&
+         rect1.y_range.end === rect2.y_range.end;
+}
+
+// Create a combined overlay when both conditions have overlapping rectangles
+function createCombinedRectangleOverlay(
+  initialRect: RectangleInfo,
+  finalRect: RectangleInfo,
+  cellSize: number
+): JSX.Element {
+  return (
+    <div
+      key="combined-rect"
+      className="absolute pointer-events-none"
+      style={{
+        left: initialRect.x_range.start * cellSize,
+        top: initialRect.y_range.start * cellSize,
+        width: (initialRect.x_range.end - initialRect.x_range.start) * cellSize,
+        height: (initialRect.y_range.end - initialRect.y_range.start) * cellSize,
+        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 50%, rgba(59, 130, 246, 0.08) 50%)',
+        border: '2px solid',
+        borderImage: 'linear-gradient(135deg, rgba(34, 197, 94, 0.6), rgba(59, 130, 246, 0.6)) 1',
+        borderRadius: '6px',
+        zIndex: 10,
+      }}
+    />
+  );
+}
+
+// Create a single rectangle overlay
+function createSingleRectangleOverlay(
+  rect: RectangleInfo,
+  cellSize: number,
+  type: 'initial' | 'final',
+  index: number
+): JSX.Element {
+  const isInitial = type === 'initial';
+  const color = isInitial ? '34, 197, 94' : '59, 130, 246'; // Green for initial, blue for final
+  
+  return (
+    <div
+      key={`${type}-rect-${index}`}
+      className="absolute pointer-events-none"
+      style={{
+        left: rect.x_range.start * cellSize,
+        top: rect.y_range.start * cellSize,
+        width: (rect.x_range.end - rect.x_range.start) * cellSize,
+        height: (rect.y_range.end - rect.y_range.start) * cellSize,
+        border: `2px dashed rgba(${color}, 0.5)`,
+        backgroundColor: `rgba(${color}, 0.06)`,
+        borderRadius: '6px',
+        zIndex: 10,
+      }}
+    />
+  );
+}
+
+// Build overlay for individual cell conditions
+function buildCellOverlay(
+  overlays: { initial?: boolean; final?: boolean }
+): JSX.Element | null {
+  if (overlays.initial === undefined && overlays.final === undefined) {
+    return null;
+  }
+
+  const overlayStyles: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    pointerEvents: 'none',
+    borderRadius: '2px',
+  };
+  
+  if (overlays.initial !== undefined && overlays.final !== undefined) {
+    // Both conditions - show split overlay
+    overlayStyles.background = `linear-gradient(135deg, 
+      ${overlays.initial ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.1)'} 50%, 
+      ${overlays.final ? 'rgba(59, 130, 246, 0.25)' : 'rgba(59, 130, 246, 0.1)'} 50%)`;
+  } else if (overlays.initial !== undefined) {
+    // Initial condition only
+    overlayStyles.backgroundColor = overlays.initial 
+      ? 'rgba(34, 197, 94, 0.25)' // Green for must be alive
+      : 'rgba(34, 197, 94, 0.08)'; // Lighter green for must be dead
+    if (!overlays.initial) {
+      overlayStyles.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(34, 197, 94, 0.15) 3px, rgba(34, 197, 94, 0.15) 6px)';
+    }
+  } else if (overlays.final !== undefined) {
+    // Final condition only
+    overlayStyles.backgroundColor = overlays.final 
+      ? 'rgba(59, 130, 246, 0.25)' // Blue for must be alive
+      : 'rgba(59, 130, 246, 0.08)'; // Lighter blue for must be dead
+    if (!overlays.final) {
+      overlayStyles.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(59, 130, 246, 0.15) 3px, rgba(59, 130, 246, 0.15) 6px)';
+    }
+  }
+  
+  return <div style={overlayStyles} />;
 }
 
 export const GameBoard = memo(function GameBoard({
@@ -17,6 +146,8 @@ export const GameBoard = memo(function GameBoard({
   cells,
   onCellClick,
   cellSize = 20,
+  initialConditions,
+  finalConditions,
 }: GameBoardProps) {
   const handleCellClick = useCallback(
     (x: number, y: number) => {
@@ -25,18 +156,53 @@ export const GameBoard = memo(function GameBoard({
     [onCellClick]
   );
 
+  // Helper function to check if a cell has conditions
+  const getCellOverlay = useCallback((x: number, y: number) => {
+    const overlays: { initial?: boolean; final?: boolean } = {};
+    
+    // Check initial conditions
+    if (initialConditions) {
+      for (const condition of initialConditions) {
+        if ('TestPosition' in condition) {
+          const { position, is_live } = condition.TestPosition;
+          if (position.x === x && position.y === y) {
+            overlays.initial = is_live;
+          }
+        }
+      }
+    }
+    
+    // Check final conditions
+    if (finalConditions) {
+      for (const condition of finalConditions) {
+        if ('TestPosition' in condition) {
+          const { position, is_live } = condition.TestPosition;
+          if (position.x === x && position.y === y) {
+            overlays.final = is_live;
+          }
+        }
+      }
+    }
+    
+    return overlays;
+  }, [initialConditions, finalConditions]);
+
+  // Build the grid of cells
   const grid = useMemo(() => {
     const result = [];
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const key = `${x},${y}`;
         const isAlive = cells.has(key);
+        const overlays = getCellOverlay(x, y);
+        const overlayElement = buildCellOverlay(overlays);
+        
         result.push(
           <motion.div
             key={key}
             className={`
               border border-gray-200 cursor-pointer
-              transition-all duration-150
+              transition-all duration-150 relative
               ${isAlive ? "bg-linera-primary shadow-md" : "bg-white hover:bg-gray-50"}
             `}
             style={{
@@ -53,22 +219,84 @@ export const GameBoard = memo(function GameBoard({
               boxShadow: isAlive ? "0 4px 6px rgba(222, 42, 2, 0.2)" : "none",
             }}
             transition={{ duration: 0.15 }}
-          />
+          >
+            {overlayElement}
+          </motion.div>
         );
       }
     }
     return result;
-  }, [width, height, cells, cellSize, handleCellClick]);
+  }, [width, height, cells, cellSize, handleCellClick, getCellOverlay]);
+
+  // Build rectangle overlays for area conditions
+  const rectangleOverlays = useMemo(() => {
+    const overlays: JSX.Element[] = [];
+    
+    // Extract rectangle conditions
+    const initialRect = extractRectangleCondition(initialConditions);
+    const finalRect = extractRectangleCondition(finalConditions);
+    
+    // Check if rectangles overlap
+    if (rectanglesOverlap(initialRect, finalRect)) {
+      // Create combined overlay for overlapping rectangles
+      overlays.push(createCombinedRectangleOverlay(initialRect!, finalRect!, cellSize));
+    } else {
+      // Create separate overlays for non-overlapping rectangles
+      if (initialRect) {
+        overlays.push(createSingleRectangleOverlay(initialRect, cellSize, 'initial', 0));
+      }
+      if (finalRect) {
+        overlays.push(createSingleRectangleOverlay(finalRect, cellSize, 'final', 0));
+      }
+    }
+    
+    // Handle multiple rectangle conditions (if there are more than one)
+    let rectIndex = 1;
+    if (initialConditions) {
+      initialConditions.forEach((condition) => {
+        if ('TestRectangle' in condition && condition.TestRectangle !== initialRect) {
+          overlays.push(createSingleRectangleOverlay(
+            condition.TestRectangle,
+            cellSize,
+            'initial',
+            rectIndex++
+          ));
+        }
+      });
+    }
+    
+    if (finalConditions) {
+      finalConditions.forEach((condition) => {
+        if ('TestRectangle' in condition && condition.TestRectangle !== finalRect) {
+          overlays.push(createSingleRectangleOverlay(
+            condition.TestRectangle,
+            cellSize,
+            'final',
+            rectIndex++
+          ));
+        }
+      });
+    }
+    
+    return overlays;
+  }, [initialConditions, finalConditions, cellSize]);
 
   return (
-    <div
-      className="inline-grid gap-0 bg-gray-100 p-2 rounded"
-      style={{
-        gridTemplateColumns: `repeat(${width}, ${cellSize}px)`,
-        gridTemplateRows: `repeat(${height}, ${cellSize}px)`,
-      }}
-    >
-      {grid}
+    <div className="relative inline-block bg-gray-100 p-2 rounded">
+      <div className="relative">
+        <div
+          className="inline-grid gap-0"
+          style={{
+            gridTemplateColumns: `repeat(${width}, ${cellSize}px)`,
+            gridTemplateRows: `repeat(${height}, ${cellSize}px)`,
+          }}
+        >
+          {grid}
+        </div>
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 100 }}>
+          {rectangleOverlays}
+        </div>
+      </div>
     </div>
   );
 });

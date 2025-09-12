@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LineraService, LineraBoard } from '@/lib/linera/services/LineraService';
+import { LineraService, LineraBoard, Condition } from '@/lib/linera/services/LineraService';
 import { PUZZLE_BOARD_SIZE } from '../data/puzzles';
 import { useGameOfLife } from './useGameOfLife';
 import { useLineraInitialization } from '@/lib/linera/hooks/useLineraQueries';
@@ -13,6 +13,8 @@ export interface PuzzleInfo {
   size: number;
   minimalSteps: number;
   maximalSteps: number;
+  initialConditions?: Condition[];
+  finalConditions?: Condition[];
 }
 
 const QUERY_KEYS = {
@@ -65,7 +67,8 @@ export function usePuzzleGame() {
       setShowPuzzleList(false);
       game.clear();
       
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.puzzle(puzzleId) });
+      // Set the puzzle data in the query cache
+      queryClient.setQueryData(QUERY_KEYS.puzzle(puzzleId), puzzle);
     },
     onError: (error) => {
       console.error('Failed to load puzzle:', error);
@@ -164,6 +167,8 @@ export function usePuzzleGame() {
         isValid: true,
         message: 'Solution submitted successfully!'
       });
+      // Invalidate queries to refresh completion status from blockchain
+      queryClient.invalidateQueries({ queryKey: ['completedPuzzles'] });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.puzzle(currentPuzzleId || '') });
     },
     onError: (error) => {

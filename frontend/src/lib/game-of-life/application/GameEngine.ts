@@ -37,8 +37,6 @@ export class GameEngine {
       }
     });
 
-    this.board.saveState();
-
     // Clear all cells first
     aliveCells.forEach(cell => {
       this.board.setCell(cell.x, cell.y, false);
@@ -59,7 +57,6 @@ export class GameEngine {
         }
       });
     });
-    this.board.saveState();
   }
 
   generateRandomPattern(density: number = 0.3): void {
@@ -80,8 +77,6 @@ export class GameEngine {
         }
       }
     }
-    
-    this.board.saveState();
   }
 
   // we don't use this anymore but maybe we will in the future

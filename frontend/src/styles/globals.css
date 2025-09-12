@@ -8,6 +8,7 @@
     "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
   --font-mono: "Fira Code", "Courier New", monospace;
+  background-color: var(--color-neutral-100);
 }
 
 @layer base {

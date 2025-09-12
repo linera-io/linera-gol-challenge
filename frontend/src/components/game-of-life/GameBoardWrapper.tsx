@@ -2,6 +2,8 @@
 
 import { GameBoard } from "./GameBoard";
 import { GameBoardCanvas } from "./GameBoardCanvas";
+import { Condition } from "@/lib/linera/services/LineraService";
+import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
 
 interface GameBoardWrapperProps {
   width: number;
@@ -9,13 +11,13 @@ interface GameBoardWrapperProps {
   cells: Map<string, boolean>;
   onCellClick: (x: number, y: number) => void;
   cellSize?: number;
+  initialConditions?: Condition[];
+  finalConditions?: Condition[];
 }
-
-const CANVAS_THRESHOLD = 50;
 
 export function GameBoardWrapper(props: GameBoardWrapperProps) {
   const { width, height } = props;
-  const shouldUseCanvas = width > CANVAS_THRESHOLD || height > CANVAS_THRESHOLD;
+  const shouldUseCanvas = width > BOARD_CONFIG.CANVAS_THRESHOLD || height > BOARD_CONFIG.CANVAS_THRESHOLD;
 
   if (shouldUseCanvas) {
     return <GameBoardCanvas {...props} />;

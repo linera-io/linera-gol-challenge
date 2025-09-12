@@ -15,6 +15,7 @@
     "@heroui/badge": "^2.2.15",
     "@heroui/button": "2.2.24",
     "@heroui/card": "^2.2.23",
+    "@heroui/chip": "^2.2.21",
     "@heroui/code": "2.2.18",
     "@heroui/input": "2.4.25",
     "@heroui/kbd": "2.2.19",
@@ -42,7 +43,9 @@
     "next-themes": "0.4.6",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "^6.30.0"
+    "react-router-dom": "^6.30.0",
+    "@dynamic-labs/ethereum": "^4.29.4",
+    "@dynamic-labs/sdk-react-core": "^4.29.4"
   },
   "devDependencies": {
     "@react-types/shared": "3.30.0",

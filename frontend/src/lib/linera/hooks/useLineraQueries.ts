@@ -1,46 +1,51 @@
 import { useQuery } from "@tanstack/react-query";
 import { LineraService } from "../services/LineraService";
+import { useAuth } from "./useAuth";
 
 export const QUERY_KEYS = {
   wallet: ["linera", "wallet"],
   initialized: ["linera", "initialized"],
 };
 
-const initializeService = async () => {
-  const service = LineraService.getInstance();
-  await new Promise((f) => setTimeout(f, 100));
-  await service.initialize();
-  return true;
-};
-
 export function useLineraInitialization() {
+  const { isConnectedToLinera, isAppConnected } = useAuth();
+  
   return useQuery({
     queryKey: QUERY_KEYS.initialized,
-    queryFn: initializeService,
+    queryFn: async () => {
+      // Simply return the connection status
+      // The actual initialization happens through useAuth hook
+      return isConnectedToLinera && isAppConnected;
+    },
+    enabled: true,
     staleTime: Infinity,
-    retry: 3,
   });
 }
 
 export function useWallet() {
+  const { walletAddress, chainId } = useAuth();
+  
   return useQuery({
     queryKey: QUERY_KEYS.wallet,
     queryFn: async () => {
       const service = LineraService.getInstance();
       return service.checkWallet();
     },
+    enabled: !!walletAddress && !!chainId,
     staleTime: Infinity,
   });
 }
 
 export function useLineraOperations() {
+  const auth = useAuth();
   const initialization = useLineraInitialization();
   const wallet = useWallet();
 
   return {
-    isInitialized: initialization.isSuccess,
-    isInitializing: initialization.isLoading,
-    initError: initialization.error,
+    isInitialized: auth.isConnectedToLinera && auth.isAppConnected,
+    isInitializing: auth.isLoading,
+    initError: auth.error,
     wallet: wallet.data,
+    auth,
   };
 }
