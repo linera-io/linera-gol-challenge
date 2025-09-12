@@ -152,7 +152,7 @@ export function GamePlayingView({
                   <GameBoardSkeleton />
                 ) : (
                   <div className="flex items-center justify-center rounded-lg">
-                    <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                    <div className="border-2 border-gray-200 rounded-lg overflow-auto max-h-[70vh]">
                       <GameBoardWrapper
                         width={puzzle.size}
                         height={puzzle.size}

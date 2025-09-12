@@ -150,9 +150,8 @@ export const GameBoard = memo(function GameBoard({
     return result;
   }, [width, height, cells, cellSize, handleCellClick, getCellOverlay]);
 
-
   return (
-    <div className="relative inline-block bg-gray-100 p-2 rounded">
+    <div className="relative bg-gray-100 p-2 rounded">
       <div className="relative">
         <div
           className="inline-grid gap-0"

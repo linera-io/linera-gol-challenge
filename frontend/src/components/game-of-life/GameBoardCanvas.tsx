@@ -148,7 +148,7 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
   );
 
   return (
-    <div className="relative inline-block">
+    <div className="relative bg-gray-100 rounded">
       <canvas
         ref={canvasRef}
         width={width * cellSize}
