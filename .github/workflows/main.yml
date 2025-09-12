@@ -25,9 +25,6 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 'Install Linera CLI'
-        run: cargo install linera-storage-service@0.15.1 linera-service@0.15.1
-
       - name: 'Check formatting'
         run: cargo fmt -- --check
 
@@ -39,6 +36,9 @@ jobs:
 
       - name: 'Generate puzzles'
         run: cargo run --bin gol -- create-puzzles
+
+      - name: 'Install Linera CLI'
+        run: cargo install linera-storage-service@0.15.1 linera-service@0.15.1
 
       - name: 'Check README'
         run: linera extract-script-from-markdown backend/README.md | bash -ex
