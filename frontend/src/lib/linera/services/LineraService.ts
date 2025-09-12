@@ -35,7 +35,7 @@ export interface Puzzle {
   id: string;
   title: string;
   summary: string;
-  difficulty: "Easy" | "Medium" | "Hard";
+  difficulty: "EASY" | "MEDIUM" | "HARD";
   size: number;
   minimalSteps: number;
   maximalSteps: number;
@@ -255,14 +255,14 @@ export class LineraService {
       const puzzleData = result.data.puzzle;
       console.log("[GOL] Parsed puzzle data:", puzzleData);
       
-      // Ensure difficulty is valid, default to "Easy" if not
-      const validDifficulties = ["Easy", "Medium", "Hard"];
+      // Ensure difficulty is valid, default to "EASY" if not
+      const validDifficulties = ["EASY", "MEDIUM", "HARD"];
       const difficulty = validDifficulties.includes(puzzleData.difficulty) 
-        ? puzzleData.difficulty as "Easy" | "Medium" | "Hard"
-        : "Easy";
+        ? puzzleData.difficulty as "EASY" | "MEDIUM" | "HARD"
+        : "EASY";
       
       if (puzzleData.difficulty !== difficulty) {
-        console.warn(`Invalid difficulty value: ${puzzleData.difficulty}, defaulting to Easy`);
+        console.warn(`Invalid difficulty value: ${puzzleData.difficulty}, defaulting to EASY`);
       }
 
       return {
