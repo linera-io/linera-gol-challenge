@@ -9,12 +9,10 @@ export const QUERY_KEYS = {
 
 export function useLineraInitialization() {
   const { isConnectedToLinera, isAppConnected } = useAuth();
-  
+
   return useQuery({
     queryKey: QUERY_KEYS.initialized,
     queryFn: async () => {
-      // Simply return the connection status
-      // The actual initialization happens through useAuth hook
       return isConnectedToLinera && isAppConnected;
     },
     enabled: true,
@@ -24,7 +22,7 @@ export function useLineraInitialization() {
 
 export function useWallet() {
   const { walletAddress, chainId } = useAuth();
-  
+
   return useQuery({
     queryKey: QUERY_KEYS.wallet,
     queryFn: async () => {
@@ -38,7 +36,7 @@ export function useWallet() {
 
 export function useLineraOperations() {
   const auth = useAuth();
-  const initialization = useLineraInitialization();
+  useLineraInitialization();
   const wallet = useWallet();
 
   return {

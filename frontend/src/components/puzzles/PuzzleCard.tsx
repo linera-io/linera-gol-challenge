@@ -1,7 +1,8 @@
 import { Card, CardBody } from "@heroui/card";
 import { Badge } from "@heroui/badge";
 import { ChevronRight, CheckCircle } from "lucide-react";
-import { PuzzleMetadata } from "@/lib/game-of-life/data/puzzles";
+import { PuzzleMetadata, DifficultyLevel } from "@/lib/types/puzzle.types";
+import { formatDifficulty } from "@/lib/types/puzzle.types";
 
 interface PuzzleCardProps {
   puzzle: PuzzleMetadata;
@@ -9,7 +10,7 @@ interface PuzzleCardProps {
   isCompleted: boolean;
   isLoading: boolean;
   onSelect: () => void;
-  difficulty: "Easy" | "Medium" | "Hard";
+  difficulty: DifficultyLevel;
   difficultyConfig: {
     icon: string;
     bgColor: string;
@@ -73,7 +74,7 @@ export function PuzzleCard({
                 `}
               >
                 <span className="text-xs sm:text-sm">{difficultyConfig.icon}</span>
-                <span>{difficulty}</span>
+                <span>{formatDifficulty(difficulty)}</span>
               </span>
             </div>
           </div>

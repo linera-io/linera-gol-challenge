@@ -1,48 +1,34 @@
-import { useState, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LineraService, LineraBoard, Condition } from '@/lib/linera/services/LineraService';
-import { PUZZLE_BOARD_SIZE } from '../data/puzzles';
-import { useGameOfLife } from './useGameOfLife';
-import { useLineraInitialization } from '@/lib/linera/hooks/useLineraQueries';
-
-export interface PuzzleInfo {
-  id: string;
-  title: string;
-  summary: string;
-  difficulty: "Easy" | "Medium" | "Hard";
-  size: number;
-  minimalSteps: number;
-  maximalSteps: number;
-  initialConditions?: Condition[];
-  finalConditions?: Condition[];
-}
+import { useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { LineraService } from "@/lib/linera/services/LineraService";
+import { LineraBoard } from "@/lib/types/puzzle.types";
+import { useGameOfLife } from "./useGameOfLife";
+import { useLineraInitialization } from "@/lib/linera/hooks/useLineraQueries";
 
 const QUERY_KEYS = {
-  puzzle: (id: string) => ['puzzle', id],
-  validation: (puzzleId: string, board: LineraBoard) => ['validation', puzzleId, board],
+  puzzle: (id: string) => ["puzzle", id],
+  validation: (puzzleId: string, board: LineraBoard) => [
+    "validation",
+    puzzleId,
+    board,
+  ],
 };
 
 export function usePuzzleGame() {
   const [currentPuzzleId, setCurrentPuzzleId] = useState<string | null>(null);
   const [stepCount, setStepCount] = useState(0);
-  const [validationResult, setValidationResult] = useState<{ isValid: boolean; message?: string } | null>(null);
+  const [validationResult, setValidationResult] = useState<{
+    isValid: boolean;
+    message?: string;
+  } | null>(null);
   const [showPuzzleList, setShowPuzzleList] = useState(true);
-  const [puzzleSize, setPuzzleSize] = useState(PUZZLE_BOARD_SIZE);
-  
+
   const queryClient = useQueryClient();
   const { data: isInitialized } = useLineraInitialization();
   const lineraService = LineraService.getInstance();
-  
-  const game = useGameOfLife({
-    width: puzzleSize,
-    height: puzzleSize,
-    infinite: false,
-    initialSpeed: 5
-  });
 
-  // Query for current puzzle
   const { data: currentPuzzle, isLoading: isPuzzleLoading } = useQuery({
-    queryKey: QUERY_KEYS.puzzle(currentPuzzleId || ''),
+    queryKey: QUERY_KEYS.puzzle(currentPuzzleId || ""),
     queryFn: async () => {
       if (!currentPuzzleId) return null;
       return lineraService.getPuzzle(currentPuzzleId);
@@ -50,57 +36,52 @@ export function usePuzzleGame() {
     enabled: !!isInitialized && !!currentPuzzleId,
   });
 
-  const loadPuzzleMutation = useMutation({
-    mutationFn: async (puzzleId: string) => {
-      const puzzle = await lineraService.getPuzzle(puzzleId);
-      console.log("[GOL] Loaded puzzle from chain", puzzle);
-      if (!puzzle) {
-        throw new Error('Puzzle not found');
-      }
-      return { puzzleId, puzzle };
-    },
-    onSuccess: ({ puzzleId, puzzle }) => {
+  const puzzleSize = currentPuzzle?.size;
+
+  const game = useGameOfLife({
+    width: puzzleSize || 0,
+    height: puzzleSize || 0,
+    infinite: false,
+    initialSpeed: 5,
+  });
+
+  const loadPuzzle = useCallback(
+    (puzzleId: string) => {
+      // set the puzzle ID and let the query fetch the data
       setCurrentPuzzleId(puzzleId);
-      setPuzzleSize(puzzle.size);
       setStepCount(0);
       setValidationResult(null);
       setShowPuzzleList(false);
       game.clear();
-      
-      // Set the puzzle data in the query cache
-      queryClient.setQueryData(QUERY_KEYS.puzzle(puzzleId), puzzle);
     },
-    onError: (error) => {
-      console.error('Failed to load puzzle:', error);
-    }
-  });
-
-  const loadPuzzle = useCallback((puzzleId: string) => {
-    loadPuzzleMutation.mutate(puzzleId);
-  }, [loadPuzzleMutation]);
+    [game]
+  );
 
   const getCellsAsLineraBoard = useCallback(() => {
     const liveCells: Array<{ x: number; y: number }> = [];
-    
+
     game.cells.forEach((alive, key) => {
       if (alive) {
-        const [x, y] = key.split(',').map(Number);
+        const [x, y] = key.split(",").map(Number);
         liveCells.push({ x, y });
       }
     });
-    
-    return {
-      size: currentPuzzle?.size || puzzleSize,
-      liveCells
-    };
-  }, [game.cells, currentPuzzle, puzzleSize]);
 
-  const loadLineraBoard = useCallback((board: { size: number; liveCells: Array<{ x: number; y: number }> }) => {
-    game.clear();
-    board.liveCells.forEach(({ x, y }) => {
-      game.toggleCell(x, y);
-    });
-  }, [game]);
+    return {
+      size: puzzleSize || 0,
+      liveCells,
+    };
+  }, [game.cells, puzzleSize]);
+
+  const loadLineraBoard = useCallback(
+    (board: { size: number; liveCells: Array<{ x: number; y: number }> }) => {
+      game.clear();
+      board.liveCells.forEach(({ x, y }) => {
+        game.toggleCell(x, y);
+      });
+    },
+    [game]
+  );
 
   const advanceBoardMutation = useMutation({
     mutationFn: async (steps: number = 1) => {
@@ -109,21 +90,24 @@ export function usePuzzleGame() {
     },
     onSuccess: (newBoard, steps = 1) => {
       loadLineraBoard(newBoard);
-      setStepCount(prev => prev + steps);
+      setStepCount((prev) => prev + steps);
     },
     onError: (error) => {
-      console.error('Failed to advance board:', error);
+      console.error("Failed to advance board:", error);
     },
   });
 
-  const advanceBoardOnChain = useCallback((steps: number = 1) => {
-    return advanceBoardMutation.mutate(steps);
-  }, [advanceBoardMutation]);
+  const advanceBoardOnChain = useCallback(
+    (steps: number = 1) => {
+      return advanceBoardMutation.mutate(steps);
+    },
+    [advanceBoardMutation]
+  );
 
   const validateMutation = useMutation({
     mutationFn: async () => {
       if (!currentPuzzle) {
-        throw new Error('No puzzle selected');
+        throw new Error("No puzzle selected");
       }
       const board = getCellsAsLineraBoard();
       return lineraService.validateSolution(board, currentPuzzle.id);
@@ -131,14 +115,19 @@ export function usePuzzleGame() {
     onSuccess: (result) => {
       setValidationResult({
         isValid: result.isValid,
-        message: result.errorMessage || (result.isValid ? 'Solution is valid!' : 'Solution is not valid')
+        message:
+          result.errorMessage ||
+          (result.isValid ? "Solution is valid!" : "Solution is not valid"),
       });
     },
     onError: (error) => {
-      console.error('Failed to validate solution:', error);
-      setValidationResult({ 
-        isValid: false, 
-        message: error instanceof Error ? error.message : 'Failed to validate solution' 
+      console.error("Failed to validate solution:", error);
+      setValidationResult({
+        isValid: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to validate solution",
       });
     },
   });
@@ -150,32 +139,40 @@ export function usePuzzleGame() {
   const submitMutation = useMutation({
     mutationFn: async () => {
       if (!currentPuzzle) {
-        throw new Error('No puzzle selected');
+        throw new Error("No puzzle selected");
       }
-      
+
       const board = getCellsAsLineraBoard();
-      const validationResult = await lineraService.validateSolution(board, currentPuzzle.id);
-      
+      const validationResult = await lineraService.validateSolution(
+        board,
+        currentPuzzle.id
+      );
+
       if (!validationResult.isValid) {
-        throw new Error(validationResult.errorMessage || 'Solution is not valid');
+        throw new Error(
+          validationResult.errorMessage || "Solution is not valid"
+        );
       }
-      
+
       return lineraService.submitSolution(currentPuzzle.id, board);
     },
     onSuccess: () => {
       setValidationResult({
         isValid: true,
-        message: 'Solution submitted successfully!'
+        message: "Solution submitted successfully!",
       });
       // Invalidate queries to refresh completion status from blockchain
-      queryClient.invalidateQueries({ queryKey: ['completedPuzzles'] });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.puzzle(currentPuzzleId || '') });
+      queryClient.invalidateQueries({ queryKey: ["completedPuzzles"] });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.puzzle(currentPuzzleId || ""),
+      });
     },
     onError: (error) => {
-      console.error('Failed to submit solution:', error);
+      console.error("Failed to submit solution:", error);
       setValidationResult({
         isValid: false,
-        message: error instanceof Error ? error.message : 'Failed to submit solution'
+        message:
+          error instanceof Error ? error.message : "Failed to submit solution",
       });
     },
   });
@@ -188,7 +185,7 @@ export function usePuzzleGame() {
   const originalNext = game.next;
   const next = useCallback(() => {
     originalNext();
-    setStepCount(prev => prev + 1);
+    setStepCount((prev) => prev + 1);
   }, [originalNext]);
 
   const originalClear = game.clear;
@@ -212,7 +209,7 @@ export function usePuzzleGame() {
     clear,
     currentPuzzle: currentPuzzle || null,
     currentPuzzleId,
-    isPuzzleLoading: isPuzzleLoading || loadPuzzleMutation.isPending,
+    isPuzzleLoading,
     stepCount,
     isValidating: validateMutation.isPending,
     validationResult,
@@ -226,6 +223,6 @@ export function usePuzzleGame() {
     loadLineraBoard,
     showPuzzleList,
     setShowPuzzleList,
-    backToPuzzleList
+    backToPuzzleList,
   };
 }

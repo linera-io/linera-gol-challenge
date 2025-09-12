@@ -1,52 +1,12 @@
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { lineraAdapter } from "../lib/linera-adapter";
 import { GOL_APP_ID } from "../constants";
-
-export interface LineraBoard {
-  size: number;
-  liveCells: Array<{ x: number; y: number }>;
-}
-
-// Condition types matching the backend structure
-export interface Position {
-  x: number;
-  y: number;
-}
-
-export interface TestPositionCondition {
-  TestPosition: {
-    position: Position;
-    is_live: boolean;
-  };
-}
-
-export interface TestRectangleCondition {
-  TestRectangle: {
-    x_range: { start: number; end: number };
-    y_range: { start: number; end: number };
-    min_live_count: number;
-    max_live_count: number;
-  };
-}
-
-export type Condition = TestPositionCondition | TestRectangleCondition;
-
-export interface Puzzle {
-  id: string;
-  title: string;
-  summary: string;
-  difficulty: "EASY" | "MEDIUM" | "HARD";
-  size: number;
-  minimalSteps: number;
-  maximalSteps: number;
-  initialConditions?: Condition[];
-  finalConditions?: Condition[];
-}
-
-export interface ValidationResult {
-  isValid: boolean;
-  errorMessage?: string;
-}
+import {
+  Puzzle,
+  LineraBoard,
+  ValidationResult,
+  DifficultyLevel,
+} from "@/lib/types/puzzle.types";
 
 export interface WalletInfo {
   chainId: string;
@@ -55,7 +15,6 @@ export interface WalletInfo {
 
 export class LineraService {
   private static instance: LineraService | null = null;
-  private dynamicWallet: DynamicWallet | null = null;
   private initialized = false;
   private isInitializing = false;
   private walletInfo: WalletInfo | null = null;
@@ -77,11 +36,9 @@ export class LineraService {
 
     try {
       console.log("Initializing Linera service with Dynamic wallet...");
-      
-      this.dynamicWallet = dynamicWallet;
 
       const provider = await lineraAdapter.connect(dynamicWallet);
-      
+
       await lineraAdapter.setApplication(GOL_APP_ID);
 
       this.walletInfo = {
@@ -254,22 +211,24 @@ export class LineraService {
 
       const puzzleData = result.data.puzzle;
       console.log("[GOL] Parsed puzzle data:", puzzleData);
-      
+
       // Ensure difficulty is valid, default to "EASY" if not
       const validDifficulties = ["EASY", "MEDIUM", "HARD"];
-      const difficulty = validDifficulties.includes(puzzleData.difficulty) 
-        ? puzzleData.difficulty as "EASY" | "MEDIUM" | "HARD"
+      const difficulty = validDifficulties.includes(puzzleData.difficulty)
+        ? (puzzleData.difficulty as DifficultyLevel)
         : "EASY";
-      
+
       if (puzzleData.difficulty !== difficulty) {
-        console.warn(`Invalid difficulty value: ${puzzleData.difficulty}, defaulting to EASY`);
+        console.warn(
+          `Invalid difficulty value: ${puzzleData.difficulty}, defaulting to EASY`
+        );
       }
 
       return {
         id: puzzleId,
         title: puzzleData.title || "Untitled Puzzle",
         summary: puzzleData.summary || "No description available",
-        difficulty: difficulty,
+        difficulty: difficulty as DifficultyLevel,
         size: puzzleData.size || 7,
         minimalSteps: puzzleData.minimalSteps || 0,
         maximalSteps: puzzleData.maximalSteps || 100,
@@ -358,7 +317,6 @@ export class LineraService {
     lineraAdapter.reset();
     this.initialized = false;
     this.isInitializing = false;
-    this.dynamicWallet = null;
     this.walletInfo = null;
   }
 
@@ -390,14 +348,3 @@ export class LineraService {
     return this.walletInfo;
   }
 }
-
-// Block Pattern (2x2):
-// X X
-// X X
-// Just 4 cells in a square formation.
-
-// Boat Pattern:
-// X X .
-// X . X
-// . X .
-// A 5-cell boat-shaped stable pattern.

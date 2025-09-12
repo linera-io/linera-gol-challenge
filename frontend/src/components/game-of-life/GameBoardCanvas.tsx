@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useCallback, memo } from "react";
-import { Condition } from "@/lib/linera/services/LineraService";
+import { Condition } from "@/lib/types/puzzle.types";
 import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
 
 interface GameBoardCanvasProps {

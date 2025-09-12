@@ -2,10 +2,10 @@ import { Card, CardBody } from "@heroui/card";
 import { Chip } from "@heroui/chip";
 import { Button } from "@heroui/button";
 import { CheckCircle, AlertCircle, Target } from "lucide-react";
-import { PuzzleInfo as PuzzleData } from "@/lib/game-of-life/hooks/usePuzzleGame";
+import { Puzzle, formatDifficulty, getDifficultyColor } from "@/lib/types/puzzle.types";
 
 interface PuzzleInfoProps {
-  puzzle: PuzzleData | null;
+  puzzle: Puzzle | null;
   generation: number;
   validationResult: { isValid: boolean; message?: string } | null;
   isValidating: boolean;
@@ -32,7 +32,12 @@ export function PuzzleInfo({
     );
   }
 
-  const difficulty = puzzle.difficulty || "Easy";
+  const difficulty = puzzle.difficulty || "EASY";
+  const difficultyColor = getDifficultyColor(difficulty);
+  const colorClass = 
+    difficultyColor === "success" ? "bg-green-100 text-green-700" :
+    difficultyColor === "warning" ? "bg-yellow-100 text-yellow-700" :
+    "bg-red-100 text-red-700";
 
   return (
     <div className="space-y-4">
@@ -47,15 +52,9 @@ export function PuzzleInfo({
               <Chip
                 variant="flat"
                 size="sm"
-                className={
-                  difficulty === "Easy"
-                    ? "bg-green-100 text-green-700"
-                    : difficulty === "Medium"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                }
+                className={colorClass}
               >
-                Difficulty {difficulty}
+                Difficulty {formatDifficulty(difficulty)}
               </Chip>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed">

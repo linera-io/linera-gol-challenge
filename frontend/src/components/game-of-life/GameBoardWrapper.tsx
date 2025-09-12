@@ -2,7 +2,7 @@
 
 import { GameBoard } from "./GameBoard";
 import { GameBoardCanvas } from "./GameBoardCanvas";
-import { Condition } from "@/lib/linera/services/LineraService";
+import { Condition } from "@/lib/types/puzzle.types";
 import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
 
 interface GameBoardWrapperProps {

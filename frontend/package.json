@@ -12,6 +12,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@dynamic-labs/ethereum": "^4.29.4",
+    "@dynamic-labs/sdk-react-core": "^4.29.4",
     "@heroui/badge": "^2.2.15",
     "@heroui/button": "2.2.24",
     "@heroui/card": "^2.2.23",
@@ -23,6 +25,7 @@
     "@heroui/listbox": "2.3.23",
     "@heroui/navbar": "2.2.22",
     "@heroui/select": "^2.4.25",
+    "@heroui/skeleton": "^2.2.16",
     "@heroui/slider": "^2.4.21",
     "@heroui/snippet": "2.2.25",
     "@heroui/switch": "2.2.22",
@@ -43,9 +46,7 @@
     "next-themes": "0.4.6",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "^6.30.0",
-    "@dynamic-labs/ethereum": "^4.29.4",
-    "@dynamic-labs/sdk-react-core": "^4.29.4"
+    "react-router-dom": "^6.30.0"
   },
   "devDependencies": {
     "@react-types/shared": "3.30.0",

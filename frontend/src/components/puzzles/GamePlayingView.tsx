@@ -1,16 +1,18 @@
 import { useState, useMemo, useEffect } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { ArrowLeft, Info, Grid3x3, Play, Check } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { GameBoardWrapper } from "@/components/game-of-life/GameBoardWrapper";
 import { PuzzleInfo } from "./PuzzleInfo";
 import { GameControls } from "./GameControls";
-import { PuzzleInfo as PuzzleData } from "@/lib/game-of-life/hooks/usePuzzleGame";
-import { PUZZLE_BOARD_SIZE } from "@/lib/game-of-life/data/puzzles";
+import { PuzzleTutorial } from "./PuzzleTutorial";
+import { GameBoardSkeleton, PuzzleInfoSkeleton } from "./GamePlayingSkeleton";
+import { Puzzle as PuzzleData } from "@/lib/types/puzzle.types";
 import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
 
 interface GamePlayingViewProps {
   puzzle: PuzzleData | null;
+  isPuzzleLoading?: boolean;
   generation: number;
   cells: Map<string, boolean>;
   validationResult: { isValid: boolean; message?: string } | null;
@@ -32,6 +34,7 @@ interface GamePlayingViewProps {
 
 export function GamePlayingView({
   puzzle,
+  isPuzzleLoading = false,
   generation,
   cells,
   validationResult,
@@ -111,90 +114,63 @@ export function GamePlayingView({
         <div className="flex-1" />
       </div>
 
-      {puzzle && (
-        <h1 className="text-3xl font-bold text-gray-900 text-center">
-          {puzzle.title}
-        </h1>
+      {isPuzzleLoading ? (
+        <div className="flex justify-center">
+          <div className="w-64 h-9 bg-gray-200 rounded-lg animate-pulse" />
+        </div>
+      ) : (
+        puzzle && (
+          <h1 className="text-3xl font-bold text-gray-900 text-center">
+            {puzzle.title}
+          </h1>
+        )
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
-          <PuzzleInfo
-            puzzle={puzzle}
-            generation={generation}
-            validationResult={validationResult}
-            isValidating={isValidating}
-            isSubmitting={isSubmitting}
-            onSubmit={onSubmit}
-            onClear={onClear}
-          />
-
-          {showTutorial && (
-            <Card className="bg-white shadow-lg">
-              <CardBody className="p-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <Info size={18} className="text-gray-400" />
-                    How to Play
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex gap-3">
-                      <Grid3x3
-                        size={20}
-                        className="text-gray-400 mt-0.5 flex-shrink-0"
-                      />
-                      <p className="text-sm text-gray-500">
-                        Place cells by clicking on the grid to create your
-                        desired pattern.
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <Play
-                        size={20}
-                        className="text-gray-400 mt-0.5 flex-shrink-0"
-                      />
-                      <p className="text-sm text-gray-500">
-                        Test your solution by pressing the "Play" to advance the
-                        simulation and check the outcome.
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <Check
-                        size={20}
-                        className="text-gray-400 mt-0.5 flex-shrink-0"
-                      />
-                      <p className="text-sm text-gray-500">
-                        Submit when you think you've solved the puzzle to record
-                        it on the blockchain!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+        <div className="lg:col-span-1 space-y-4 order-1 lg:order-1">
+          {isPuzzleLoading ? (
+            <PuzzleInfoSkeleton />
+          ) : (
+            <PuzzleInfo
+              puzzle={puzzle}
+              generation={generation}
+              validationResult={validationResult}
+              isValidating={isValidating}
+              isSubmitting={isSubmitting}
+              onSubmit={onSubmit}
+              onClear={onClear}
+            />
           )}
+
+          <div className="hidden lg:block">
+            {showTutorial && <PuzzleTutorial />}
+          </div>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 order-2 lg:order-2">
           <Card className="bg-white shadow-lg">
             <CardBody className="p-6">
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900 text-center mb-4">
                   Game of Life Playground
                 </h2>
-                <div className="flex items-center justify-center rounded-lg">
-                  <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                    <GameBoardWrapper
-                      width={puzzle?.size || PUZZLE_BOARD_SIZE}
-                      height={puzzle?.size || PUZZLE_BOARD_SIZE}
-                      cells={cells}
-                      onCellClick={onCellClick}
-                      cellSize={optimalCellSize}
-                      initialConditions={showInitialConditions ? puzzle?.initialConditions : undefined}
-                      finalConditions={showFinalConditions ? puzzle?.finalConditions : undefined}
-                    />
+                {isPuzzleLoading || !puzzle?.size ? (
+                  <GameBoardSkeleton />
+                ) : (
+                  <div className="flex items-center justify-center rounded-lg">
+                    <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                      <GameBoardWrapper
+                        width={puzzle.size}
+                        height={puzzle.size}
+                        cells={cells}
+                        onCellClick={onCellClick}
+                        cellSize={optimalCellSize}
+                        initialConditions={showInitialConditions ? puzzle?.initialConditions : undefined}
+                        finalConditions={showFinalConditions ? puzzle?.finalConditions : undefined}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <GameControls
                   isPlaying={isPlaying}
@@ -213,6 +189,10 @@ export function GamePlayingView({
               </div>
             </CardBody>
           </Card>
+        </div>
+
+        <div className="lg:hidden order-3">
+          {showTutorial && <PuzzleTutorial />}
         </div>
       </div>
     </div>

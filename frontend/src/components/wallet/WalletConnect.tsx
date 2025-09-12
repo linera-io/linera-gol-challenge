@@ -53,7 +53,7 @@ export function WalletConnect() {
         size="sm"
         variant="light"
         isIconOnly
-        onPress={disconnect}
+        onPress={() => disconnect()}
         className="text-gray-600 hover:text-gray-900"
       >
         <LogOut size={16} />
