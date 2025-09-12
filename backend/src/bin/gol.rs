@@ -248,12 +248,12 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
 fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
     // Define the target pattern (2x2 block in center)
     let target_board = Board::with_live_cells(
-        6,
+        8,
         vec![
-            Position { x: 2, y: 2 },
-            Position { x: 2, y: 3 },
-            Position { x: 3, y: 2 },
             Position { x: 3, y: 3 },
+            Position { x: 3, y: 4 },
+            Position { x: 4, y: 3 },
+            Position { x: 4, y: 4 },
         ],
     );
 
@@ -265,7 +265,7 @@ fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
         title: "Block Formation".to_string(),
         summary: "Create a stable 2x2 block pattern in the center of the board".to_string(),
         difficulty: Difficulty::Easy,
-        size: 6,
+        size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
@@ -284,14 +284,14 @@ fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
     // ●  ●
     //  ●●
     let target_board = Board::with_live_cells(
-        7,
+        9,
         vec![
-            Position { x: 2, y: 1 },
-            Position { x: 3, y: 1 },
-            Position { x: 1, y: 2 },
+            Position { x: 3, y: 2 },
             Position { x: 4, y: 2 },
             Position { x: 2, y: 3 },
-            Position { x: 3, y: 3 },
+            Position { x: 5, y: 3 },
+            Position { x: 3, y: 4 },
+            Position { x: 4, y: 4 },
         ],
     );
 
@@ -304,7 +304,7 @@ fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
         title: "Beehive Formation".to_string(),
         summary: "Create a stable beehive pattern (6-cell hexagonal shape)".to_string(),
         difficulty: Difficulty::Easy,
-        size: 7,
+        size: 9,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
@@ -324,15 +324,15 @@ fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
     //  ● ●
     //   ●
     let target_board = Board::with_live_cells(
-        8,
+        10,
         vec![
-            Position { x: 2, y: 1 },
-            Position { x: 3, y: 1 },
-            Position { x: 1, y: 2 },
+            Position { x: 3, y: 2 },
             Position { x: 4, y: 2 },
             Position { x: 2, y: 3 },
-            Position { x: 4, y: 3 },
+            Position { x: 5, y: 3 },
             Position { x: 3, y: 4 },
+            Position { x: 5, y: 4 },
+            Position { x: 4, y: 5 },
         ],
     );
 
@@ -345,7 +345,7 @@ fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
         title: "Loaf Formation".to_string(),
         summary: "Create a stable loaf pattern (7-cell bread loaf shape)".to_string(),
         difficulty: Difficulty::Easy,
-        size: 8,
+        size: 10,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
@@ -364,13 +364,13 @@ fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
     // ● ●
     //  ●
     let target_board = Board::with_live_cells(
-        6,
+        8,
         vec![
-            Position { x: 1, y: 1 },
-            Position { x: 2, y: 1 },
-            Position { x: 1, y: 2 },
+            Position { x: 2, y: 2 },
             Position { x: 3, y: 2 },
             Position { x: 2, y: 3 },
+            Position { x: 4, y: 3 },
+            Position { x: 3, y: 4 },
         ],
     );
 
@@ -383,7 +383,7 @@ fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
         title: "Boat Formation".to_string(),
         summary: "Create a stable boat pattern (5-cell boat shape)".to_string(),
         difficulty: Difficulty::Easy,
-        size: 6,
+        size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
@@ -402,12 +402,12 @@ fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
     // ● ●
     //  ●
     let target_board = Board::with_live_cells(
-        5,
+        7,
         vec![
-            Position { x: 2, y: 1 },
-            Position { x: 1, y: 2 },
             Position { x: 3, y: 2 },
             Position { x: 2, y: 3 },
+            Position { x: 4, y: 3 },
+            Position { x: 3, y: 4 },
         ],
     );
 
@@ -420,7 +420,7 @@ fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
         title: "Tub Formation".to_string(),
         summary: "Create a stable tub pattern (4-cell hollow square)".to_string(),
         difficulty: Difficulty::Easy,
-        size: 5,
+        size: 7,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
@@ -439,11 +439,11 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
     // ●
     // ●
     let target_board = Board::with_live_cells(
-        5,
+        7,
         vec![
-            Position { x: 2, y: 1 },
-            Position { x: 2, y: 2 },
-            Position { x: 2, y: 3 },
+            Position { x: 3, y: 2 },
+            Position { x: 3, y: 3 },
+            Position { x: 3, y: 4 },
         ],
     );
 
@@ -459,7 +459,7 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
         summary: "Create a blinker oscillator pattern (3-cell vertical line that oscillates)"
             .to_string(),
         difficulty: Difficulty::Easy,
-        size: 5,
+        size: 7,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
@@ -478,16 +478,16 @@ fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
     // ··●●
     // ··●●
     let target_board = Board::with_live_cells(
-        6,
+        8,
         vec![
-            Position { x: 1, y: 1 },
-            Position { x: 2, y: 1 },
-            Position { x: 1, y: 2 },
             Position { x: 2, y: 2 },
+            Position { x: 3, y: 2 },
+            Position { x: 2, y: 3 },
             Position { x: 3, y: 3 },
-            Position { x: 4, y: 3 },
-            Position { x: 3, y: 4 },
             Position { x: 4, y: 4 },
+            Position { x: 5, y: 4 },
+            Position { x: 4, y: 5 },
+            Position { x: 5, y: 5 },
         ],
     );
 
@@ -503,7 +503,7 @@ fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
         summary: "Create a beacon oscillator pattern (two 2x2 blocks that blink diagonally)"
             .to_string(),
         difficulty: Difficulty::Easy,
-        size: 6,
+        size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
@@ -522,14 +522,14 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
     // ·●·●
     // ·●··
     let target_board = Board::with_live_cells(
-        6,
+        8,
         vec![
-            Position { x: 3, y: 1 },
-            Position { x: 1, y: 2 },
-            Position { x: 3, y: 2 },
+            Position { x: 4, y: 2 },
             Position { x: 2, y: 3 },
             Position { x: 4, y: 3 },
-            Position { x: 2, y: 4 },
+            Position { x: 3, y: 4 },
+            Position { x: 5, y: 4 },
+            Position { x: 3, y: 5 },
         ],
     );
 
@@ -544,7 +544,7 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
         title: "Clock Formation".to_string(),
         summary: "Create a clock oscillator pattern (period-4 oscillator)".to_string(),
         difficulty: Difficulty::Medium,
-        size: 6,
+        size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
