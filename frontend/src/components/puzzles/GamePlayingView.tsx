@@ -181,6 +181,8 @@ export function GamePlayingView({
                   onToggleHints={() => setShowInitialConditions(!showInitialConditions)}
                   onToggleGoals={() => setShowFinalConditions(!showFinalConditions)}
                   hasConditions={hasConditions}
+                  minSteps={puzzle?.minimalSteps}
+                  maxSteps={puzzle?.maximalSteps}
                 />
               </div>
             </CardBody>

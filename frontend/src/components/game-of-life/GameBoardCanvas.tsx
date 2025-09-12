@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useCallback, memo } from "react";
 import { Condition } from "@/lib/types/puzzle.types";
 import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
+import { RectangleOverlays } from "./RectangleOverlays";
 
 interface GameBoardCanvasProps {
   width: number;
@@ -77,30 +78,6 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
                 cellSize - 2
               );
             }
-          } else if ("TestRectangle" in condition) {
-            const { x_range, y_range } = condition.TestRectangle;
-
-            // Draw rectangle area - adjust line width for small cells
-            ctx.strokeStyle = "rgba(34, 197, 94, 0.5)";
-            ctx.lineWidth = cellSize < 15 ? 1 : 2;
-            ctx.setLineDash([5, 5]);
-            ctx.strokeRect(
-              x_range.start * cellSize,
-              y_range.start * cellSize,
-              (x_range.end - x_range.start) * cellSize,
-              (y_range.end - y_range.start) * cellSize
-            );
-
-            // Fill with very light color
-            ctx.fillStyle = "rgba(34, 197, 94, 0.06)";
-            ctx.fillRect(
-              x_range.start * cellSize,
-              y_range.start * cellSize,
-              (x_range.end - x_range.start) * cellSize,
-              (y_range.end - y_range.start) * cellSize
-            );
-
-            ctx.setLineDash([]);
           }
         });
       }
@@ -121,30 +98,6 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
                 cellSize - 2
               );
             }
-          } else if ("TestRectangle" in condition) {
-            const { x_range, y_range } = condition.TestRectangle;
-
-            // Draw rectangle area - adjust line width for small cells
-            ctx.strokeStyle = "rgba(59, 130, 246, 0.5)";
-            ctx.lineWidth = cellSize < 15 ? 1 : 2;
-            ctx.setLineDash([5, 5]);
-            ctx.strokeRect(
-              x_range.start * cellSize,
-              y_range.start * cellSize,
-              (x_range.end - x_range.start) * cellSize,
-              (y_range.end - y_range.start) * cellSize
-            );
-
-            // Fill with very light color
-            ctx.fillStyle = "rgba(59, 130, 246, 0.06)";
-            ctx.fillRect(
-              x_range.start * cellSize,
-              y_range.start * cellSize,
-              (x_range.end - x_range.start) * cellSize,
-              (y_range.end - y_range.start) * cellSize
-            );
-
-            ctx.setLineDash([]);
           }
         });
       }
@@ -195,16 +148,23 @@ export const GameBoardCanvas = memo(function GameBoardCanvas({
   );
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width * cellSize}
-      height={height * cellSize}
-      className="cursor-pointer rounded-lg border border-gray-200"
-      onClick={handleCanvasClick}
-      style={{
-        imageRendering: "pixelated",
-        backgroundColor: "#FFFFFF",
-      }}
-    />
+    <div className="relative inline-block">
+      <canvas
+        ref={canvasRef}
+        width={width * cellSize}
+        height={height * cellSize}
+        className="cursor-pointer rounded-lg border border-gray-200"
+        onClick={handleCanvasClick}
+        style={{
+          imageRendering: "pixelated",
+          backgroundColor: "#FFFFFF",
+        }}
+      />
+      <RectangleOverlays
+        initialConditions={initialConditions}
+        finalConditions={finalConditions}
+        cellSize={cellSize}
+      />
+    </div>
   );
 });

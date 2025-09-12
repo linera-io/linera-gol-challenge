@@ -15,6 +15,8 @@ interface GameControlsProps {
   onToggleHints?: () => void;
   onToggleGoals?: () => void;
   hasConditions?: boolean;
+  minSteps?: number;
+  maxSteps?: number;
 }
 
 export function GameControls({
@@ -30,7 +32,11 @@ export function GameControls({
   onToggleHints,
   onToggleGoals,
   hasConditions = false,
+  minSteps,
+  maxSteps,
 }: GameControlsProps) {
+  const hasStepRequirement = minSteps !== undefined && maxSteps !== undefined;
+  
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="flex gap-6 items-center">
@@ -95,6 +101,21 @@ export function GameControls({
           Clear
         </Button>
       </div>
+      {hasStepRequirement && (
+        <div className="mt-2 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-50 border border-gray-200">
+            <span className="text-lg">🎯</span>
+            <span className="text-sm font-medium text-gray-700">
+              {minSteps === maxSteps
+                ? `Reach goal pattern in exactly ${minSteps} step${minSteps !== 1 ? "s" : ""}`
+                : `Reach goal pattern in ${minSteps}-${maxSteps} steps`}
+            </span>
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            Each step = 1 generation of the Game of Life
+          </div>
+        </div>
+      )}
     </div>
   );
 }
