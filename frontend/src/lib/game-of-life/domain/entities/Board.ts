@@ -1,4 +1,4 @@
-import { Cell } from './Cell';
+import { Cell } from "./Cell";
 
 export interface BoardConfig {
   width: number;
@@ -42,16 +42,16 @@ export class Board {
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
         if (dx === 0 && dy === 0) continue;
-        
+
         const nx = x + dx;
         const ny = y + dy;
-        
+
         if (!this.config.infinite) {
           if (nx < 0 || nx >= this.config.width || ny < 0 || ny >= this.config.height) {
             continue;
           }
         }
-        
+
         neighbors.push(this.getCell(nx, ny));
       }
     }
@@ -59,11 +59,11 @@ export class Board {
   }
 
   countAliveNeighbors(x: number, y: number): number {
-    return this.getNeighbors(x, y).filter(cell => cell.alive).length;
+    return this.getNeighbors(x, y).filter((cell) => cell.alive).length;
   }
 
   getAllAliveCells(): Cell[] {
-    return Array.from(this.cells.values()).filter(cell => cell.alive);
+    return Array.from(this.cells.values()).filter((cell) => cell.alive);
   }
 
   clear(): void {
@@ -79,7 +79,7 @@ export class Board {
         state.set(key, new Cell(cell.x, cell.y, true));
       }
     });
-    
+
     this.history = this.history.slice(0, this.currentHistoryIndex + 1);
     this.history.push(state);
     this.currentHistoryIndex++;
@@ -99,14 +99,14 @@ export class Board {
 
   undo(): void {
     if (!this.canUndo()) return;
-    
+
     this.currentHistoryIndex--;
     this.restoreState(this.history[this.currentHistoryIndex]);
   }
 
   redo(): void {
     if (!this.canRedo()) return;
-    
+
     this.currentHistoryIndex++;
     this.restoreState(this.history[this.currentHistoryIndex]);
   }
@@ -121,17 +121,19 @@ export class Board {
   getActiveBounds(): { minX: number; minY: number; maxX: number; maxY: number } | null {
     const aliveCells = this.getAllAliveCells();
     if (aliveCells.length === 0) return null;
-    
-    let minX = Infinity, minY = Infinity;
-    let maxX = -Infinity, maxY = -Infinity;
-    
-    aliveCells.forEach(cell => {
+
+    let minX = Infinity,
+      minY = Infinity;
+    let maxX = -Infinity,
+      maxY = -Infinity;
+
+    aliveCells.forEach((cell) => {
       minX = Math.min(minX, cell.x);
       minY = Math.min(minY, cell.y);
       maxX = Math.max(maxX, cell.x);
       maxY = Math.max(maxY, cell.y);
     });
-    
+
     return { minX, minY, maxX, maxY };
   }
 }

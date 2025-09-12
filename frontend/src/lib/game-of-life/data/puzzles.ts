@@ -6,76 +6,73 @@
 // 2. For each puzzle file, run: linera publish-data-blob <puzzle_name>_puzzle.bcs
 // 3. Create a blob mapping JSON file and use --blob-map option
 
-export interface PuzzleMetadata {
-  id: string;
-  title: string;
-  summary: string;
-  difficulty: "Easy" | "Medium" | "Hard";
-  size: number;
-}
+import { PuzzleMetadata, DifficultyLevel } from "@/lib/types/puzzle.types";
+
+// Re-export for backward compatibility
+export type { PuzzleMetadata } from "@/lib/types/puzzle.types";
 
 export const KNOWN_PUZZLES: PuzzleMetadata[] = [
   {
     id: "4d74a8a0466df69a8d2e4b16e1ebe4a82e067cad460c22130bf4542cc39ea7fe",
     title: "Block Formation",
     summary: "Create a stable 2x2 block pattern in the center of the board",
-    difficulty: "Easy",
+    difficulty: "EASY",
     size: 6,
   },
   {
     id: "d35f92421b00a3bd3d92e01c11e45ea9c3cc7d4a510005b3664009540f7a7da0",
     title: "Beehive Formation",
     summary: "Create a stable beehive pattern (6-cell hexagonal shape)",
-    difficulty: "Easy",
+    difficulty: "EASY",
     size: 7,
   },
   {
     id: "4133771d8a2e82b75ae7528167cb3a3338aebd97a26304996a55d3d7b26de814",
     title: "Loaf Formation",
     summary: "Create a stable loaf pattern (7-cell bread loaf shape)",
-    difficulty: "Easy",
+    difficulty: "EASY",
     size: 8,
   },
   {
     id: "35ce219839e8ee7b9d22370e8b7ec889b205f28547d53a496e69b0c2bb1bc4f0",
     title: "Boat Formation",
     summary: "Create a stable boat pattern (5-cell boat shape)",
-    difficulty: "Easy",
+    difficulty: "EASY",
     size: 6,
   },
   {
     id: "5219a384d3ba16dda76d1a8dbbb4acc4b2cbace5a0318ce6439ce0eb0eb4bd31",
     title: "Tub Formation",
     summary: "Create a stable tub pattern (4-cell hollow square)",
-    difficulty: "Easy",
+    difficulty: "EASY",
     size: 5,
   },
   {
     id: "b0608e739a7b58f076849cf9aa9039a1ae348d4c0670f867e961548f30ddb264",
     title: "Blinker Formation",
     summary: "Create a blinker oscillator pattern (3-cell vertical line that oscillates)",
-    difficulty: "Easy",
+    difficulty: "EASY",
     size: 5,
   },
   {
     id: "5a32e9c47e4622f80967b5e2de7d3a67b783d2b0afb89985e5de1af430a872e9",
     title: "Beacon Formation",
     summary: "Create a beacon oscillator pattern (two 2x2 blocks that blink diagonally)",
-    difficulty: "Easy",
+    difficulty: "EASY",
     size: 6,
   },
   {
     id: "5d73086d1effc5214e8c6d421b9de9c77b69faae2f5947c725a32ff7e9fdafaa",
     title: "Clock Formation",
     summary: "Create a clock oscillator pattern (period-4 oscillator)",
-    difficulty: "Medium",
+    difficulty: "MEDIUM",
     size: 6,
   },
   {
     id: "e7de932762b0a6a27d29097f20caa0084c87a61fb6e21d5f49cc88c1e5542479",
     title: "Robot face",
     summary: "Create a robot-like face from very few cells",
-    difficulty: "Medium",
+    difficulty: "MEDIUM",
     size: 60,
   },
 ];
@@ -86,8 +83,6 @@ export function getPuzzleMetadata(id: string): PuzzleMetadata | undefined {
 }
 
 // Helper to get puzzles by difficulty
-export function getPuzzlesByDifficulty(
-  difficulty: "Easy" | "Medium" | "Hard"
-): PuzzleMetadata[] {
+export function getPuzzlesByDifficulty(difficulty: DifficultyLevel): PuzzleMetadata[] {
   return KNOWN_PUZZLES.filter((puzzle) => puzzle.difficulty === difficulty);
 }

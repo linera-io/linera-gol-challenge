@@ -8,12 +8,9 @@ export function GameHeader() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Gamepad2 className="h-5 w-5 text-linera-primary" />
-            <h1 className="text-lg font-semibold text-gray-900">
-              Conway's Game of Life
-            </h1>
+            <h1 className="text-lg font-semibold text-gray-900">Conway's Game of Life</h1>
             <span className="hidden sm:inline text-sm text-gray-500">
-              • Powered by{" "}
-              <span className="text-linera-primary font-medium">Linera</span>
+              • Powered by <span className="text-linera-primary font-medium">Linera</span>
             </span>
           </div>
           <WalletConnect />

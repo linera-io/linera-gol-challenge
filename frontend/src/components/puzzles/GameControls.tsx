@@ -29,7 +29,7 @@ export function GameControls({
   showGoals = false,
   onToggleHints,
   onToggleGoals,
-  hasConditions = false
+  hasConditions = false,
 }: GameControlsProps) {
   return (
     <div className="flex flex-col items-center gap-4">
@@ -65,8 +65,8 @@ export function GameControls({
               <button
                 onClick={onToggleHints}
                 className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                  showHints 
-                    ? "bg-green-500 text-white" 
+                  showHints
+                    ? "bg-green-500 text-white"
                     : "bg-gray-200 hover:bg-gray-300 text-gray-600"
                 }`}
               >
@@ -77,8 +77,8 @@ export function GameControls({
               <button
                 onClick={onToggleGoals}
                 className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                  showGoals 
-                    ? "bg-blue-500 text-white" 
+                  showGoals
+                    ? "bg-blue-500 text-white"
                     : "bg-gray-200 hover:bg-gray-300 text-gray-600"
                 }`}
               >

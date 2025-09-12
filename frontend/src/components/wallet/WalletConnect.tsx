@@ -14,12 +14,7 @@ export function WalletConnect() {
 
   if (isLoading) {
     return (
-      <Button
-        size="sm"
-        variant="flat"
-        disabled
-        className="bg-gray-100"
-      >
+      <Button size="sm" variant="flat" disabled className="bg-gray-100">
         Connecting...
       </Button>
     );
@@ -43,17 +38,17 @@ export function WalletConnect() {
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
         <div className="flex items-center gap-1">
-          <div className={`w-2 h-2 rounded-full ${isConnectedToLinera ? 'bg-green-500' : 'bg-yellow-500'}`} />
-          <span className="text-sm text-gray-700">
-            {shortenAddress(walletAddress)}
-          </span>
+          <div
+            className={`w-2 h-2 rounded-full ${isConnectedToLinera ? "bg-green-500" : "bg-yellow-500"}`}
+          />
+          <span className="text-sm text-gray-700">{shortenAddress(walletAddress)}</span>
         </div>
       </div>
       <Button
         size="sm"
         variant="light"
         isIconOnly
-        onPress={disconnect}
+        onPress={() => disconnect()}
         className="text-gray-600 hover:text-gray-900"
       >
         <LogOut size={16} />

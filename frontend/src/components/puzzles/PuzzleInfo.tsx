@@ -2,10 +2,10 @@ import { Card, CardBody } from "@heroui/card";
 import { Chip } from "@heroui/chip";
 import { Button } from "@heroui/button";
 import { CheckCircle, AlertCircle, Target } from "lucide-react";
-import { PuzzleInfo as PuzzleData } from "@/lib/game-of-life/hooks/usePuzzleGame";
+import { Puzzle, formatDifficulty, getDifficultyColor } from "@/lib/types/puzzle.types";
 
 interface PuzzleInfoProps {
-  puzzle: PuzzleData | null;
+  puzzle: Puzzle | null;
   generation: number;
   validationResult: { isValid: boolean; message?: string } | null;
   isValidating: boolean;
@@ -32,7 +32,14 @@ export function PuzzleInfo({
     );
   }
 
-  const difficulty = puzzle.difficulty || "Easy";
+  const difficulty = puzzle.difficulty || "EASY";
+  const difficultyColor = getDifficultyColor(difficulty);
+  const colorClass =
+    difficultyColor === "success"
+      ? "bg-green-100 text-green-700"
+      : difficultyColor === "warning"
+        ? "bg-yellow-100 text-yellow-700"
+        : "bg-red-100 text-red-700";
 
   return (
     <div className="space-y-4">
@@ -41,26 +48,12 @@ export function PuzzleInfo({
         <CardBody className="p-6">
           <div className="space-y-3">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {puzzle.title}
-              </h3>
-              <Chip
-                variant="flat"
-                size="sm"
-                className={
-                  difficulty === "Easy"
-                    ? "bg-green-100 text-green-700"
-                    : difficulty === "Medium"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                }
-              >
-                Difficulty {difficulty}
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{puzzle.title}</h3>
+              <Chip variant="flat" size="sm" className={colorClass}>
+                Difficulty {formatDifficulty(difficulty)}
               </Chip>
             </div>
-            <p className="text-gray-500 text-sm leading-relaxed">
-              {puzzle.summary}
-            </p>
+            <p className="text-gray-500 text-sm leading-relaxed">{puzzle.summary}</p>
           </div>
         </CardBody>
       </Card>
@@ -71,12 +64,8 @@ export function PuzzleInfo({
           <div className="space-y-4">
             {/* Current Generation Display */}
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <span className="text-gray-700 font-medium">
-                Current generation
-              </span>
-              <span className="text-2xl font-bold text-linera-primary">
-                {generation}
-              </span>
+              <span className="text-gray-700 font-medium">Current generation</span>
+              <span className="text-2xl font-bold text-linera-primary">{generation}</span>
             </div>
 
             {/* Instructions */}
@@ -87,9 +76,7 @@ export function PuzzleInfo({
             )}
 
             {generation === 0 && !validationResult && (
-              <p className="text-sm text-gray-500">
-                Place your cells and press submit when ready.
-              </p>
+              <p className="text-sm text-gray-500">Place your cells and press submit when ready.</p>
             )}
 
             {/* Validation Result */}
@@ -110,9 +97,7 @@ export function PuzzleInfo({
                   <div className="flex-1">
                     <p
                       className={`font-medium ${
-                        validationResult.isValid
-                          ? "text-green-800"
-                          : "text-red-800"
+                        validationResult.isValid ? "text-green-800" : "text-red-800"
                       }`}
                     >
                       {validationResult.message}

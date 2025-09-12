@@ -51,9 +51,7 @@ export class DynamicSigner implements Signer {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to sign message:", error);
-      throw new Error(
-        `Dynamic signature request failed: ${error?.message || error}`
-      );
+      throw new Error(`Dynamic signature request failed: ${error?.message || error}`);
     }
   }
 }

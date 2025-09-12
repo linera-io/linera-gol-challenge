@@ -5,8 +5,7 @@ import { LineraService } from "../services/LineraService";
 import { lineraAdapter } from "../lib/linera-adapter";
 
 export function useAuth() {
-  const { sdkHasLoaded, primaryWallet, setShowAuthFlow, handleLogOut } =
-    useDynamicContext();
+  const { sdkHasLoaded, primaryWallet, setShowAuthFlow, handleLogOut } = useDynamicContext();
   const isLoggedIn = useIsLoggedIn();
   const queryClient = useQueryClient();
 

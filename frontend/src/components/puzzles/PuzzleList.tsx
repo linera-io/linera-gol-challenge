@@ -1,5 +1,6 @@
 import { Card, CardBody } from "@heroui/card";
-import { KNOWN_PUZZLES, PuzzleMetadata } from "@/lib/game-of-life/data/puzzles";
+import { KNOWN_PUZZLES } from "@/lib/game-of-life/data/puzzles";
+import { PuzzleMetadata, DifficultyLevel } from "@/lib/types/puzzle.types";
 import { useCompletedPuzzles } from "@/lib/game-of-life/hooks/useCompletedPuzzles";
 import { PuzzleCard } from "./PuzzleCard";
 
@@ -8,30 +9,34 @@ interface PuzzleListProps {
   currentPuzzleId?: string;
 }
 
-const difficultyConfig = {
-  Easy: {
+const difficultyConfig: Record<
+  DifficultyLevel,
+  {
+    icon: string;
+    bgColor: string;
+    textColor: string;
+  }
+> = {
+  EASY: {
     icon: "🌱",
     bgColor: "bg-green-50",
     textColor: "text-green-700",
   },
-  Medium: {
+  MEDIUM: {
     icon: "🔥",
     bgColor: "bg-amber-50",
     textColor: "text-amber-700",
   },
-  Hard: {
+  HARD: {
     icon: "💀",
     bgColor: "bg-red-50",
     textColor: "text-red-700",
   },
 };
 
-export function PuzzleList({
-  onSelectPuzzle,
-  currentPuzzleId,
-}: PuzzleListProps) {
+export function PuzzleList({ onSelectPuzzle, currentPuzzleId }: PuzzleListProps) {
   const { isPuzzleCompleted, isLoadingFromBlockchain } = useCompletedPuzzles();
-  
+
   const groupedPuzzles = KNOWN_PUZZLES.reduce(
     (acc, puzzle) => {
       if (!acc[puzzle.difficulty]) {
@@ -40,13 +45,13 @@ export function PuzzleList({
       acc[puzzle.difficulty].push(puzzle);
       return acc;
     },
-    {} as Record<string, PuzzleMetadata[]>
+    {} as Record<DifficultyLevel, PuzzleMetadata[]>
   );
 
   return (
     <div className="space-y-2 sm:space-y-3">
       {Object.entries(groupedPuzzles).map(([difficulty, puzzles]) => {
-        const config = difficultyConfig[difficulty as keyof typeof difficultyConfig];
+        const config = difficultyConfig[difficulty as DifficultyLevel];
 
         return (
           <div key={difficulty} className="space-y-1.5 sm:space-y-2">
@@ -58,7 +63,7 @@ export function PuzzleList({
                 isCompleted={isPuzzleCompleted(puzzle.id)}
                 isLoading={isLoadingFromBlockchain}
                 onSelect={() => onSelectPuzzle(puzzle.id)}
-                difficulty={difficulty as "Easy" | "Medium" | "Hard"}
+                difficulty={difficulty as DifficultyLevel}
                 difficultyConfig={config}
               />
             ))}
@@ -70,9 +75,7 @@ export function PuzzleList({
         <Card className="bg-gray-50">
           <CardBody className="text-center py-8">
             <p className="text-gray-600">No puzzles available</p>
-            <p className="text-sm text-gray-500 mt-1">
-              Check back later for new challenges!
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Check back later for new challenges!</p>
           </CardBody>
         </Card>
       )}

@@ -2,7 +2,7 @@
 
 import React, { useCallback, useMemo, memo } from "react";
 import { motion } from "framer-motion";
-import { Condition } from "@/lib/linera/services/LineraService";
+import { Condition } from "@/lib/types/puzzle.types";
 
 interface GameBoardProps {
   width: number;
@@ -24,9 +24,9 @@ interface RectangleInfo {
 // Helper function to extract rectangle conditions
 function extractRectangleCondition(conditions: Condition[] | undefined): RectangleInfo | null {
   if (!conditions) return null;
-  
+
   for (const condition of conditions) {
-    if ('TestRectangle' in condition) {
+    if ("TestRectangle" in condition) {
       return condition.TestRectangle;
     }
   }
@@ -36,17 +36,19 @@ function extractRectangleCondition(conditions: Condition[] | undefined): Rectang
 // Helper function to check if two rectangles cover the same area
 function rectanglesOverlap(rect1: RectangleInfo | null, rect2: RectangleInfo | null): boolean {
   if (!rect1 || !rect2) return false;
-  
-  return rect1.x_range.start === rect2.x_range.start &&
-         rect1.x_range.end === rect2.x_range.end &&
-         rect1.y_range.start === rect2.y_range.start &&
-         rect1.y_range.end === rect2.y_range.end;
+
+  return (
+    rect1.x_range.start === rect2.x_range.start &&
+    rect1.x_range.end === rect2.x_range.end &&
+    rect1.y_range.start === rect2.y_range.start &&
+    rect1.y_range.end === rect2.y_range.end
+  );
 }
 
 // Create a combined overlay when both conditions have overlapping rectangles
 function createCombinedRectangleOverlay(
   initialRect: RectangleInfo,
-  finalRect: RectangleInfo,
+  _finalRect: RectangleInfo,
   cellSize: number
 ): JSX.Element {
   return (
@@ -58,10 +60,11 @@ function createCombinedRectangleOverlay(
         top: initialRect.y_range.start * cellSize,
         width: (initialRect.x_range.end - initialRect.x_range.start) * cellSize,
         height: (initialRect.y_range.end - initialRect.y_range.start) * cellSize,
-        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 50%, rgba(59, 130, 246, 0.08) 50%)',
-        border: '2px solid',
-        borderImage: 'linear-gradient(135deg, rgba(34, 197, 94, 0.6), rgba(59, 130, 246, 0.6)) 1',
-        borderRadius: '6px',
+        background:
+          "linear-gradient(135deg, rgba(34, 197, 94, 0.08) 50%, rgba(59, 130, 246, 0.08) 50%)",
+        border: "2px solid",
+        borderImage: "linear-gradient(135deg, rgba(34, 197, 94, 0.6), rgba(59, 130, 246, 0.6)) 1",
+        borderRadius: "6px",
         zIndex: 10,
       }}
     />
@@ -72,12 +75,12 @@ function createCombinedRectangleOverlay(
 function createSingleRectangleOverlay(
   rect: RectangleInfo,
   cellSize: number,
-  type: 'initial' | 'final',
+  type: "initial" | "final",
   index: number
 ): JSX.Element {
-  const isInitial = type === 'initial';
-  const color = isInitial ? '34, 197, 94' : '59, 130, 246'; // Green for initial, blue for final
-  
+  const isInitial = type === "initial";
+  const color = isInitial ? "34, 197, 94" : "59, 130, 246"; // Green for initial, blue for final
+
   return (
     <div
       key={`${type}-rect-${index}`}
@@ -89,7 +92,7 @@ function createSingleRectangleOverlay(
         height: (rect.y_range.end - rect.y_range.start) * cellSize,
         border: `2px dashed rgba(${color}, 0.5)`,
         backgroundColor: `rgba(${color}, 0.06)`,
-        borderRadius: '6px',
+        borderRadius: "6px",
         zIndex: 10,
       }}
     />
@@ -97,46 +100,46 @@ function createSingleRectangleOverlay(
 }
 
 // Build overlay for individual cell conditions
-function buildCellOverlay(
-  overlays: { initial?: boolean; final?: boolean }
-): JSX.Element | null {
+function buildCellOverlay(overlays: { initial?: boolean; final?: boolean }): JSX.Element | null {
   if (overlays.initial === undefined && overlays.final === undefined) {
     return null;
   }
 
   const overlayStyles: React.CSSProperties = {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    pointerEvents: 'none',
-    borderRadius: '2px',
+    pointerEvents: "none",
+    borderRadius: "2px",
   };
-  
+
   if (overlays.initial !== undefined && overlays.final !== undefined) {
     // Both conditions - show split overlay
     overlayStyles.background = `linear-gradient(135deg, 
-      ${overlays.initial ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.1)'} 50%, 
-      ${overlays.final ? 'rgba(59, 130, 246, 0.25)' : 'rgba(59, 130, 246, 0.1)'} 50%)`;
+      ${overlays.initial ? "rgba(34, 197, 94, 0.25)" : "rgba(34, 197, 94, 0.1)"} 50%, 
+      ${overlays.final ? "rgba(59, 130, 246, 0.25)" : "rgba(59, 130, 246, 0.1)"} 50%)`;
   } else if (overlays.initial !== undefined) {
     // Initial condition only
-    overlayStyles.backgroundColor = overlays.initial 
-      ? 'rgba(34, 197, 94, 0.25)' // Green for must be alive
-      : 'rgba(34, 197, 94, 0.08)'; // Lighter green for must be dead
+    overlayStyles.backgroundColor = overlays.initial
+      ? "rgba(34, 197, 94, 0.25)" // Green for must be alive
+      : "rgba(34, 197, 94, 0.08)"; // Lighter green for must be dead
     if (!overlays.initial) {
-      overlayStyles.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(34, 197, 94, 0.15) 3px, rgba(34, 197, 94, 0.15) 6px)';
+      overlayStyles.backgroundImage =
+        "repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(34, 197, 94, 0.15) 3px, rgba(34, 197, 94, 0.15) 6px)";
     }
   } else if (overlays.final !== undefined) {
     // Final condition only
-    overlayStyles.backgroundColor = overlays.final 
-      ? 'rgba(59, 130, 246, 0.25)' // Blue for must be alive
-      : 'rgba(59, 130, 246, 0.08)'; // Lighter blue for must be dead
+    overlayStyles.backgroundColor = overlays.final
+      ? "rgba(59, 130, 246, 0.25)" // Blue for must be alive
+      : "rgba(59, 130, 246, 0.08)"; // Lighter blue for must be dead
     if (!overlays.final) {
-      overlayStyles.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(59, 130, 246, 0.15) 3px, rgba(59, 130, 246, 0.15) 6px)';
+      overlayStyles.backgroundImage =
+        "repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(59, 130, 246, 0.15) 3px, rgba(59, 130, 246, 0.15) 6px)";
     }
   }
-  
+
   return <div style={overlayStyles} />;
 }
 
@@ -157,35 +160,38 @@ export const GameBoard = memo(function GameBoard({
   );
 
   // Helper function to check if a cell has conditions
-  const getCellOverlay = useCallback((x: number, y: number) => {
-    const overlays: { initial?: boolean; final?: boolean } = {};
-    
-    // Check initial conditions
-    if (initialConditions) {
-      for (const condition of initialConditions) {
-        if ('TestPosition' in condition) {
-          const { position, is_live } = condition.TestPosition;
-          if (position.x === x && position.y === y) {
-            overlays.initial = is_live;
+  const getCellOverlay = useCallback(
+    (x: number, y: number) => {
+      const overlays: { initial?: boolean; final?: boolean } = {};
+
+      // Check initial conditions
+      if (initialConditions) {
+        for (const condition of initialConditions) {
+          if ("TestPosition" in condition) {
+            const { position, is_live } = condition.TestPosition;
+            if (position.x === x && position.y === y) {
+              overlays.initial = is_live;
+            }
           }
         }
       }
-    }
-    
-    // Check final conditions
-    if (finalConditions) {
-      for (const condition of finalConditions) {
-        if ('TestPosition' in condition) {
-          const { position, is_live } = condition.TestPosition;
-          if (position.x === x && position.y === y) {
-            overlays.final = is_live;
+
+      // Check final conditions
+      if (finalConditions) {
+        for (const condition of finalConditions) {
+          if ("TestPosition" in condition) {
+            const { position, is_live } = condition.TestPosition;
+            if (position.x === x && position.y === y) {
+              overlays.final = is_live;
+            }
           }
         }
       }
-    }
-    
-    return overlays;
-  }, [initialConditions, finalConditions]);
+
+      return overlays;
+    },
+    [initialConditions, finalConditions]
+  );
 
   // Build the grid of cells
   const grid = useMemo(() => {
@@ -196,7 +202,7 @@ export const GameBoard = memo(function GameBoard({
         const isAlive = cells.has(key);
         const overlays = getCellOverlay(x, y);
         const overlayElement = buildCellOverlay(overlays);
-        
+
         result.push(
           <motion.div
             key={key}
@@ -231,11 +237,11 @@ export const GameBoard = memo(function GameBoard({
   // Build rectangle overlays for area conditions
   const rectangleOverlays = useMemo(() => {
     const overlays: JSX.Element[] = [];
-    
+
     // Extract rectangle conditions
     const initialRect = extractRectangleCondition(initialConditions);
     const finalRect = extractRectangleCondition(finalConditions);
-    
+
     // Check if rectangles overlap
     if (rectanglesOverlap(initialRect, finalRect)) {
       // Create combined overlay for overlapping rectangles
@@ -243,41 +249,35 @@ export const GameBoard = memo(function GameBoard({
     } else {
       // Create separate overlays for non-overlapping rectangles
       if (initialRect) {
-        overlays.push(createSingleRectangleOverlay(initialRect, cellSize, 'initial', 0));
+        overlays.push(createSingleRectangleOverlay(initialRect, cellSize, "initial", 0));
       }
       if (finalRect) {
-        overlays.push(createSingleRectangleOverlay(finalRect, cellSize, 'final', 0));
+        overlays.push(createSingleRectangleOverlay(finalRect, cellSize, "final", 0));
       }
     }
-    
+
     // Handle multiple rectangle conditions (if there are more than one)
     let rectIndex = 1;
     if (initialConditions) {
       initialConditions.forEach((condition) => {
-        if ('TestRectangle' in condition && condition.TestRectangle !== initialRect) {
-          overlays.push(createSingleRectangleOverlay(
-            condition.TestRectangle,
-            cellSize,
-            'initial',
-            rectIndex++
-          ));
+        if ("TestRectangle" in condition && condition.TestRectangle !== initialRect) {
+          overlays.push(
+            createSingleRectangleOverlay(condition.TestRectangle, cellSize, "initial", rectIndex++)
+          );
         }
       });
     }
-    
+
     if (finalConditions) {
       finalConditions.forEach((condition) => {
-        if ('TestRectangle' in condition && condition.TestRectangle !== finalRect) {
-          overlays.push(createSingleRectangleOverlay(
-            condition.TestRectangle,
-            cellSize,
-            'final',
-            rectIndex++
-          ));
+        if ("TestRectangle" in condition && condition.TestRectangle !== finalRect) {
+          overlays.push(
+            createSingleRectangleOverlay(condition.TestRectangle, cellSize, "final", rectIndex++)
+          );
         }
       });
     }
-    
+
     return overlays;
   }, [initialConditions, finalConditions, cellSize]);
 

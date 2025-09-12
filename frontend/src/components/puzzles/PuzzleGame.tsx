@@ -29,6 +29,7 @@ export function PuzzleGame() {
         ) : (
           <GamePlayingView
             puzzle={game.currentPuzzle}
+            isPuzzleLoading={game.isPuzzleLoading}
             generation={game.generation}
             cells={game.cells}
             validationResult={game.validationResult}
