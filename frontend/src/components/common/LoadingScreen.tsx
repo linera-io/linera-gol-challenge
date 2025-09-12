@@ -9,12 +9,12 @@ interface LoadingScreenProps {
   onRetry?: () => void;
 }
 
-export function LoadingScreen({ 
+export function LoadingScreen({
   message = "Loading Game of Life...",
   showConnectButton = false,
   onConnect,
   error,
-  onRetry
+  onRetry,
 }: LoadingScreenProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -37,9 +37,7 @@ export function LoadingScreen({
 
         {/* Title */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Conway's Game of Life
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Conway's Game of Life</h1>
           <p className="text-gray-500">
             Powered by <span className="text-linera-primary font-medium">Linera</span>
           </p>

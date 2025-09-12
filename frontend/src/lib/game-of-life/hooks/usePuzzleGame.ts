@@ -7,11 +7,7 @@ import { useLineraInitialization } from "@/lib/linera/hooks/useLineraQueries";
 
 const QUERY_KEYS = {
   puzzle: (id: string) => ["puzzle", id],
-  validation: (puzzleId: string, board: LineraBoard) => [
-    "validation",
-    puzzleId,
-    board,
-  ],
+  validation: (puzzleId: string, board: LineraBoard) => ["validation", puzzleId, board],
 };
 
 export function usePuzzleGame() {
@@ -117,18 +113,14 @@ export function usePuzzleGame() {
       setValidationResult({
         isValid: result.isValid,
         message:
-          result.errorMessage ||
-          (result.isValid ? "Solution is valid!" : "Solution is not valid"),
+          result.errorMessage || (result.isValid ? "Solution is valid!" : "Solution is not valid"),
       });
     },
     onError: (error) => {
       console.error("Failed to validate solution:", error);
       setValidationResult({
         isValid: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to validate solution",
+        message: error instanceof Error ? error.message : "Failed to validate solution",
       });
     },
   });
@@ -144,15 +136,10 @@ export function usePuzzleGame() {
       }
 
       const board = getCellsAsLineraBoard();
-      const validationResult = await lineraService.validateSolution(
-        board,
-        currentPuzzle.id
-      );
+      const validationResult = await lineraService.validateSolution(board, currentPuzzle.id);
 
       if (!validationResult.isValid) {
-        throw new Error(
-          validationResult.errorMessage || "Solution is not valid"
-        );
+        throw new Error(validationResult.errorMessage || "Solution is not valid");
       }
 
       return lineraService.submitSolution(currentPuzzle.id, board);
@@ -172,8 +159,7 @@ export function usePuzzleGame() {
       console.error("Failed to submit solution:", error);
       setValidationResult({
         isValid: false,
-        message:
-          error instanceof Error ? error.message : "Failed to submit solution",
+        message: error instanceof Error ? error.message : "Failed to submit solution",
       });
     },
   });

@@ -1,9 +1,4 @@
-import initLinera, {
-  Faucet,
-  Client,
-  Wallet,
-  Application,
-} from "@linera/client";
+import initLinera, { Faucet, Client, Wallet, Application } from "@linera/client";
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { DynamicSigner } from "./dynamic-signer";
 import { LINERA_RPC_URL, GOL_APP_ID } from "../constants";
@@ -31,10 +26,7 @@ export class LineraAdapter {
     return LineraAdapter.instance;
   }
 
-  async connect(
-    dynamicWallet: DynamicWallet,
-    rpcUrl?: string
-  ): Promise<LineraProvider> {
+  async connect(dynamicWallet: DynamicWallet, rpcUrl?: string): Promise<LineraProvider> {
     if (this.provider) return this.provider;
     if (this.connectPromise) return this.connectPromise;
 
@@ -55,9 +47,7 @@ export class LineraAdapter {
           const msg = e instanceof Error ? e.message : String(e);
           console.log("mesage of the error", msg);
           if (msg.includes("storage is already initialized")) {
-            console.warn(
-              "⚠️ Linera storage already initialized; continuing without re-init"
-            );
+            console.warn("⚠️ Linera storage already initialized; continuing without re-init");
           } else {
             throw e;
           }
@@ -100,9 +90,7 @@ export class LineraAdapter {
   async setApplication(appId?: string) {
     if (!this.provider) throw new Error("Not connected to Linera");
 
-    const application = await this.provider.client
-      .frontend()
-      .application(appId || GOL_APP_ID);
+    const application = await this.provider.client.frontend().application(appId || GOL_APP_ID);
 
     if (!application) throw new Error("Failed to get application");
     console.log("✅ Linera application set successfully!");

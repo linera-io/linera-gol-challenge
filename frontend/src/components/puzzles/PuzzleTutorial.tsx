@@ -17,15 +17,24 @@ export function PuzzleTutorial() {
               <ul className="space-y-1 ml-4">
                 <li className="flex items-start gap-2">
                   <span className="text-gray-400 mt-0.5">•</span>
-                  <span><strong>Survival:</strong> A living cell with 2 or 3 living neighbors stays alive</span>
+                  <span>
+                    <strong>Survival:</strong> A living cell with 2 or 3 living neighbors stays
+                    alive
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-gray-400 mt-0.5">•</span>
-                  <span><strong>Death:</strong> A living cell with fewer than 2 or more than 3 neighbors dies</span>
+                  <span>
+                    <strong>Death:</strong> A living cell with fewer than 2 or more than 3 neighbors
+                    dies
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-gray-400 mt-0.5">•</span>
-                  <span><strong>Birth:</strong> A dead cell with exactly 3 living neighbors becomes alive</span>
+                  <span>
+                    <strong>Birth:</strong> A dead cell with exactly 3 living neighbors becomes
+                    alive
+                  </span>
                 </li>
               </ul>
               <p className="text-xs text-gray-500 mt-2 italic">
@@ -41,56 +50,39 @@ export function PuzzleTutorial() {
               How to Play
             </h3>
             <div className="space-y-3">
-            <div className="flex gap-3">
-              <Grid3x3
-                size={20}
-                className="text-gray-400 mt-0.5 flex-shrink-0"
-              />
-              <p className="text-sm text-gray-500">
-                Place cells by clicking on the grid to create your
-                desired pattern.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Play
-                size={20}
-                className="text-gray-400 mt-0.5 flex-shrink-0"
-              />
-              <p className="text-sm text-gray-500">
-                Test your solution by pressing "Play" to advance the
-                simulation and check the outcome.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Lightbulb
-                size={20}
-                className="text-gray-400 mt-0.5 flex-shrink-0"
-              />
-              <p className="text-sm text-gray-500">
-                Use "Show hints" to see the starting position constraints -
-                green cells must be alive, red cells must be dead.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Target
-                size={20}
-                className="text-gray-400 mt-0.5 flex-shrink-0"
-              />
-              <p className="text-sm text-gray-500">
-                Use "Show goals" to see the target pattern you need to achieve -
-                highlighted areas show where cells should end up.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Check
-                size={20}
-                className="text-gray-400 mt-0.5 flex-shrink-0"
-              />
-              <p className="text-sm text-gray-500">
-                Submit when you've solved the puzzle to record
-                it on the blockchain!
-              </p>
-            </div>
+              <div className="flex gap-3">
+                <Grid3x3 size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-gray-500">
+                  Place cells by clicking on the grid to create your desired pattern.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Play size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-gray-500">
+                  Test your solution by pressing "Play" to advance the simulation and check the
+                  outcome.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Lightbulb size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-gray-500">
+                  Use "Show hints" to see the starting position constraints - green cells must be
+                  alive, red cells must be dead.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Target size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-gray-500">
+                  Use "Show goals" to see the target pattern you need to achieve - highlighted areas
+                  show where cells should end up.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Check size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-gray-500">
+                  Submit when you've solved the puzzle to record it on the blockchain!
+                </p>
+              </div>
             </div>
           </div>
         </div>

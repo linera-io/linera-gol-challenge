@@ -17,7 +17,8 @@ interface GameBoardWrapperProps {
 
 export function GameBoardWrapper(props: GameBoardWrapperProps) {
   const { width, height } = props;
-  const shouldUseCanvas = width > BOARD_CONFIG.CANVAS_THRESHOLD || height > BOARD_CONFIG.CANVAS_THRESHOLD;
+  const shouldUseCanvas =
+    width > BOARD_CONFIG.CANVAS_THRESHOLD || height > BOARD_CONFIG.CANVAS_THRESHOLD;
 
   if (shouldUseCanvas) {
     return <GameBoardCanvas {...props} />;

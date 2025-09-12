@@ -37,8 +37,8 @@ export function PuzzleCard({
           isSelected
             ? "ring-2 ring-linera-primary shadow-md transform scale-[1.02]"
             : isCompleted && !isLoading
-            ? "bg-green-50/50 hover:shadow-md hover:scale-[1.01]"
-            : "hover:shadow-md hover:scale-[1.01]"
+              ? "bg-green-50/50 hover:shadow-md hover:scale-[1.01]"
+              : "hover:shadow-md hover:scale-[1.01]"
         }
       `}
     >
@@ -50,7 +50,7 @@ export function PuzzleCard({
               <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                 {puzzle.title}
               </h3>
-              
+
               <div className="flex items-center gap-1.5">
                 {isSelected && (
                   <Badge color="primary" variant="solid" size="sm">
@@ -61,9 +61,7 @@ export function PuzzleCard({
             </div>
 
             {/* Summary - hidden on very small screens */}
-            <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">
-              {puzzle.summary}
-            </p>
+            <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{puzzle.summary}</p>
 
             <div className="flex items-center gap-2">
               <span
@@ -84,9 +82,7 @@ export function PuzzleCard({
             {isLoading ? (
               <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-200 animate-pulse" />
             ) : (
-              isCompleted && (
-                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
-              )
+              isCompleted && <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
             )}
             <ChevronRight
               className={`

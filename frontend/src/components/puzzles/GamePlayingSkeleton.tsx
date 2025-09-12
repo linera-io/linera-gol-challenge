@@ -116,7 +116,7 @@ export function GameBoardSkeleton() {
                 className="w-8 h-8 bg-gray-200 rounded"
                 style={{
                   animationDelay: `${i * 10}ms`,
-                  opacity: 0.5 + (Math.random() * 0.5)
+                  opacity: 0.5 + Math.random() * 0.5,
                 }}
               />
             ))}

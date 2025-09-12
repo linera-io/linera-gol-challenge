@@ -55,7 +55,7 @@ export function GamePlayingView({
   const [showInitialConditions, setShowInitialConditions] = useState(false);
   const [showFinalConditions, setShowFinalConditions] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  
+
   const hasConditions = !!(
     (puzzle?.initialConditions && puzzle.initialConditions.length > 0) ||
     (puzzle?.finalConditions && puzzle.finalConditions.length > 0)
@@ -66,12 +66,12 @@ export function GamePlayingView({
     const handleResize = () => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
-    
+
     // Set initial size
     handleResize();
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Calculate optimal cell size based on viewport and puzzle size
@@ -79,23 +79,23 @@ export function GamePlayingView({
     if (!puzzle?.size || windowSize.width === 0) {
       return 30; // Default cell size
     }
-    
+
     const puzzleSize = puzzle.size;
-    
+
     // Simple logic: use desktop or mobile max width
     const isMobile = windowSize.width < 768; // Standard mobile breakpoint
     const maxBoardWidth = isMobile ? BOARD_CONFIG.MAX_MOBILE_WIDTH : BOARD_CONFIG.MAX_DESKTOP_WIDTH;
-    
+
     // Calculate max available space (leaving some room for UI)
     const maxHeight = windowSize.height * 0.7 - 120; // 70% of viewport minus controls
-    
+
     // Calculate cell size that fits both dimensions
     const cellSizeByWidth = Math.floor(maxBoardWidth / puzzleSize);
     const cellSizeByHeight = Math.floor(maxHeight / puzzleSize);
-    
+
     // Use the smaller to ensure it fits
     const optimalSize = Math.min(cellSizeByWidth, cellSizeByHeight);
-    
+
     // Enforce min/max for usability
     return Math.max(BOARD_CONFIG.MIN_CELL, Math.min(BOARD_CONFIG.MAX_CELL, optimalSize));
   }, [puzzle?.size, windowSize.width, windowSize.height]);
@@ -119,11 +119,7 @@ export function GamePlayingView({
           <div className="w-64 h-9 bg-gray-200 rounded-lg animate-pulse" />
         </div>
       ) : (
-        puzzle && (
-          <h1 className="text-3xl font-bold text-gray-900 text-center">
-            {puzzle.title}
-          </h1>
-        )
+        puzzle && <h1 className="text-3xl font-bold text-gray-900 text-center">{puzzle.title}</h1>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -142,9 +138,7 @@ export function GamePlayingView({
             />
           )}
 
-          <div className="hidden lg:block">
-            {showTutorial && <PuzzleTutorial />}
-          </div>
+          <div className="hidden lg:block">{showTutorial && <PuzzleTutorial />}</div>
         </div>
 
         <div className="lg:col-span-2 order-2 lg:order-2">
@@ -165,7 +159,9 @@ export function GamePlayingView({
                         cells={cells}
                         onCellClick={onCellClick}
                         cellSize={optimalCellSize}
-                        initialConditions={showInitialConditions ? puzzle?.initialConditions : undefined}
+                        initialConditions={
+                          showInitialConditions ? puzzle?.initialConditions : undefined
+                        }
                         finalConditions={showFinalConditions ? puzzle?.finalConditions : undefined}
                       />
                     </div>
@@ -191,9 +187,7 @@ export function GamePlayingView({
           </Card>
         </div>
 
-        <div className="lg:hidden order-3">
-          {showTutorial && <PuzzleTutorial />}
-        </div>
+        <div className="lg:hidden order-3">{showTutorial && <PuzzleTutorial />}</div>
       </div>
     </div>
   );

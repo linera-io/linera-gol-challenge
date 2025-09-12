@@ -1,12 +1,7 @@
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { lineraAdapter } from "../lib/linera-adapter";
 import { GOL_APP_ID } from "../constants";
-import {
-  Puzzle,
-  LineraBoard,
-  ValidationResult,
-  DifficultyLevel,
-} from "@/lib/types/puzzle.types";
+import { Puzzle, LineraBoard, ValidationResult, DifficultyLevel } from "@/lib/types/puzzle.types";
 
 export interface WalletInfo {
   chainId: string;
@@ -87,10 +82,7 @@ export class LineraService {
     return result.data.printBoard;
   }
 
-  async advanceBoard(
-    board: LineraBoard,
-    steps: number = 1
-  ): Promise<LineraBoard> {
+  async advanceBoard(board: LineraBoard, steps: number = 1): Promise<LineraBoard> {
     await this.ensureInitialized();
 
     const query = {
@@ -117,10 +109,7 @@ export class LineraService {
     return result.data.advanceBoard;
   }
 
-  async validateSolution(
-    board: LineraBoard,
-    puzzleId: string
-  ): Promise<ValidationResult> {
+  async validateSolution(board: LineraBoard, puzzleId: string): Promise<ValidationResult> {
     await this.ensureInitialized();
 
     const query = {
@@ -219,9 +208,7 @@ export class LineraService {
         : "EASY";
 
       if (puzzleData.difficulty !== difficulty) {
-        console.warn(
-          `Invalid difficulty value: ${puzzleData.difficulty}, defaulting to EASY`
-        );
+        console.warn(`Invalid difficulty value: ${puzzleData.difficulty}, defaulting to EASY`);
       }
 
       return {

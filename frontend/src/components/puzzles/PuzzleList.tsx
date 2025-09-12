@@ -9,11 +9,14 @@ interface PuzzleListProps {
   currentPuzzleId?: string;
 }
 
-const difficultyConfig: Record<DifficultyLevel, {
-  icon: string;
-  bgColor: string;
-  textColor: string;
-}> = {
+const difficultyConfig: Record<
+  DifficultyLevel,
+  {
+    icon: string;
+    bgColor: string;
+    textColor: string;
+  }
+> = {
   EASY: {
     icon: "🌱",
     bgColor: "bg-green-50",
@@ -31,12 +34,9 @@ const difficultyConfig: Record<DifficultyLevel, {
   },
 };
 
-export function PuzzleList({
-  onSelectPuzzle,
-  currentPuzzleId,
-}: PuzzleListProps) {
+export function PuzzleList({ onSelectPuzzle, currentPuzzleId }: PuzzleListProps) {
   const { isPuzzleCompleted, isLoadingFromBlockchain } = useCompletedPuzzles();
-  
+
   const groupedPuzzles = KNOWN_PUZZLES.reduce(
     (acc, puzzle) => {
       if (!acc[puzzle.difficulty]) {
@@ -75,9 +75,7 @@ export function PuzzleList({
         <Card className="bg-gray-50">
           <CardBody className="text-center py-8">
             <p className="text-gray-600">No puzzles available</p>
-            <p className="text-sm text-gray-500 mt-1">
-              Check back later for new challenges!
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Check back later for new challenges!</p>
           </CardBody>
         </Card>
       )}

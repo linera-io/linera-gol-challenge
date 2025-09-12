@@ -7,14 +7,14 @@ import { LoadingScreen } from "./components/common/LoadingScreen";
 import { useAuth } from "./lib/linera/hooks/useAuth";
 
 function AppContent() {
-  const { 
-    isLoading, 
-    isLoggedIn, 
-    isConnectedToLinera, 
+  const {
+    isLoading,
+    isLoggedIn,
+    isConnectedToLinera,
     isAppConnected,
     error,
     showConnectWallet,
-    retryConnection 
+    retryConnection,
   } = useAuth();
 
   // Show loading screen while Dynamic SDK loads or connecting to Linera
@@ -25,7 +25,7 @@ function AppContent() {
   // Show connect wallet screen if not logged in
   if (!isLoggedIn) {
     return (
-      <LoadingScreen 
+      <LoadingScreen
         message="Please connect your wallet to continue"
         showConnectButton
         onConnect={showConnectWallet}
@@ -36,7 +36,7 @@ function AppContent() {
   // Show connecting to Linera screen
   if (isLoggedIn && !isConnectedToLinera) {
     return (
-      <LoadingScreen 
+      <LoadingScreen
         message="Connecting to Linera network..."
         error={error}
         onRetry={error ? retryConnection : undefined}
@@ -47,7 +47,7 @@ function AppContent() {
   // Show setting up app screen
   if (isConnectedToLinera && !isAppConnected) {
     return (
-      <LoadingScreen 
+      <LoadingScreen
         message="Setting up Game of Life..."
         error={error}
         onRetry={error ? retryConnection : undefined}

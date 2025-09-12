@@ -13,11 +13,13 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
   // Create board and engine with proper dimensions, recreating when dimensions change
   const boardRef = useRef<Board | null>(null);
   const engineRef = useRef<GameEngine | null>(null);
-  
+
   // Initialize or update board when dimensions change
-  if (!boardRef.current || 
-      boardRef.current.config.width !== options.width || 
-      boardRef.current.config.height !== options.height) {
+  if (
+    !boardRef.current ||
+    boardRef.current.config.width !== options.width ||
+    boardRef.current.config.height !== options.height
+  ) {
     boardRef.current = new Board({
       width: options.width,
       height: options.height,
@@ -25,10 +27,10 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
     });
     engineRef.current = new GameEngine(boardRef.current);
   }
-  
+
   const board = boardRef.current;
   const engine = engineRef.current;
-  
+
   const [generation, setGeneration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(options.initialSpeed || 100);
@@ -140,7 +142,7 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
       updateCells();
     }
   }, [options.width, options.height]);
-  
+
   useEffect(() => {
     updateCells();
   }, []);

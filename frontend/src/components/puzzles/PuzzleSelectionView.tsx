@@ -9,10 +9,7 @@ interface PuzzleSelectionViewProps {
   currentPuzzleId?: string;
 }
 
-export function PuzzleSelectionView({ 
-  onSelectPuzzle, 
-  currentPuzzleId 
-}: PuzzleSelectionViewProps) {
+export function PuzzleSelectionView({ onSelectPuzzle, currentPuzzleId }: PuzzleSelectionViewProps) {
   const { getCompletionCount, isLoadingFromBlockchain } = useCompletedPuzzles();
   const completedCount = getCompletionCount();
   const totalCount = KNOWN_PUZZLES.length;
@@ -21,9 +18,7 @@ export function PuzzleSelectionView({
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-          Choose Your Challenge
-        </h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Choose Your Challenge</h2>
         {isLoadingFromBlockchain ? (
           <div className="flex items-center gap-2">
             <div className="h-5 w-5 rounded bg-gray-200 animate-pulse" />
@@ -44,10 +39,7 @@ export function PuzzleSelectionView({
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-1">
-          <PuzzleList
-            onSelectPuzzle={onSelectPuzzle}
-            currentPuzzleId={currentPuzzleId}
-          />
+          <PuzzleList onSelectPuzzle={onSelectPuzzle} currentPuzzleId={currentPuzzleId} />
         </div>
         <div className="lg:col-span-2 hidden sm:block">
           <Card className="bg-white shadow-lg h-full">
@@ -85,7 +77,7 @@ export function PuzzleSelectionView({
                     {completedCount > 0 && (
                       <div className="mt-4">
                         <div className="w-48 mx-auto bg-gray-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-green-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${completionPercentage}%` }}
                           />

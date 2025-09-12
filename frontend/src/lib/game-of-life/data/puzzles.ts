@@ -6,10 +6,10 @@
 // 2. For each puzzle file, run: linera publish-data-blob <puzzle_name>_puzzle.bcs
 // 3. Create a blob mapping JSON file and use --blob-map option
 
-import { PuzzleMetadata, DifficultyLevel } from '@/lib/types/puzzle.types';
+import { PuzzleMetadata, DifficultyLevel } from "@/lib/types/puzzle.types";
 
 // Re-export for backward compatibility
-export type { PuzzleMetadata } from '@/lib/types/puzzle.types';
+export type { PuzzleMetadata } from "@/lib/types/puzzle.types";
 
 export const KNOWN_PUZZLES: PuzzleMetadata[] = [
   {
@@ -83,8 +83,6 @@ export function getPuzzleMetadata(id: string): PuzzleMetadata | undefined {
 }
 
 // Helper to get puzzles by difficulty
-export function getPuzzlesByDifficulty(
-  difficulty: DifficultyLevel
-): PuzzleMetadata[] {
+export function getPuzzlesByDifficulty(difficulty: DifficultyLevel): PuzzleMetadata[] {
   return KNOWN_PUZZLES.filter((puzzle) => puzzle.difficulty === difficulty);
 }
