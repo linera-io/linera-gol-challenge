@@ -8,7 +8,7 @@ use std::{collections::HashMap, fs, io::Write, path::PathBuf};
 
 use async_graphql::InputType as _;
 use clap::{Parser, Subcommand};
-use gol_challenge::game::{Board, Condition, Difficulty, Position, Puzzle};
+use gol_challenge::game::{Board, Difficulty, Position, Puzzle};
 
 #[derive(Parser)]
 #[command(name = "gol")]
@@ -248,32 +248,28 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
 fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
     // Define the target pattern (2x2 block in center)
     let target_board = Board::with_live_cells(
-        6,
+        8,
         vec![
-            Position { x: 2, y: 2 },
-            Position { x: 2, y: 3 },
-            Position { x: 3, y: 2 },
             Position { x: 3, y: 3 },
+            Position { x: 3, y: 4 },
+            Position { x: 4, y: 3 },
+            Position { x: 4, y: 4 },
         ],
     );
+
+    // Create initial conditions: target pattern minus one cell
+    let mut initial_conditions = target_board.to_exactly_matching_conditions();
+    initial_conditions.remove(3);
 
     let puzzle = Puzzle {
         title: "Block Formation".to_string(),
         summary: "Create a stable 2x2 block pattern in the center of the board".to_string(),
         difficulty: Difficulty::Easy,
-        size: 6,
+        size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
-        initial_conditions: vec![
-            // Allow any initial configuration with 4-8 live cells
-            Condition::TestRectangle {
-                x_range: 0..6,
-                y_range: 0..6,
-                min_live_count: 4,
-                max_live_count: 8,
-            },
-        ],
+        initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
@@ -288,31 +284,31 @@ fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
     // ●  ●
     //  ●●
     let target_board = Board::with_live_cells(
-        7,
+        9,
         vec![
-            Position { x: 2, y: 1 },
-            Position { x: 3, y: 1 },
-            Position { x: 1, y: 2 },
+            Position { x: 3, y: 2 },
             Position { x: 4, y: 2 },
             Position { x: 2, y: 3 },
-            Position { x: 3, y: 3 },
+            Position { x: 5, y: 3 },
+            Position { x: 3, y: 4 },
+            Position { x: 4, y: 4 },
         ],
     );
+
+    // Create initial conditions: target pattern minus two cells.
+    let mut initial_conditions = target_board.to_exactly_matching_conditions();
+    initial_conditions.remove(5);
+    initial_conditions.remove(4);
 
     let puzzle = Puzzle {
         title: "Beehive Formation".to_string(),
         summary: "Create a stable beehive pattern (6-cell hexagonal shape)".to_string(),
         difficulty: Difficulty::Easy,
-        size: 7,
+        size: 9,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
-        initial_conditions: vec![Condition::TestRectangle {
-            x_range: 0..7,
-            y_range: 0..7,
-            min_live_count: 6,
-            max_live_count: 10,
-        }],
+        initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
@@ -328,32 +324,32 @@ fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
     //  ● ●
     //   ●
     let target_board = Board::with_live_cells(
-        8,
+        10,
         vec![
-            Position { x: 2, y: 1 },
-            Position { x: 3, y: 1 },
-            Position { x: 1, y: 2 },
+            Position { x: 3, y: 2 },
             Position { x: 4, y: 2 },
             Position { x: 2, y: 3 },
-            Position { x: 4, y: 3 },
+            Position { x: 5, y: 3 },
             Position { x: 3, y: 4 },
+            Position { x: 5, y: 4 },
+            Position { x: 4, y: 5 },
         ],
     );
+
+    // Create initial conditions: target pattern minus two cells.
+    let mut initial_conditions = target_board.to_exactly_matching_conditions();
+    initial_conditions.remove(6);
+    initial_conditions.remove(5);
 
     let puzzle = Puzzle {
         title: "Loaf Formation".to_string(),
         summary: "Create a stable loaf pattern (7-cell bread loaf shape)".to_string(),
         difficulty: Difficulty::Easy,
-        size: 8,
+        size: 10,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
-        initial_conditions: vec![Condition::TestRectangle {
-            x_range: 0..8,
-            y_range: 0..8,
-            min_live_count: 7,
-            max_live_count: 10,
-        }],
+        initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
@@ -368,30 +364,30 @@ fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
     // ● ●
     //  ●
     let target_board = Board::with_live_cells(
-        6,
+        8,
         vec![
-            Position { x: 1, y: 1 },
-            Position { x: 2, y: 1 },
-            Position { x: 1, y: 2 },
+            Position { x: 2, y: 2 },
             Position { x: 3, y: 2 },
             Position { x: 2, y: 3 },
+            Position { x: 4, y: 3 },
+            Position { x: 3, y: 4 },
         ],
     );
+
+    // Create initial conditions: target pattern minus two cells.
+    let mut initial_conditions = target_board.to_exactly_matching_conditions();
+    initial_conditions.remove(4);
+    initial_conditions.remove(3);
 
     let puzzle = Puzzle {
         title: "Boat Formation".to_string(),
         summary: "Create a stable boat pattern (5-cell boat shape)".to_string(),
         difficulty: Difficulty::Easy,
-        size: 6,
+        size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
-        initial_conditions: vec![Condition::TestRectangle {
-            x_range: 0..6,
-            y_range: 0..6,
-            min_live_count: 5,
-            max_live_count: 8,
-        }],
+        initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
@@ -406,29 +402,29 @@ fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
     // ● ●
     //  ●
     let target_board = Board::with_live_cells(
-        5,
+        7,
         vec![
-            Position { x: 2, y: 1 },
-            Position { x: 1, y: 2 },
             Position { x: 3, y: 2 },
             Position { x: 2, y: 3 },
+            Position { x: 4, y: 3 },
+            Position { x: 3, y: 4 },
         ],
     );
+
+    // Create initial conditions: target pattern minus two cells.
+    let mut initial_conditions = target_board.to_exactly_matching_conditions();
+    initial_conditions.remove(3);
+    initial_conditions.remove(2);
 
     let puzzle = Puzzle {
         title: "Tub Formation".to_string(),
         summary: "Create a stable tub pattern (4-cell hollow square)".to_string(),
         difficulty: Difficulty::Easy,
-        size: 5,
+        size: 7,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
-        initial_conditions: vec![Condition::TestRectangle {
-            x_range: 0..5,
-            y_range: 0..5,
-            min_live_count: 4,
-            max_live_count: 7,
-        }],
+        initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
@@ -443,35 +439,36 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
     // ●
     // ●
     let target_board = Board::with_live_cells(
-        5,
+        7,
         vec![
-            Position { x: 2, y: 1 },
-            Position { x: 2, y: 2 },
-            Position { x: 2, y: 3 },
+            Position { x: 3, y: 2 },
+            Position { x: 3, y: 3 },
+            Position { x: 3, y: 4 },
         ],
     );
+
+    // Solution is the target pattern itself advanced by 1 (oscillator of period 2).
+    let initial_board = target_board.advance_once();
+    // Create initial conditions: target pattern minus two cells.
+    let mut initial_conditions = initial_board.to_exactly_matching_conditions();
+    initial_conditions.remove(2);
+    initial_conditions.remove(0);
 
     let puzzle = Puzzle {
         title: "Blinker Formation".to_string(),
         summary: "Create a blinker oscillator pattern (3-cell vertical line that oscillates)"
             .to_string(),
         difficulty: Difficulty::Easy,
-        size: 5,
+        size: 7,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
-        initial_conditions: vec![Condition::TestRectangle {
-            x_range: 0..5,
-            y_range: 0..5,
-            min_live_count: 3,
-            max_live_count: 6,
-        }],
+        initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
-    // Solution is the target pattern itself advanced by 1 (oscillator of period 2)
-    (puzzle, target_board.advance_once())
+    (puzzle, initial_board)
 }
 
 fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
@@ -481,40 +478,41 @@ fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
     // ··●●
     // ··●●
     let target_board = Board::with_live_cells(
-        6,
+        8,
         vec![
-            Position { x: 1, y: 1 },
-            Position { x: 2, y: 1 },
-            Position { x: 1, y: 2 },
             Position { x: 2, y: 2 },
+            Position { x: 3, y: 2 },
+            Position { x: 2, y: 3 },
             Position { x: 3, y: 3 },
-            Position { x: 4, y: 3 },
-            Position { x: 3, y: 4 },
             Position { x: 4, y: 4 },
+            Position { x: 5, y: 4 },
+            Position { x: 4, y: 5 },
+            Position { x: 5, y: 5 },
         ],
     );
+
+    // Solution is the target pattern itself advanced by 1 (oscillator of period 2).
+    let initial_board = target_board.advance_once();
+    // Create initial conditions: target pattern minus two cells.
+    let mut initial_conditions = initial_board.to_exactly_matching_conditions();
+    initial_conditions.remove(5);
+    initial_conditions.remove(0);
 
     let puzzle = Puzzle {
         title: "Beacon Formation".to_string(),
         summary: "Create a beacon oscillator pattern (two 2x2 blocks that blink diagonally)"
             .to_string(),
         difficulty: Difficulty::Easy,
-        size: 6,
+        size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
-        initial_conditions: vec![Condition::TestRectangle {
-            x_range: 0..6,
-            y_range: 0..6,
-            min_live_count: 6,
-            max_live_count: 8,
-        }],
+        initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
-    // Solution is the target pattern itself advanced by 1 (oscillator of period 2)
-    (puzzle, target_board.advance_once())
+    (puzzle, initial_board)
 }
 
 fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
@@ -524,37 +522,38 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
     // ·●·●
     // ·●··
     let target_board = Board::with_live_cells(
-        6,
+        8,
         vec![
-            Position { x: 3, y: 1 },
-            Position { x: 1, y: 2 },
-            Position { x: 3, y: 2 },
+            Position { x: 4, y: 2 },
             Position { x: 2, y: 3 },
             Position { x: 4, y: 3 },
-            Position { x: 2, y: 4 },
+            Position { x: 3, y: 4 },
+            Position { x: 5, y: 4 },
+            Position { x: 3, y: 5 },
         ],
     );
+
+    // Solution is the target pattern itself advanced by 3 steps (period-4 oscillator completes full cycle).
+    let initial_board = target_board.advance(3);
+    // Create initial conditions: target pattern minus two cells.
+    let mut initial_conditions = initial_board.to_exactly_matching_conditions();
+    initial_conditions.remove(5);
+    initial_conditions.remove(0);
 
     let puzzle = Puzzle {
         title: "Clock Formation".to_string(),
         summary: "Create a clock oscillator pattern (period-4 oscillator)".to_string(),
         difficulty: Difficulty::Medium,
-        size: 6,
+        size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
         is_strict: false,
-        initial_conditions: vec![Condition::TestRectangle {
-            x_range: 0..6,
-            y_range: 0..6,
-            min_live_count: 6,
-            max_live_count: 10,
-        }],
+        initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
     };
 
-    // Solution is the target pattern itself advanced by 3 steps (period-4 oscillator completes full cycle)
-    (puzzle, target_board.advance(3))
+    (puzzle, initial_board)
 }
 
 fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {

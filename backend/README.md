@@ -93,8 +93,8 @@ query {
 ```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
 mutation {
     submitSolution(puzzleId: "$BLOB_ID", board: {
-        size: 7,
-        liveCells: [{x: 1, y: 2}, {x: 2, y: 1}, {x: 2, y: 3}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 4, y: 2}]
+        size: 9,
+        liveCells: [{x: 3, y: 2}, {x: 4, y: 2}, {x: 2, y: 3}, {x: 5, y: 3}, {x: 3, y: 4}, {x: 4, y: 4}]
     })
 }
 ```
