@@ -82,6 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[allow(clippy::type_complexity)]
 fn get_all_puzzles() -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
     vec![
         ("01_block_pattern", create_block_puzzle_and_solution),
@@ -556,6 +557,7 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
     (puzzle, initial_board)
 }
 
+#[allow(clippy::identity_op)]
 fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
     let size = 60;
     let offset = size / 2 - 2;
