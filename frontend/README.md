@@ -2,50 +2,11 @@
 
 > **Important Note:** This project includes temporary fixes and shows the direction of ongoing development. Some manual configuration is required.
 
-### Repository Structure
-
-The project requires a specific directory structure with the Linera protocol repository:
-
-```
-root/
-  gol-challenge/          (this repository)
-  linera-protocol/     (Linera SDK repository)
-```
-
-### Linera Protocol Setup
-
-1. Clone the `linera-protocol` repository next to this project
-2. Checkout the `devnet_2025_08_21` branch (required until a new module is published to npmjs)
-
-```bash
-cd ..
-git clone https://github.com/linera-io/linera-protocol.git
-cd linera-protocol
-git checkout devnet_2025_08_21
-```
-
 ## Installation
-
-### Step 1: Install Linera SDK Dependencies
-
-Navigate to the Linera protocol packages and install dependencies:
-
-```bash
-# Install @linera/client dependencies
-cd ../../linera-protocol/linera-web
-pnpm install
-
-# Install @linera/signer dependencies
-cd ../../linera-protocol/linera-web/signer
-pnpm install
-```
-
-### Step 2: Install Project Dependencies
 
 Return to this project and install its dependencies:
 
 ```bash
-cd ../../../../gol-challenge
 pnpm install
 ```
 
