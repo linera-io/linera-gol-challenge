@@ -51,7 +51,7 @@ node service.
 ```bash
 APP_ID=$(linera --wait-for-outgoing-messages \
   project publish-and-create backend gol_challenge $CHAIN \
-    --json-argument "null")
+    --json-parameters "{}")
 ```
 
 ### Creating a new puzzle
