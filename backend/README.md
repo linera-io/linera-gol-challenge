@@ -146,7 +146,7 @@ query {
 }
 ```
 
-### Testing the scoring chain's GraphQL APIs from yet another wallet
+### Testing the scoring chain's GraphQL APIs from another wallet
 
 We re-use the user wallet for simplicity.
 

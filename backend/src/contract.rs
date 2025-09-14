@@ -29,8 +29,8 @@ linera_sdk::contract!(GolChallengeContract);
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Parameters {
-    /// Where to report puzzles for scoring. If `None`, don't report puzzles.
-    scoring_chain_id: Option<ChainId>,
+    /// Where to report puzzles for scoring.
+    scoring_chain_id: ChainId,
 }
 
 impl WithContractAbi for GolChallengeContract {
@@ -93,17 +93,15 @@ impl Contract for GolChallengeContract {
                     .insert(&puzzle_id, solution)
                     .expect("Store solution");
 
-                if let Parameters {
-                    scoring_chain_id: Some(chain_id),
-                } = self.runtime.application_parameters()
-                {
-                    let message = Message {
-                        puzzle_id,
-                        timestamp,
-                        owner,
-                    };
-                    self.runtime.prepare_message(message).send_to(chain_id);
-                }
+                let Parameters { scoring_chain_id } = self.runtime.application_parameters();
+                let message = Message {
+                    puzzle_id,
+                    timestamp,
+                    owner,
+                };
+                self.runtime
+                    .prepare_message(message)
+                    .send_to(scoring_chain_id);
             }
             Operation::RegisterPuzzle { puzzle_id } => {
                 self.assert_scoring_chain("Puzzles are only registered on the scoring chain.");
@@ -147,13 +145,8 @@ impl Contract for GolChallengeContract {
 
 impl GolChallengeContract {
     fn assert_scoring_chain(&mut self, error: &str) {
-        let Parameters {
-            scoring_chain_id: Some(chain_id),
-        } = self.runtime.application_parameters()
-        else {
-            panic!("If we're receiving a message, the scoring chain must exist.")
-        };
-        assert_eq!(self.runtime.chain_id(), chain_id, "{}", error);
+        let Parameters { scoring_chain_id } = self.runtime.application_parameters();
+        assert_eq!(self.runtime.chain_id(), scoring_chain_id, "{}", error);
     }
 }
 
