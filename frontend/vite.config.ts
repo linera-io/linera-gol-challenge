@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   server: {
     fs: {
-      allow: ["..", "../../linera-protocol"],
+      allow: [".."],
     },
     headers: {
       "Cross-Origin-Embedder-Policy": "credentialless",

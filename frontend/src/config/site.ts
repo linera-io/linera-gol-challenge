@@ -13,7 +13,7 @@ export const siteConfig = {
   links: {
     github: "https://github.com/linera-io/linera-protocol",
     twitter: "https://twitter.com/linera_io",
-    docs: "https://linera.io",
+    docs: "https://linera.dev",
     discord: "",
     sponsor: "",
   },

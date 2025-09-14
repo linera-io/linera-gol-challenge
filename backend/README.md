@@ -32,26 +32,16 @@ linera_spawn linera net up --with-faucet --faucet-port $FAUCET_PORT
 Create the user wallets and add chains to them:
 
 ```bash
-export LINERA_WALLET_1="$LINERA_TMP_DIR/wallet_1.json"
-export LINERA_KEYSTORE_1="$LINERA_TMP_DIR/keystore_1.json"
-export LINERA_STORAGE_1="rocksdb:$LINERA_TMP_DIR/client_1.db"
-export LINERA_WALLET_2="$LINERA_TMP_DIR/wallet_2.json"
-export LINERA_KEYSTORE_2="$LINERA_TMP_DIR/keystore_2.json"
-export LINERA_STORAGE_2="rocksdb:$LINERA_TMP_DIR/client_2.db"
+export LINERA_WALLET="$LINERA_TMP_DIR/wallet.json"
+export LINERA_KEYSTORE="$LINERA_TMP_DIR/keystore.json"
+export LINERA_STORAGE="rocksdb:$LINERA_TMP_DIR/client.db"
 
-linera --with-wallet 1 wallet init --faucet $FAUCET_URL
-linera --with-wallet 2 wallet init --faucet $FAUCET_URL
+linera wallet init --faucet $FAUCET_URL
 
-INFO_1=($(linera --with-wallet 1 wallet request-chain --faucet $FAUCET_URL))
-# INFO_2=($(linera --with-wallet 2 wallet request-chain --faucet $FAUCET_URL))
-CHAIN_1="${INFO_1[0]}"
-# CHAIN_2="${INFO_2[0]}"
-OWNER_1="${INFO_1[1]}"
-# OWNER_2="${INFO_2[1]}"
+INFO=($(linera wallet request-chain --faucet $FAUCET_URL))
+CHAIN="${INFO[0]}"
+OWNER="${INFO[1]}"
 ```
-
-Note that `linera --with-wallet 1` or `linera -w1` is equivalent to `linera --wallet
-"$LINERA_WALLET_1"  --keystore "$LINERA_KEYSTORE_1" --storage "$LINERA_STORAGE_1"`.
 
 ### Creating the GoL challenge application
 
@@ -59,17 +49,23 @@ We use the default chain of the first wallet to create the application on it and
 node service.
 
 ```bash
-APP_ID=$(linera -w1 --wait-for-outgoing-messages \
-  project publish-and-create backend gol_challenge $CHAIN_1 \
+APP_ID=$(linera --wait-for-outgoing-messages \
+  project publish-and-create backend gol_challenge $CHAIN \
     --json-argument "null")
 ```
 
 ### Creating a new puzzle
 
 ```bash
-cargo run --bin gol -- create-puzzles
+cargo run --bin gol -- create-puzzles -o $LINERA_TMP_DIR
 
-BLOB_ID=$(linera -w1 publish-data-blob "02_beehive_pattern_puzzle.bcs")
+BLOB_ID=$(linera publish-data-blob "$LINERA_TMP_DIR/02_beehive_pattern_puzzle.bcs")
+```
+
+### Publishing puzzles and running code-generation
+
+```bash
+./publish-puzzles.sh
 ```
 
 ### Testing the GraphQL APIs
@@ -78,27 +74,27 @@ In this section, we are using the GraphQL service of the native client to show e
 GraphQL queries. Note that Web frontends have their own GraphQL endpoint.
 
 ```bash
-linera -w1 service --port 8080 &
+linera service --port 8080 &
 sleep 1
 ```
 
-```gql,uri=http://localhost:8080/chains/$CHAIN_1/applications/$APP_ID
+```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
 query {
     printPuzzle(puzzleId: "$BLOB_ID")
 }
 ```
 
-```gql,uri=http://localhost:8080/chains/$CHAIN_1/applications/$APP_ID
+```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
 query {
     puzzle(puzzleId: "$BLOB_ID") { title, summary }
 }
 ```
 
-```gql,uri=http://localhost:8080/chains/$CHAIN_1/applications/$APP_ID
+```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
 mutation {
     submitSolution(puzzleId: "$BLOB_ID", board: {
-        size: 7,
-        liveCells: [{x: 1, y: 2}, {x: 2, y: 1}, {x: 2, y: 3}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 4, y: 2}]
+        size: 9,
+        liveCells: [{x: 3, y: 2}, {x: 4, y: 2}, {x: 2, y: 3}, {x: 5, y: 3}, {x: 3, y: 4}, {x: 4, y: 4}]
     })
 }
 ```

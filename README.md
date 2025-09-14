@@ -1,7 +1,7 @@
 # Game-of-Life challenge
 
 ```
-cargo install linera-storage-service@0.15.1 linera-service@0.15.1
+cargo install linera-storage-service@0.15.3 linera-service@0.15.3
 
 cargo build --release --target wasm32-unknown-unknown
 
