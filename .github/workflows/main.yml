@@ -41,7 +41,7 @@ jobs:
         run: cargo run --locked --bin gol -- create-puzzles
 
       - name: 'Install Linera CLI'
-        run: cargo install --locked linera-storage-service@0.15.2 linera-service@0.15.2
+        run: cargo install --locked linera-storage-service@0.15.3 linera-service@0.15.3
 
       - name: 'Run code in README including code-generation'
         run: linera extract-script-from-markdown backend/README.md | bash -ex
