@@ -5,6 +5,10 @@
 
 set -e
 
+# Expecting some URI to query the node service of the scoring chain.
+# If absent, puzzles will be published but not registered for scoring.
+URI="$1"
+
 # Create temporary directory
 TEMP_DIR=$(mktemp -d)
 echo "Using temporary directory: $TEMP_DIR"
@@ -57,6 +61,13 @@ for i in "${!PUZZLE_FILES[@]}"; do
             echo "  \"$PUZZLE\": \"$BLOB_ID\"" >> "$BLOB_MAP_FILE"
         else
             echo "  \"$PUZZLE\": \"$BLOB_ID\"," >> "$BLOB_MAP_FILE"
+        fi
+
+        if [ -n "$URI" ]; then
+            QUERY="mutation { registerPuzzle(puzzleId: \"$BLOB_ID\")}"
+            JSON_QUERY=$( jq -n --arg q "$QUERY" '{"query": $q}' )
+            # Use js to parse the result and fail otherwise.
+            curl -w '\n' -g -X POST -H "Content-Type: application/json" -d "$JSON_QUERY" "$URI" | tee /dev/stderr | jq -e .data
         fi
     else
         echo "  Error: Could not extract blob ID for $PUZZLE"

@@ -11,7 +11,7 @@ pub mod game;
 use async_graphql::{Request, Response};
 use linera_sdk::{
     graphql::GraphQLMutationRoot,
-    linera_base_types::{ContractAbi, DataBlobHash, ServiceAbi},
+    linera_base_types::{AccountOwner, ContractAbi, DataBlobHash, ServiceAbi},
 };
 use serde::{Deserialize, Serialize};
 
@@ -29,6 +29,14 @@ pub enum Operation {
         puzzle_id: DataBlobHash,
         /// The board of the solution.
         board: Board,
+        /// Optional owner to credit instead of the current authenticated owner.
+        owner: Option<AccountOwner>,
+    },
+    // Scoring appchain only
+    /// Register a puzzle to activate scoring for it.
+    RegisterPuzzle {
+        /// The ID of the puzzle to register.
+        puzzle_id: DataBlobHash,
     },
 }
 
