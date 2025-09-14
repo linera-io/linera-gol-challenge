@@ -3,6 +3,7 @@
 import React, { useCallback, useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { Condition } from "@/lib/types/puzzle.types";
+import { RectangleOverlays } from "./RectangleOverlays";
 
 interface GameBoardProps {
   width: number;
@@ -12,91 +13,6 @@ interface GameBoardProps {
   cellSize?: number;
   initialConditions?: Condition[];
   finalConditions?: Condition[];
-}
-
-interface RectangleInfo {
-  x_range: { start: number; end: number };
-  y_range: { start: number; end: number };
-  min_live_count: number;
-  max_live_count: number;
-}
-
-// Helper function to extract rectangle conditions
-function extractRectangleCondition(conditions: Condition[] | undefined): RectangleInfo | null {
-  if (!conditions) return null;
-
-  for (const condition of conditions) {
-    if ("TestRectangle" in condition) {
-      return condition.TestRectangle;
-    }
-  }
-  return null;
-}
-
-// Helper function to check if two rectangles cover the same area
-function rectanglesOverlap(rect1: RectangleInfo | null, rect2: RectangleInfo | null): boolean {
-  if (!rect1 || !rect2) return false;
-
-  return (
-    rect1.x_range.start === rect2.x_range.start &&
-    rect1.x_range.end === rect2.x_range.end &&
-    rect1.y_range.start === rect2.y_range.start &&
-    rect1.y_range.end === rect2.y_range.end
-  );
-}
-
-// Create a combined overlay when both conditions have overlapping rectangles
-function createCombinedRectangleOverlay(
-  initialRect: RectangleInfo,
-  _finalRect: RectangleInfo,
-  cellSize: number
-): JSX.Element {
-  return (
-    <div
-      key="combined-rect"
-      className="absolute pointer-events-none"
-      style={{
-        left: initialRect.x_range.start * cellSize,
-        top: initialRect.y_range.start * cellSize,
-        width: (initialRect.x_range.end - initialRect.x_range.start) * cellSize,
-        height: (initialRect.y_range.end - initialRect.y_range.start) * cellSize,
-        background:
-          "linear-gradient(135deg, rgba(34, 197, 94, 0.08) 50%, rgba(59, 130, 246, 0.08) 50%)",
-        border: "2px solid",
-        borderImage: "linear-gradient(135deg, rgba(34, 197, 94, 0.6), rgba(59, 130, 246, 0.6)) 1",
-        borderRadius: "6px",
-        zIndex: 10,
-      }}
-    />
-  );
-}
-
-// Create a single rectangle overlay
-function createSingleRectangleOverlay(
-  rect: RectangleInfo,
-  cellSize: number,
-  type: "initial" | "final",
-  index: number
-): JSX.Element {
-  const isInitial = type === "initial";
-  const color = isInitial ? "34, 197, 94" : "59, 130, 246"; // Green for initial, blue for final
-
-  return (
-    <div
-      key={`${type}-rect-${index}`}
-      className="absolute pointer-events-none"
-      style={{
-        left: rect.x_range.start * cellSize,
-        top: rect.y_range.start * cellSize,
-        width: (rect.x_range.end - rect.x_range.start) * cellSize,
-        height: (rect.y_range.end - rect.y_range.start) * cellSize,
-        border: `2px dashed rgba(${color}, 0.5)`,
-        backgroundColor: `rgba(${color}, 0.06)`,
-        borderRadius: "6px",
-        zIndex: 10,
-      }}
-    />
-  );
 }
 
 // Build overlay for individual cell conditions
@@ -234,55 +150,8 @@ export const GameBoard = memo(function GameBoard({
     return result;
   }, [width, height, cells, cellSize, handleCellClick, getCellOverlay]);
 
-  // Build rectangle overlays for area conditions
-  const rectangleOverlays = useMemo(() => {
-    const overlays: JSX.Element[] = [];
-
-    // Extract rectangle conditions
-    const initialRect = extractRectangleCondition(initialConditions);
-    const finalRect = extractRectangleCondition(finalConditions);
-
-    // Check if rectangles overlap
-    if (rectanglesOverlap(initialRect, finalRect)) {
-      // Create combined overlay for overlapping rectangles
-      overlays.push(createCombinedRectangleOverlay(initialRect!, finalRect!, cellSize));
-    } else {
-      // Create separate overlays for non-overlapping rectangles
-      if (initialRect) {
-        overlays.push(createSingleRectangleOverlay(initialRect, cellSize, "initial", 0));
-      }
-      if (finalRect) {
-        overlays.push(createSingleRectangleOverlay(finalRect, cellSize, "final", 0));
-      }
-    }
-
-    // Handle multiple rectangle conditions (if there are more than one)
-    let rectIndex = 1;
-    if (initialConditions) {
-      initialConditions.forEach((condition) => {
-        if ("TestRectangle" in condition && condition.TestRectangle !== initialRect) {
-          overlays.push(
-            createSingleRectangleOverlay(condition.TestRectangle, cellSize, "initial", rectIndex++)
-          );
-        }
-      });
-    }
-
-    if (finalConditions) {
-      finalConditions.forEach((condition) => {
-        if ("TestRectangle" in condition && condition.TestRectangle !== finalRect) {
-          overlays.push(
-            createSingleRectangleOverlay(condition.TestRectangle, cellSize, "final", rectIndex++)
-          );
-        }
-      });
-    }
-
-    return overlays;
-  }, [initialConditions, finalConditions, cellSize]);
-
   return (
-    <div className="relative inline-block bg-gray-100 p-2 rounded">
+    <div className="relative bg-gray-100 p-2 rounded">
       <div className="relative">
         <div
           className="inline-grid gap-0"
@@ -293,9 +162,11 @@ export const GameBoard = memo(function GameBoard({
         >
           {grid}
         </div>
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 100 }}>
-          {rectangleOverlays}
-        </div>
+        <RectangleOverlays
+          initialConditions={initialConditions}
+          finalConditions={finalConditions}
+          cellSize={cellSize}
+        />
       </div>
     </div>
   );
