@@ -8,7 +8,7 @@ mod state;
 use async_graphql::ComplexObject;
 use gol_challenge::{GolChallengeAbi, Operation};
 use linera_sdk::{
-    linera_base_types::{AccountOwner, ChainId, DataBlobHash, Timestamp, WithContractAbi},
+    linera_base_types::WithContractAbi,
     views::{RootView, View},
     Contract, ContractRuntime,
 };
