@@ -3,11 +3,9 @@
 
 use async_graphql::{InputObject, SimpleObject};
 use gol_challenge::game::Board;
-use linera_sdk::linera_base_types::AccountOwner;
-use linera_sdk::views::{CollectionView, LogView, SetView};
 use linera_sdk::{
-    linera_base_types::{DataBlobHash, Timestamp},
-    views::{linera_views, MapView, RootView, ViewStorageContext},
+    linera_base_types::{AccountOwner, DataBlobHash, Timestamp},
+    views::{linera_views, CollectionView, MapView, RootView, SetView, ViewStorageContext},
 };
 use serde::{Deserialize, Serialize};
 
@@ -23,9 +21,9 @@ pub struct GolChallengeState {
     // Scoring chain only.
     /// The set of registered puzzles.
     pub registered_puzzles: SetView<DataBlobHash>,
-    /// The set of all solutions reported to us, indexed by owner. We only track
+    /// The set of all solutions reported to us, indexed by owner, then by puzzle_id. We only track
     /// registered puzzles.
-    pub reported_solutions: CollectionView<AccountOwner, LogView<ReportedSolution>>,
+    pub reported_solutions: CollectionView<AccountOwner, MapView<DataBlobHash, Timestamp>>,
 }
 
 /// A verified solution to a GoL puzzle.
@@ -37,13 +35,4 @@ pub struct Solution {
     pub timestamp: Timestamp,
     /// The user credited for the solution.
     pub owner: AccountOwner,
-}
-
-/// A solution reported to the scoring chain.
-#[derive(Debug, Clone, Serialize, Deserialize, InputObject, SimpleObject)]
-pub struct ReportedSolution {
-    /// The ID of the puzzle that was solved.
-    pub puzzle_id: DataBlobHash,
-    /// The timestamp of the solution.
-    pub timestamp: Timestamp,
 }

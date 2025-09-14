@@ -130,15 +130,21 @@ mutation {
 
 ### Testing the scoring chain's GraphQL APIs
 
+To debug GraphQL APIs, uncomment the line with `read` and run `bash -x -e <(linera extract-script-from-markdown backend/README.md)`.
+```bash
+echo http://localhost:8081/chains/$CHAIN_1/applications/$APP_ID
+# read
+```
+
 ```gql,uri=http://localhost:8081/chains/$CHAIN_1/applications/$APP_ID
 query {
     reportedSolutions {
         entry(key: "$OWNER") {
             key
             value {
-                entries(start: 0) {
-                    puzzleId
-                    timestamp
+                entries(input: {}) {
+                    key
+                    value
                 }
             }
         }
@@ -165,9 +171,9 @@ query {
         entry(key: "$OWNER") {
             key
             value {
-                entries(start: 0) {
-                    puzzleId
-                    timestamp
+                entries(input: {}) {
+                    key
+                    value
                 }
             }
         }

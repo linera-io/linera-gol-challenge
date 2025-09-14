@@ -7,17 +7,12 @@ mod state;
 
 use async_graphql::ComplexObject;
 use gol_challenge::{GolChallengeAbi, Operation};
-use linera_sdk::linera_base_types::AccountOwner;
-use linera_sdk::linera_base_types::ChainId;
-use linera_sdk::linera_base_types::DataBlobHash;
-use linera_sdk::linera_base_types::Timestamp;
 use linera_sdk::{
-    linera_base_types::WithContractAbi,
+    linera_base_types::{AccountOwner, ChainId, DataBlobHash, Timestamp, WithContractAbi},
     views::{RootView, View},
     Contract, ContractRuntime,
 };
 use serde::{Deserialize, Serialize};
-use state::ReportedSolution;
 use state::{GolChallengeState, Solution};
 
 pub struct GolChallengeContract {
@@ -125,17 +120,13 @@ impl Contract for GolChallengeContract {
             .await
             .unwrap();
         assert!(is_registered, "Puzzle must be registered");
-        let log_view = self
+        let map = self
             .state
             .reported_solutions
             .load_entry_mut(&owner)
             .await
             .unwrap();
-        let solution = ReportedSolution {
-            puzzle_id,
-            timestamp,
-        };
-        log_view.push(solution);
+        map.insert(&puzzle_id, timestamp).unwrap();
     }
 
     async fn store(mut self) {

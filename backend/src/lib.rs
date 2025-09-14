@@ -9,10 +9,9 @@
 pub mod game;
 
 use async_graphql::{Request, Response};
-use linera_sdk::linera_base_types::AccountOwner;
 use linera_sdk::{
     graphql::GraphQLMutationRoot,
-    linera_base_types::{ContractAbi, DataBlobHash, ServiceAbi},
+    linera_base_types::{AccountOwner, ContractAbi, DataBlobHash, ServiceAbi},
 };
 use serde::{Deserialize, Serialize};
 
