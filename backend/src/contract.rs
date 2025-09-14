@@ -6,7 +6,7 @@
 mod state;
 
 use async_graphql::ComplexObject;
-use gol_challenge::{GolChallengeAbi, Operation};
+use gol_challenge::{game::Puzzle, GolChallengeAbi, Operation};
 use linera_sdk::{
     linera_base_types::{AccountOwner, ChainId, DataBlobHash, Timestamp, WithContractAbi},
     views::{RootView, View},
@@ -75,8 +75,8 @@ impl Contract for GolChallengeContract {
                         .expect("Operation must have an owner or be authenticated.")
                 });
                 let puzzle_bytes = self.runtime.read_data_blob(puzzle_id);
-                let puzzle = bcs::from_bytes(&puzzle_bytes).expect("Deserialize puzzle");
-                board.check_puzzle(&puzzle).expect("Invalid solution");
+                let puzzle = bcs::from_bytes::<Puzzle>(&puzzle_bytes).expect("Deserialize puzzle");
+                puzzle.check_solution(&board).expect("Invalid solution");
                 let timestamp = self.runtime.system_time();
                 let solution = Solution {
                     board,

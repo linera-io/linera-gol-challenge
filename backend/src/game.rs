@@ -823,71 +823,71 @@ impl Board {
 
         conditions
     }
+}
 
+impl Puzzle {
     /// Check that the board satisfies the given puzzle.
-    pub fn check_puzzle(&self, puzzle: &Puzzle) -> Result<u16, InvalidSolution> {
-        if puzzle.minimal_steps > puzzle.maximal_steps {
+    pub fn check_solution(&self, board: &Board) -> Result<u16, InvalidSolution> {
+        if self.minimal_steps > self.maximal_steps {
             return Err(InvalidSolution::InvalidStepRange {
-                min_steps: puzzle.minimal_steps,
-                max_steps: puzzle.maximal_steps,
+                min_steps: self.minimal_steps,
+                max_steps: self.maximal_steps,
             });
         }
-        if self.size != puzzle.size {
+        if board.size != self.size {
             return Err(InvalidSolution::SizeMismatch {
-                board_size: self.size,
-                puzzle_size: puzzle.size,
+                board_size: board.size,
+                puzzle_size: self.size,
             });
         }
-        if let Err((condition_index, reason)) = self.check_conditions(&puzzle.initial_conditions) {
+        if let Err((condition_index, reason)) = board.check_conditions(&self.initial_conditions) {
             return Err(InvalidSolution::InitialConditionFailed {
                 condition_index,
                 reason,
             });
         }
-        if puzzle.is_strict {
-            if puzzle.minimal_steps == 0 {
+        if self.is_strict {
+            if self.minimal_steps == 0 {
                 return Err(InvalidSolution::InvalidStepRange {
-                    min_steps: puzzle.minimal_steps,
-                    max_steps: puzzle.maximal_steps,
+                    min_steps: self.minimal_steps,
+                    max_steps: self.maximal_steps,
                 });
             }
-            let board = self.advance(puzzle.minimal_steps - 1);
+            let board = board.advance(self.minimal_steps - 1);
             match board.advance_until(
-                &puzzle.final_conditions,
-                puzzle.maximal_steps - puzzle.minimal_steps + 1,
+                &self.final_conditions,
+                self.maximal_steps - self.minimal_steps + 1,
             ) {
                 Ok((steps, _)) => {
                     if steps == 0 {
                         return Err(InvalidSolution::FinalConditionsMustFailAt {
-                            steps: puzzle.minimal_steps - 1,
+                            steps: self.minimal_steps - 1,
                         });
                     }
-                    Ok(puzzle.minimal_steps - 1 + steps)
+                    Ok(self.minimal_steps - 1 + steps)
                 }
                 Err((condition_index, reason)) => Err(InvalidSolution::FinalConditionFailed {
                     condition_index,
-                    steps: puzzle.maximal_steps,
+                    steps: self.maximal_steps,
                     reason,
                 }),
             }
         } else {
-            let board = self.advance(puzzle.minimal_steps);
+            let board = board.advance(self.minimal_steps);
             match board.advance_until(
-                &puzzle.final_conditions,
-                puzzle.maximal_steps - puzzle.minimal_steps,
+                &self.final_conditions,
+                self.maximal_steps - self.minimal_steps,
             ) {
-                Ok((steps, _)) => Ok(puzzle.minimal_steps + steps),
+                Ok((steps, _)) => Ok(self.minimal_steps + steps),
                 Err((condition_index, reason)) => Err(InvalidSolution::FinalConditionFailed {
                     condition_index,
-                    steps: puzzle.maximal_steps,
+                    steps: self.maximal_steps,
                     reason,
                 }),
             }
         }
     }
-}
 
-impl Puzzle {
     /// Convert this puzzle to a DirectPuzzle representation for display.
     pub fn to_direct_puzzle(&self) -> DirectPuzzle {
         let mut initial_constraints =
@@ -1265,7 +1265,7 @@ mod tests {
         };
 
         assert_eq!(
-            board.check_puzzle(&puzzle),
+            puzzle.check_solution(&board),
             Err(InvalidSolution::SizeMismatch {
                 board_size: 5,
                 puzzle_size: 10
@@ -1289,7 +1289,7 @@ mod tests {
         };
 
         assert_eq!(
-            board.check_puzzle(&puzzle),
+            puzzle.check_solution(&board),
             Err(InvalidSolution::InvalidStepRange {
                 min_steps: 6,
                 max_steps: 4
@@ -1316,7 +1316,7 @@ mod tests {
         };
 
         assert_eq!(
-            board.check_puzzle(&puzzle),
+            puzzle.check_solution(&board),
             Err(InvalidSolution::InitialConditionFailed {
                 condition_index: 0,
                 reason: ConditionFailureReason::PositionMismatch {
@@ -1378,7 +1378,7 @@ mod tests {
         };
 
         // Test that after 2 steps (full blinker cycle), we get back to the initial pattern.
-        assert_eq!(board.check_puzzle(&puzzle), Ok(2));
+        assert_eq!(puzzle.check_solution(&board), Ok(2));
     }
 
     #[test]
@@ -1450,7 +1450,7 @@ mod tests {
             ],
         };
 
-        assert_eq!(board.check_puzzle(&puzzle), Ok(31));
+        assert_eq!(puzzle.check_solution(&board), Ok(31));
     }
 
     #[test]
@@ -1522,7 +1522,7 @@ mod tests {
         };
 
         assert_eq!(
-            board.check_puzzle(&puzzle),
+            puzzle.check_solution(&board),
             Err(InvalidSolution::FinalConditionFailed {
                 condition_index: 0,
                 steps: 1,
@@ -1577,7 +1577,7 @@ mod tests {
         };
 
         // Test initial condition failure with detailed information.
-        match board.check_puzzle(&puzzle) {
+        match puzzle.check_solution(&board) {
             Err(InvalidSolution::InitialConditionFailed {
                 condition_index,
                 reason,
@@ -1628,7 +1628,7 @@ mod tests {
             final_conditions: vec![],
         };
 
-        match board2.check_puzzle(&puzzle2) {
+        match puzzle2.check_solution(&board2) {
             Err(InvalidSolution::InitialConditionFailed {
                 condition_index,
                 reason,

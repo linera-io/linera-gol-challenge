@@ -81,9 +81,10 @@ impl GolChallengeState {
             .data::<Arc<ServiceRuntime<GolChallengeService>>>()
             .unwrap();
         let puzzle_bytes = runtime.read_data_blob(puzzle_id);
-        let puzzle = bcs::from_bytes(&puzzle_bytes).expect("Failed to deserialize puzzle");
+        let puzzle =
+            bcs::from_bytes::<Puzzle>(&puzzle_bytes).expect("Failed to deserialize puzzle");
 
-        match board.check_puzzle(&puzzle) {
+        match puzzle.check_solution(&board) {
             Ok(steps) => ValidationResult {
                 is_valid_after_steps: Some(steps),
                 error_message: None,
