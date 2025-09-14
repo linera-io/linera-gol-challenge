@@ -103,6 +103,7 @@ GraphQL queries. Note that Web frontends have their own GraphQL endpoint.
 
 ```bash
 linera service --port 8080 &
+PID=$!
 sleep 1
 ```
 
@@ -144,3 +145,34 @@ query {
     }
 }
 ```
+
+### Testing the scoring chain's GraphQL APIs from yet another wallet
+
+We re-use the user wallet for simplicity.
+
+Restart the service with the scoring chain followed in read-only:
+```bash
+kill $PID
+
+linera wallet follow-chain "$CHAIN_1"
+
+linera service --port 8080 &
+```
+
+```gql,uri=http://localhost:8080/chains/$CHAIN_1/applications/$APP_ID
+query {
+    reportedSolutions {
+        entry(key: "$OWNER") {
+            key
+            value {
+                entries(start: 0) {
+                    puzzleId
+                    timestamp
+                }
+            }
+        }
+    }
+}
+```
+
+The error "kill: ???: No such process" at the end is expected.
