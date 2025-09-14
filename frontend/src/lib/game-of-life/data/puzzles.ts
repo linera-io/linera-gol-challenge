@@ -75,6 +75,13 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     difficulty: "MEDIUM",
     size: 60,
   },
+  {
+    id: "ffe62034f299c71d9fdc3e42bd5b8797f6c88983e03ff1f7b29cd710f8d5afe2",
+    title: "Glider Migration",
+    summary: "Guide a glider from the top-left square to the bottom-right square",
+    difficulty: "MEDIUM",
+    size: 16,
+  },
 ];
 
 // Helper to get puzzle by ID

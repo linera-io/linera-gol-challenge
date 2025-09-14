@@ -8,7 +8,7 @@ use std::{collections::HashMap, fs, io::Write, path::PathBuf};
 
 use async_graphql::InputType as _;
 use clap::{Parser, Subcommand};
-use gol_challenge::game::{Board, Difficulty, Position, Puzzle};
+use gol_challenge::game::{Board, Condition, Difficulty, Position, Puzzle};
 
 #[derive(Parser)]
 #[command(name = "gol")]
@@ -94,6 +94,10 @@ fn get_all_puzzles() -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
         ("07_beacon_pattern", create_beacon_puzzle_and_solution),
         ("10_clock_pattern", create_clock_puzzle_and_solution),
         ("20_robot_face", create_robot_face_puzzle_and_solution),
+        (
+            "21_glider_migration",
+            create_glider_migration_puzzle_and_solution,
+        ),
     ]
 }
 
@@ -612,6 +616,63 @@ fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
         maximal_steps: 200,
         is_strict: false,
         initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_migration_puzzle_and_solution() -> (Puzzle, Board) {
+    // Place a glider pattern in the top-left square.
+    let initial_board = Board::with_live_cells(
+        16,
+        vec![
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 2 },
+            Position { x: 1, y: 3 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 3 },
+        ],
+    );
+
+    let final_board = initial_board.advance(40);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let puzzle = Puzzle {
+        title: "Glider Migration".to_string(),
+        summary: "Guide a glider from the top-left square to the bottom-right square".to_string(),
+        difficulty: Difficulty::Medium,
+        size: 16,
+        minimal_steps: 40,
+        maximal_steps: 40,
+        is_strict: true,
+        initial_conditions: vec![
+            // Hint.
+            Condition::TestPosition {
+                position: Position { x: 3, y: 3 },
+                is_live: true,
+            },
+            // All 5 cells should be in top-left square (0-7, 0-7).
+            Condition::TestRectangle {
+                x_range: 0..8,
+                y_range: 0..8,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+            // No cells elsewhere.
+            Condition::TestRectangle {
+                x_range: 8..16,
+                y_range: 0..8,
+                min_live_count: 0,
+                max_live_count: 0,
+            },
+            Condition::TestRectangle {
+                x_range: 0..16,
+                y_range: 8..16,
+                min_live_count: 0,
+                max_live_count: 0,
+            },
+        ],
         final_conditions,
     };
 
