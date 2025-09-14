@@ -7,7 +7,10 @@ mod state;
 
 use async_graphql::ComplexObject;
 use gol_challenge::{GolChallengeAbi, Operation};
+use linera_sdk::linera_base_types::AccountOwner;
 use linera_sdk::linera_base_types::ChainId;
+use linera_sdk::linera_base_types::DataBlobHash;
+use linera_sdk::linera_base_types::Timestamp;
 use linera_sdk::{
     linera_base_types::WithContractAbi,
     views::{RootView, View},
@@ -34,8 +37,18 @@ impl WithContractAbi for GolChallengeContract {
     type Abi = GolChallengeAbi;
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Message {
+    /// The ID of the puzzle that was solved.
+    pub puzzle_id: DataBlobHash,
+    /// The timestamp of the solution.
+    pub timestamp: Timestamp,
+    /// The user credited for the solution.
+    pub owner: AccountOwner,
+}
+
 impl Contract for GolChallengeContract {
-    type Message = ReportedSolution;
+    type Message = Message;
     type InstantiationArgument = ();
     type Parameters = Parameters;
     type EventValue = ();
@@ -55,61 +68,92 @@ impl Contract for GolChallengeContract {
 
     async fn execute_operation(&mut self, operation: Operation) {
         log::trace!("Handling operation {:?}", operation);
-        let Operation::SubmitSolution {
-            puzzle_id,
-            board,
-            owner,
-        } = operation;
-        let owner = owner.unwrap_or_else(|| {
-            self.runtime
-                .authenticated_signer()
-                .expect("Operation must have an owner or be authenticated.")
-        });
-        let puzzle_bytes = self.runtime.read_data_blob(puzzle_id);
-        let puzzle = bcs::from_bytes(&puzzle_bytes).expect("Deserialize puzzle");
-        board.check_puzzle(&puzzle).expect("Invalid solution");
-        let timestamp = self.runtime.system_time();
-        let solution = Solution {
-            board,
-            timestamp,
-            owner,
-        };
-        self.state
-            .solutions
-            .insert(&puzzle_id, solution)
-            .expect("Store solution");
-
-        if let Parameters {
-            scoring_chain_id: Some(chain_id),
-        } = self.runtime.application_parameters()
-        {
-            let solution = ReportedSolution {
+        match operation {
+            Operation::SubmitSolution {
                 puzzle_id,
-                timestamp,
+                board,
                 owner,
-            };
-            self.runtime.prepare_message(solution).send_to(chain_id);
+            } => {
+                let owner = owner.unwrap_or_else(|| {
+                    self.runtime
+                        .authenticated_signer()
+                        .expect("Operation must have an owner or be authenticated.")
+                });
+                let puzzle_bytes = self.runtime.read_data_blob(puzzle_id);
+                let puzzle = bcs::from_bytes(&puzzle_bytes).expect("Deserialize puzzle");
+                board.check_puzzle(&puzzle).expect("Invalid solution");
+                let timestamp = self.runtime.system_time();
+                let solution = Solution {
+                    board,
+                    timestamp,
+                    owner,
+                };
+                self.state
+                    .solutions
+                    .insert(&puzzle_id, solution)
+                    .expect("Store solution");
+
+                if let Parameters {
+                    scoring_chain_id: Some(chain_id),
+                } = self.runtime.application_parameters()
+                {
+                    let message = Message {
+                        puzzle_id,
+                        timestamp,
+                        owner,
+                    };
+                    self.runtime.prepare_message(message).send_to(chain_id);
+                }
+            }
+            Operation::RegisterPuzzle { puzzle_id } => {
+                self.assert_scoring_chain("Puzzles are only registered on the scoring chain.");
+                self.state.registered_puzzles.insert(&puzzle_id).unwrap();
+            }
         }
     }
 
-    async fn execute_message(&mut self, solution: ReportedSolution) {
-        log::trace!("Handling message {:?}", solution);
+    async fn execute_message(&mut self, message: Message) {
+        log::trace!("Handling message {:?}", message);
+        let Message {
+            puzzle_id,
+            timestamp,
+            owner,
+        } = message;
+        self.assert_scoring_chain("Messages are sent to the scoring chain.");
+        let is_registered = self
+            .state
+            .registered_puzzles
+            .contains(&puzzle_id)
+            .await
+            .unwrap();
+        assert!(is_registered, "Puzzle must be registered");
+        let log_view = self
+            .state
+            .reported_solutions
+            .load_entry_mut(&owner)
+            .await
+            .unwrap();
+        let solution = ReportedSolution {
+            puzzle_id,
+            timestamp,
+        };
+        log_view.push(solution);
+    }
+
+    async fn store(mut self) {
+        self.state.save().await.expect("Failed to save state");
+    }
+}
+
+impl GolChallengeContract {
+    fn assert_scoring_chain(&mut self, error: &str) {
         let Parameters {
             scoring_chain_id: Some(chain_id),
         } = self.runtime.application_parameters()
         else {
             panic!("If we're receiving a message, the scoring chain must exist.")
         };
-        assert_eq!(
-            self.runtime.chain_id(),
-            chain_id,
-            "Messages are sent to the scoring chain."
-        );
-        self.state.reported_solutions.push(solution);
-    }
-
-    async fn store(mut self) {
-        self.state.save().await.expect("Failed to save state");
+        assert_eq!(self.runtime.chain_id(), chain_id, "{}", error);
     }
 }
 

@@ -4,7 +4,7 @@
 use async_graphql::{InputObject, SimpleObject};
 use gol_challenge::game::Board;
 use linera_sdk::linera_base_types::AccountOwner;
-use linera_sdk::views::LogView;
+use linera_sdk::views::{CollectionView, LogView, SetView};
 use linera_sdk::{
     linera_base_types::{DataBlobHash, Timestamp},
     views::{linera_views, MapView, RootView, ViewStorageContext},
@@ -16,12 +16,16 @@ use serde::{Deserialize, Serialize};
 #[graphql(complex)]
 #[view(context = ViewStorageContext)]
 pub struct GolChallengeState {
-    /// The local solutions previously submitted by an owner of the chain.
+    /// The local solutions previously submitted by an owner of the chain. Puzzles do not
+    /// need to be registered.
     pub solutions: MapView<DataBlobHash, Solution>,
 
     // Scoring chain only.
-    /// The set of all solutions reported to us.
-    pub reported_solutions: LogView<ReportedSolution>,
+    /// The set of registered puzzles.
+    pub registered_puzzles: SetView<DataBlobHash>,
+    /// The set of all solutions reported to us, indexed by owner. We only track
+    /// registered puzzles.
+    pub reported_solutions: CollectionView<AccountOwner, LogView<ReportedSolution>>,
 }
 
 /// A verified solution to a GoL puzzle.
@@ -42,6 +46,4 @@ pub struct ReportedSolution {
     pub puzzle_id: DataBlobHash,
     /// The timestamp of the solution.
     pub timestamp: Timestamp,
-    /// The user credited for the solution.
-    pub owner: AccountOwner,
 }

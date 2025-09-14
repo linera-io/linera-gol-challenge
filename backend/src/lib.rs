@@ -33,6 +33,12 @@ pub enum Operation {
         /// Optional owner to credit instead of the current authenticated owner.
         owner: Option<AccountOwner>,
     },
+    // Scoring appchain only
+    /// Register a puzzle to activate scoring for it.
+    RegisterPuzzle {
+        /// The ID of the puzzle to register.
+        puzzle_id: DataBlobHash,
+    },
 }
 
 impl ContractAbi for GolChallengeAbi {
