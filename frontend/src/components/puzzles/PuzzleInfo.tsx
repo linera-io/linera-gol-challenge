@@ -62,22 +62,8 @@ export function PuzzleInfo({
       <Card className="bg-white shadow-lg">
         <CardBody className="p-6">
           <div className="space-y-4">
-            {/* Current Generation Display */}
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <span className="text-gray-700 font-medium">Current generation</span>
-              <span className="text-2xl font-bold text-linera-primary">{generation}</span>
-            </div>
 
-            {/* Instructions */}
-            {generation !== 0 && (
-              <p className="text-sm text-gray-500">
-                Reset to generation 0 before submitting your solution.
-              </p>
-            )}
-
-            {generation === 0 && !validationResult && (
-              <p className="text-sm text-gray-500">Place your cells and press submit when ready.</p>
-            )}
+            <p className="text-sm text-gray-500">Place your cells and press submit when ready.</p>
 
             {/* Validation Result */}
             {validationResult && (

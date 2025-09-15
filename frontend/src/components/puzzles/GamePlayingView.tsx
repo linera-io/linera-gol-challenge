@@ -6,6 +6,7 @@ import { GameBoardWrapper } from "@/components/game-of-life/GameBoardWrapper";
 import { PuzzleInfo } from "./PuzzleInfo";
 import { GameControls } from "./GameControls";
 import { PuzzleTutorial } from "./PuzzleTutorial";
+import { HowToPlayTutorial } from "./HowToPlayTutorial";
 import { GameBoardSkeleton, PuzzleInfoSkeleton } from "./GamePlayingSkeleton";
 import { Puzzle as PuzzleData } from "@/lib/types/puzzle.types";
 import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
@@ -55,6 +56,7 @@ export function GamePlayingView({
   const [showInitialConditions, setShowInitialConditions] = useState(false);
   const [showFinalConditions, setShowFinalConditions] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  const [showHowToPlay, setShowHowToPlay] = useState(true);
 
   const hasConditions = !!(
     (puzzle?.initialConditions && puzzle.initialConditions.length > 0) ||
@@ -123,7 +125,8 @@ export function GamePlayingView({
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4 order-1 lg:order-1">
+        {/* Desktop: PuzzleInfo on left */}
+        <div className="hidden lg:block lg:col-span-1 space-y-4">
           {isPuzzleLoading ? (
             <PuzzleInfoSkeleton />
           ) : (
@@ -137,11 +140,11 @@ export function GamePlayingView({
               onClear={onClear}
             />
           )}
-
-          <div className="hidden lg:block">{showTutorial && <PuzzleTutorial />}</div>
+          {showTutorial && <PuzzleTutorial />}
         </div>
 
-        <div className="lg:col-span-2 order-2 lg:order-2">
+        {/* Game Board - always visible */}
+        <div className="lg:col-span-2 order-1 lg:order-2">
           <Card className="bg-white shadow-lg">
             <CardBody className="p-6">
               <div className="space-y-4">
@@ -168,6 +171,12 @@ export function GamePlayingView({
                   </div>
                 )}
 
+                {showHowToPlay && (
+                  <div className="mb-4">
+                    <HowToPlayTutorial onDismiss={() => setShowHowToPlay(false)} />
+                  </div>
+                )}
+
                 <GameControls
                   isPlaying={isPlaying}
                   canUndo={canUndo}
@@ -183,13 +192,29 @@ export function GamePlayingView({
                   hasConditions={hasConditions}
                   minSteps={puzzle?.minimalSteps}
                   maxSteps={puzzle?.maximalSteps}
+                  currentGeneration={generation}
                 />
               </div>
             </CardBody>
           </Card>
         </div>
 
-        <div className="lg:hidden order-3">{showTutorial && <PuzzleTutorial />}</div>
+        <div className="lg:hidden order-2 space-y-4">
+          {isPuzzleLoading ? (
+            <PuzzleInfoSkeleton />
+          ) : (
+            <PuzzleInfo
+              puzzle={puzzle}
+              generation={generation}
+              validationResult={validationResult}
+              isValidating={isValidating}
+              isSubmitting={isSubmitting}
+              onSubmit={onSubmit}
+              onClear={onClear}
+            />
+          )}
+          {showTutorial && <PuzzleTutorial />}
+        </div>
       </div>
     </div>
   );
