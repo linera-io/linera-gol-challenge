@@ -26,7 +26,11 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ["@linera/client"],
+      input: {
+        index: "index.html",
+        linera: "@linera/client",
+      },
+      preserveEntrySignatures: "strict",
     },
   },
 });
