@@ -38,12 +38,57 @@ flowchart LR
 
 ## Quickstart (backend)
 
-```
+```ignore
 cargo install linera-storage-service@0.15.3 linera-service@0.15.3
 
 cargo build --release --target wasm32-unknown-unknown
 
 cargo run --bin gol -- create-puzzles
 
-linera extract-script-from-markdown backend/README.md | bash -ex
+bash -e -x <(linera extract-script-from-markdown backend/README.md)
+```
+
+## Testing scores against the production app
+
+Run the commands below using `bash -e -x <(linera extract-script-from-markdown README.md)`.
+
+```bash
+# Production app
+APP_ID="c5b78269c7dfe9d121eab606c8f3ecd240de64d25b533b6f1009ac51c03d78ab"
+
+# Scoring chain
+CHAIN="e71636fde3a70cdbfdb7fd9bef6cb1ba632af8b0567b8f76df47b35489972dd3"
+
+# Test users
+MATHIEU_WEB="0x9f48844812B32aF52822363f4e14A4b849c9c95b"
+MATHIEU_CLI="0xc271f3fe7ce54619f5eb427bb77948097e76fcbfe7b0f82d9d88697d88accd19"
+
+# Getting a chain and tracking the scores
+FAUCET_URL=https://faucet.testnet-conway.linera.net
+
+LINERA_TMP_DIR=$(mktemp -d)
+export LINERA_WALLET="$LINERA_TMP_DIR/wallet.json"
+export LINERA_KEYSTORE="$LINERA_TMP_DIR/keystore.json"
+export LINERA_STORAGE="rocksdb:$LINERA_TMP_DIR/client.db"
+
+linera wallet init --faucet $FAUCET_URL
+linera wallet follow-chain $CHAIN
+
+linera service --port 8080 &
+```
+
+```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
+query {
+    reportedSolutions {
+        entry(key: "$MATHIEU_WEB") {
+            key
+            value {
+                entries(input: {}) {
+                    key
+                    value
+                }
+            }
+        }
+    }
+}
 ```
