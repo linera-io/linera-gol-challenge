@@ -3,11 +3,12 @@ import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { ArrowLeft } from "lucide-react";
 import { GameBoardWrapper } from "@/components/game-of-life/GameBoardWrapper";
-import { PuzzleInfo } from "./PuzzleInfo";
+import { PuzzleHeader } from "./PuzzleHeader";
+import { PuzzleSubmit } from "./PuzzleSubmit";
 import { GameControls } from "./GameControls";
 import { PuzzleTutorial } from "./PuzzleTutorial";
 import { HowToPlayTutorial } from "./HowToPlayTutorial";
-import { GameBoardSkeleton, PuzzleInfoSkeleton } from "./GamePlayingSkeleton";
+import { GameBoardSkeleton } from "./GamePlayingSkeleton";
 import { Puzzle as PuzzleData } from "@/lib/types/puzzle.types";
 import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
 
@@ -39,11 +40,9 @@ export function GamePlayingView({
   generation,
   cells,
   validationResult,
-  isValidating,
   isSubmitting,
   isPlaying,
   canUndo,
-  showTutorial,
   onBackToPuzzles,
   onCellClick,
   onPlay,
@@ -125,25 +124,26 @@ export function GamePlayingView({
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Desktop: PuzzleInfo on left */}
-        <div className="hidden lg:block lg:col-span-1 space-y-4">
-          {isPuzzleLoading ? (
-            <PuzzleInfoSkeleton />
-          ) : (
-            <PuzzleInfo
-              puzzle={puzzle}
-              generation={generation}
-              validationResult={validationResult}
-              isValidating={isValidating}
-              isSubmitting={isSubmitting}
-              onSubmit={onSubmit}
-              onClear={onClear}
-            />
+        <div className="lg:col-span-1 space-y-4">
+          <PuzzleHeader puzzle={puzzle} isPuzzleLoading={isPuzzleLoading} />
+
+          {!isPuzzleLoading && puzzle && (
+            // remove them from small screens to have another layout order
+            <>
+              <div className="hidden lg:block">
+                <PuzzleTutorial />
+              </div>
+              <div className="hidden lg:block">
+                <PuzzleSubmit
+                  validationResult={validationResult}
+                  isSubmitting={isSubmitting}
+                  onSubmit={onSubmit}
+                />
+              </div>
+            </>
           )}
-          {showTutorial && <PuzzleTutorial />}
         </div>
 
-        {/* Game Board - always visible */}
         <div className="lg:col-span-2 order-1 lg:order-2">
           <Card className="bg-white shadow-lg">
             <CardBody className="p-6">
@@ -200,20 +200,16 @@ export function GamePlayingView({
         </div>
 
         <div className="lg:hidden order-2 space-y-4">
-          {isPuzzleLoading ? (
-            <PuzzleInfoSkeleton />
-          ) : (
-            <PuzzleInfo
-              puzzle={puzzle}
-              generation={generation}
-              validationResult={validationResult}
-              isValidating={isValidating}
-              isSubmitting={isSubmitting}
-              onSubmit={onSubmit}
-              onClear={onClear}
-            />
+          {!isPuzzleLoading && puzzle && (
+            <>
+              <PuzzleSubmit
+                validationResult={validationResult}
+                isSubmitting={isSubmitting}
+                onSubmit={onSubmit}
+              />
+              <PuzzleTutorial />
+            </>
           )}
-          {showTutorial && <PuzzleTutorial />}
         </div>
       </div>
     </div>
