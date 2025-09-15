@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Condition } from "@/lib/types/puzzle.types";
 import { RECTANGLE_COLORS, getRGBString } from "@/lib/game-of-life/config/colors";
 import {
