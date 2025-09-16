@@ -15,9 +15,6 @@ interface GameControlsProps {
   onToggleHints?: () => void;
   onToggleGoals?: () => void;
   hasConditions?: boolean;
-  minSteps?: number;
-  maxSteps?: number;
-  currentGeneration?: number;
 }
 
 export function GameControls({
@@ -33,11 +30,7 @@ export function GameControls({
   onToggleHints,
   onToggleGoals,
   hasConditions = false,
-  minSteps,
-  maxSteps,
-  currentGeneration = 0,
 }: GameControlsProps) {
-  const hasStepRequirement = minSteps !== undefined && maxSteps !== undefined;
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -109,25 +102,6 @@ export function GameControls({
           Reset Generations
         </Button>
       </div>
-      {hasStepRequirement && (
-        <div className="mt-2 text-center">
-          <div className="flex flex-col sm:flex-row sm:inline-flex items-center gap-2 sm:gap-3 px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🎯</span>
-              <span className="text-sm font-medium text-gray-700">
-                {minSteps === maxSteps
-                  ? `Reach goal pattern in ${minSteps} ${minSteps !== 1 ? "generations" : "generation"}`
-                  : `Reach goal pattern in ${minSteps}-${maxSteps} generations`}
-              </span>
-            </div>
-            <div className="hidden sm:block text-gray-400">•</div>
-            <div className="text-sm font-medium">
-              <span className="text-gray-600">Current: </span>
-              <span className="font-bold text-red-600 text-lg">Generation {currentGeneration}</span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

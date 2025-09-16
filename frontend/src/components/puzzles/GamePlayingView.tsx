@@ -7,7 +7,6 @@ import { PuzzleHeader } from "./PuzzleHeader";
 import { PuzzleSubmit } from "./PuzzleSubmit";
 import { GameControls } from "./GameControls";
 import { PuzzleTutorial } from "./PuzzleTutorial";
-import { HowToPlayTutorial } from "./HowToPlayTutorial";
 import { GameBoardSkeleton } from "./GamePlayingSkeleton";
 import { Puzzle as PuzzleData } from "@/lib/types/puzzle.types";
 import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
@@ -55,7 +54,6 @@ export function GamePlayingView({
   const [showInitialConditions, setShowInitialConditions] = useState(false);
   const [showFinalConditions, setShowFinalConditions] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  const [showHowToPlay, setShowHowToPlay] = useState(true);
 
   const hasConditions = !!(
     (puzzle?.initialConditions && puzzle.initialConditions.length > 0) ||
@@ -135,6 +133,8 @@ export function GamePlayingView({
               </div>
               <div className="hidden lg:block">
                 <PuzzleSubmit
+                  puzzle={puzzle}
+                  generation={generation}
                   validationResult={validationResult}
                   isSubmitting={isSubmitting}
                   onSubmit={onSubmit}
@@ -154,26 +154,28 @@ export function GamePlayingView({
                 {isPuzzleLoading || !puzzle?.size ? (
                   <GameBoardSkeleton />
                 ) : (
-                  <div className="flex items-center justify-center rounded-lg">
-                    <div className="border-2 border-gray-200 rounded-lg overflow-auto max-h-[70vh]">
-                      <GameBoardWrapper
-                        width={puzzle.size}
-                        height={puzzle.size}
-                        cells={cells}
-                        onCellClick={onCellClick}
-                        cellSize={optimalCellSize}
-                        initialConditions={
-                          showInitialConditions ? puzzle?.initialConditions : undefined
-                        }
-                        finalConditions={showFinalConditions ? puzzle?.finalConditions : undefined}
-                      />
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center rounded-lg">
+                      <div className="border-2 border-gray-200 rounded-lg overflow-auto max-h-[70vh]">
+                        <GameBoardWrapper
+                          width={puzzle.size}
+                          height={puzzle.size}
+                          cells={cells}
+                          onCellClick={onCellClick}
+                          cellSize={optimalCellSize}
+                          initialConditions={
+                            showInitialConditions ? puzzle?.initialConditions : undefined
+                          }
+                          finalConditions={showFinalConditions ? puzzle?.finalConditions : undefined}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
-
-                {showHowToPlay && (
-                  <div className="mb-4">
-                    <HowToPlayTutorial onDismiss={() => setShowHowToPlay(false)} />
+                    <div className="flex justify-center">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-black rounded-full">
+                        <span className="text-sm font-medium">Generation:</span>
+                        <span className="text-lg font-bold">{generation}</span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -190,9 +192,6 @@ export function GamePlayingView({
                   onToggleHints={() => setShowInitialConditions(!showInitialConditions)}
                   onToggleGoals={() => setShowFinalConditions(!showFinalConditions)}
                   hasConditions={hasConditions}
-                  minSteps={puzzle?.minimalSteps}
-                  maxSteps={puzzle?.maximalSteps}
-                  currentGeneration={generation}
                 />
               </div>
             </CardBody>
@@ -203,6 +202,8 @@ export function GamePlayingView({
           {!isPuzzleLoading && puzzle && (
             <>
               <PuzzleSubmit
+                puzzle={puzzle}
+                generation={generation}
                 validationResult={validationResult}
                 isSubmitting={isSubmitting}
                 onSubmit={onSubmit}
