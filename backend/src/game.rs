@@ -27,7 +27,9 @@ pub struct Puzzle {
     pub minimal_steps: u16,
     /// A maximal number of steps for the final conditions to succeed.
     pub maximal_steps: u16,
-    /// If true, the final conditions must not succeeed after `minimal_steps - 1` steps.
+    /// Whether the initial conditions are enforced or just hints.
+    pub enforce_initial_conditions: bool,
+    /// If true, the final conditions must not succeed after `minimal_steps - 1` steps.
     pub is_strict: bool,
     /// The initial conditions.
     pub initial_conditions: Vec<Condition>,
@@ -251,6 +253,8 @@ pub struct DirectPuzzle {
     pub minimal_steps: u16,
     /// The maximum number of steps allowed to solve the puzzle.
     pub maximal_steps: u16,
+    /// Whether the initial conditions are enforced or just hints.
+    pub enforce_initial_conditions: bool,
     /// If true, the final conditions must not succeed after `minimal_steps - 1` steps.
     pub is_strict: bool,
     /// The width and height of the puzzle, in cells.
@@ -485,9 +489,14 @@ impl DirectPuzzle {
             ));
         }
 
+        // Add information on initial conditions
+        if self.enforce_initial_conditions {
+            result.push_str("Initial conditions are enforced\n");
+        }
+
         // Add strict mode information
         if self.is_strict {
-            result.push_str("Mode: Strict\n");
+            result.push_str("Must not exist one step early\n");
         }
 
         result.push('\n');
@@ -840,11 +849,14 @@ impl Puzzle {
                 puzzle_size: self.size,
             });
         }
-        if let Err((condition_index, reason)) = board.check_conditions(&self.initial_conditions) {
-            return Err(InvalidSolution::InitialConditionFailed {
-                condition_index,
-                reason,
-            });
+        if self.enforce_initial_conditions {
+            if let Err((condition_index, reason)) = board.check_conditions(&self.initial_conditions)
+            {
+                return Err(InvalidSolution::InitialConditionFailed {
+                    condition_index,
+                    reason,
+                });
+            }
         }
         if self.is_strict {
             if self.minimal_steps == 0 {
@@ -924,6 +936,7 @@ impl Puzzle {
             difficulty: self.difficulty,
             minimal_steps: self.minimal_steps,
             maximal_steps: self.maximal_steps,
+            enforce_initial_conditions: self.enforce_initial_conditions,
             is_strict: self.is_strict,
             size: self.size,
             initial_constraints,
@@ -1259,6 +1272,7 @@ mod tests {
             size: 10,
             minimal_steps: 1,
             maximal_steps: 5,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![],
             final_conditions: vec![],
@@ -1283,6 +1297,7 @@ mod tests {
             size: 5,
             minimal_steps: 6,
             maximal_steps: 4,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![],
             final_conditions: vec![],
@@ -1300,13 +1315,14 @@ mod tests {
     #[test]
     fn test_check_puzzle_initial_conditions_fail() {
         let board = Board::new(5);
-        let puzzle = Puzzle {
+        let mut puzzle = Puzzle {
             title: "Test".to_string(),
             summary: "Test puzzle".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
             minimal_steps: 1,
             maximal_steps: 5,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![Condition::TestPosition {
                 position: Position { x: 0, y: 0 },
@@ -1327,6 +1343,9 @@ mod tests {
                 }
             })
         );
+
+        puzzle.enforce_initial_conditions = false;
+        puzzle.check_solution(&board).unwrap();
     }
 
     #[test]
@@ -1346,6 +1365,7 @@ mod tests {
             size: 5,
             minimal_steps: 1,
             maximal_steps: 3,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1403,6 +1423,7 @@ mod tests {
             size: 16,
             minimal_steps: 20,
             maximal_steps: 40,
+            enforce_initial_conditions: true,
             is_strict: true,
             initial_conditions: vec![
                 // All 5 cells should be in top-left square (0-7, 0-7).
@@ -1510,6 +1531,7 @@ mod tests {
             size: 5,
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![Condition::TestPosition {
                 position: Position { x: 2, y: 2 },
@@ -1553,6 +1575,7 @@ mod tests {
             size: 8,
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 // This should pass.
@@ -1612,6 +1635,7 @@ mod tests {
             size: 8,
             minimal_steps: 1,
             maximal_steps: 2,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1668,6 +1692,7 @@ mod tests {
             size: 5,
             minimal_steps: 1,
             maximal_steps: 2,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1732,6 +1757,7 @@ mod tests {
             size: 3,
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1757,6 +1783,7 @@ Title: Display Test
 Summary: Test display formatting
 Difficulty: Easy
 Steps: exactly 1
+Initial conditions are enforced
 
 Initial:
 ●··
@@ -1777,6 +1804,7 @@ Title: Display Test
 Summary: Test display formatting
 Difficulty: Easy
 Steps: exactly 1
+Initial conditions are enforced
 
 Initial Conditions:
     0 1 2
@@ -1803,6 +1831,7 @@ Final Conditions:
             size: 3,
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![Condition::TestPosition {
                 position: Position { x: 1, y: 1 },
@@ -1835,6 +1864,7 @@ Final Conditions:
             size: 2,
             minimal_steps: 0,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![],
             final_conditions: vec![],
@@ -1848,6 +1878,7 @@ Title: Empty
 Summary: No conditions
 Difficulty: Easy
 Steps: 0-1
+Initial conditions are enforced
 
 Initial:
 ··
@@ -1868,6 +1899,7 @@ Final:
             size: 4,
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: true,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1913,7 +1945,8 @@ Title: Rectangle Constraints Test
 Summary: Test rectangle constraint visualization
 Difficulty: Medium
 Steps: exactly 1
-Mode: Strict
+Initial conditions are enforced
+Must not exist one step early
 
 Initial:
 ●·▢▢
@@ -1941,6 +1974,7 @@ Final:
             size: 3,
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1997,6 +2031,7 @@ Title: Multiple Constraints Test
 Summary: Test cell with both position and rectangle constraints
 Difficulty: Hard
 Steps: exactly 1
+Initial conditions are enforced
 
 Initial:
 ◦◦◦
@@ -2125,6 +2160,7 @@ Final:
             size: 3,
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -2169,6 +2205,7 @@ Title: Conflicting Constraints Test
 Summary: Test cell with conflicting constraints
 Difficulty: Hard
 Steps: exactly 1
+Initial conditions are enforced
 
 Initial:
 ···

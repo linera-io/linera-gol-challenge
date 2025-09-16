@@ -247,7 +247,7 @@ fn create_puzzles(output_dir: &PathBuf, draft: bool) -> Result<(), Box<dyn std::
     let puzzles = get_all_puzzles(draft);
 
     for (name, puzzle_and_solution_creator) in puzzles {
-        let (puzzle, solution) = puzzle_and_solution_creator();
+        let (mut puzzle, solution) = puzzle_and_solution_creator();
 
         let puzzle_path = output_dir.join(format!("{}_puzzle.bcs", name));
         let solution_path = output_dir.join(format!("{}_solution.bcs", name));
@@ -262,8 +262,9 @@ fn create_puzzles(output_dir: &PathBuf, draft: bool) -> Result<(), Box<dyn std::
         println!("{puzzle:#}");
         println!("Created solution: {}", solution_path.display());
         println!("{solution:#}");
+        puzzle.enforce_initial_conditions = true;
         let steps = puzzle.check_solution(&solution)?;
-        println!("Verified solution: {steps} steps");
+        println!("Verified solution (and hints): {steps} steps");
         println!();
     }
 
@@ -296,6 +297,7 @@ fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
         size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -335,6 +337,7 @@ fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
         size: 9,
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -376,6 +379,7 @@ fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
         size: 10,
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -414,6 +418,7 @@ fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
         size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -451,6 +456,7 @@ fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
         size: 7,
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -490,6 +496,7 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
         size: 7,
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -534,6 +541,7 @@ fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
         size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -575,6 +583,7 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
         size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -633,6 +642,7 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
         size,
         minimal_steps: 10,
         maximal_steps: 10,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         final_conditions,
@@ -694,6 +704,7 @@ fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
         size,
         minimal_steps: 170,
         maximal_steps: 200,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         final_conditions,
@@ -736,6 +747,7 @@ fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
         size: 12,
         minimal_steps: 16,
         maximal_steps: 16,
+        enforce_initial_conditions: true,
         is_strict: true,
         initial_conditions: vec![
             // First glider should be in top-left area
@@ -782,7 +794,8 @@ fn create_glider_migration_puzzle_and_solution() -> (Puzzle, Board) {
         size: 16,
         minimal_steps: 40,
         maximal_steps: 40,
-        is_strict: true,
+        enforce_initial_conditions: false,
+        is_strict: false,
         initial_conditions: vec![
             // Hint.
             Condition::TestPosition {
