@@ -58,21 +58,19 @@ export function PuzzleTutorial() {
               <div className="flex gap-3">
                 <Play size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-gray-500">
-                  Test your solution by pressing "Play" to advance the simulation and check the
-                  outcome.
+                  Test your solution by advancing the simulation to check the outcome.
                 </p>
               </div>
               <div className="flex gap-3">
                 <Lightbulb size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-gray-500">
-                  Use "Show hints" to see the starting position constraints - green cells must be
-                  alive, red cells must be dead.
+                  Use "Show hints" to help you figure out the correct initial condition.
                 </p>
               </div>
               <div className="flex gap-3">
                 <Target size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-gray-500">
-                  Use "Show goals" to see the target pattern you need to achieve - highlighted areas
+                  Use "Show goal" to see the target pattern you need to achieve - highlighted areas
                   show where cells should end up.
                 </p>
               </div>
@@ -80,6 +78,13 @@ export function PuzzleTutorial() {
                 <Check size={20} className="text-gray-400 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-gray-500">
                   Submit when you've solved the puzzle to record it on the blockchain!
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <div className="h-4 w-4 bg-gray-300 flex-shrink-0" />
+                <p className="text-sm text-gray-500">
+                  When you've successfully solved the puzzle, return to the Portal to claim your
+                  points.
                 </p>
               </div>
             </div>

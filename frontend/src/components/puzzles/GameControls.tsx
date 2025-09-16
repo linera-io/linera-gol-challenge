@@ -43,17 +43,15 @@ export function GameControls({
         </button>
         <button
           onClick={isPlaying ? onPause : onPlay}
-          className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-5 sm:py-3 rounded-full bg-linera-primary hover:bg-linera-primary-dark text-white transition-colors shadow-lg"
+          className="flex items-center gap-1.5 sm:gap-2 p-3  sm:p-5  rounded-full bg-linera-primary hover:bg-linera-primary-dark text-white transition-colors shadow-lg"
         >
           {isPlaying ? (
             <>
               <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-white" />
-              <span className="text-xs sm:text-base font-medium">Stop Evolving</span>
             </>
           ) : (
             <>
               <Play className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5 fill-white" />
-              <span className="text-xs sm:text-base font-medium">Start Evolving</span>
             </>
           )}
         </button>

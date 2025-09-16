@@ -14,6 +14,8 @@ import { BOARD_CONFIG } from "@/lib/game-of-life/config/board-config";
 interface GamePlayingViewProps {
   puzzle: PuzzleData | null;
   isPuzzleLoading?: boolean;
+  isPuzzleCompleted?: boolean;
+  areCompletedPuzzlesLoading: boolean;
   generation: number;
   cells: Map<string, boolean>;
   validationResult: { isValid: boolean; message?: string } | null;
@@ -36,6 +38,8 @@ interface GamePlayingViewProps {
 export function GamePlayingView({
   puzzle,
   isPuzzleLoading = false,
+  isPuzzleCompleted = false,
+  areCompletedPuzzlesLoading = false,
   generation,
   cells,
   validationResult,
@@ -52,8 +56,9 @@ export function GamePlayingView({
   onSubmit,
 }: GamePlayingViewProps) {
   const [showInitialConditions, setShowInitialConditions] = useState(false);
-  const [showFinalConditions, setShowFinalConditions] = useState(false);
+  const [showFinalConditions, setShowFinalConditions] = useState(true);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  const isLoading = isPuzzleLoading || areCompletedPuzzlesLoading;
 
   const hasConditions = !!(
     (puzzle?.initialConditions && puzzle.initialConditions.length > 0) ||
@@ -113,7 +118,7 @@ export function GamePlayingView({
         <div className="flex-1" />
       </div>
 
-      {isPuzzleLoading ? (
+      {isLoading ? (
         <div className="flex justify-center">
           <div className="w-64 h-9 bg-gray-200 rounded-lg animate-pulse" />
         </div>
@@ -125,7 +130,7 @@ export function GamePlayingView({
         <div className="lg:col-span-1 space-y-4">
           <PuzzleHeader puzzle={puzzle} isPuzzleLoading={isPuzzleLoading} />
 
-          {!isPuzzleLoading && puzzle && (
+          {!isLoading && puzzle && (
             // remove them from small screens to have another layout order
             <>
               <div className="hidden lg:block">
@@ -134,6 +139,7 @@ export function GamePlayingView({
                   generation={generation}
                   validationResult={validationResult}
                   isSubmitting={isSubmitting}
+                  isPuzzleCompleted={isPuzzleCompleted}
                   onSubmit={onSubmit}
                 />
               </div>
@@ -151,7 +157,7 @@ export function GamePlayingView({
                 <h2 className="text-xl font-semibold text-gray-900 text-center mb-4">
                   Game of Life Playground
                 </h2>
-                {isPuzzleLoading || !puzzle?.size ? (
+                {isLoading || !puzzle?.size ? (
                   <GameBoardSkeleton />
                 ) : (
                   <div className="space-y-4">
@@ -201,13 +207,14 @@ export function GamePlayingView({
         </div>
 
         <div className="lg:hidden order-2 space-y-4">
-          {!isPuzzleLoading && puzzle && (
+          {!isLoading && puzzle && (
             <>
               <PuzzleSubmit
                 puzzle={puzzle}
                 generation={generation}
                 validationResult={validationResult}
                 isSubmitting={isSubmitting}
+                isPuzzleCompleted={isPuzzleCompleted}
                 onSubmit={onSubmit}
               />
               <PuzzleTutorial />

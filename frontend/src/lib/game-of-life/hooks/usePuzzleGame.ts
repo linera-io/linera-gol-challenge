@@ -110,17 +110,29 @@ export function usePuzzleGame() {
       return lineraService.validateSolution(board, currentPuzzle.id);
     },
     onSuccess: (result) => {
-      setValidationResult({
-        isValid: result.isValid,
-        message:
-          result.errorMessage || (result.isValid ? "Solution is valid!" : "Solution is not valid"),
-      });
+      if (result.isValid) {
+        setValidationResult({
+          isValid: result.isValid,
+          message: "Solution is valid!",
+        });
+      } else {
+        setValidationResult({
+          isValid: result.isValid,
+          message: "Solution is not valid",
+        });
+      }
+      // setValidationResult({
+      //   isValid: result.isValid,
+      //   message:
+      //     result.errorMessage || (result.isValid ? "Solution is valid!" : "Solution is not valid"),
+      // });
     },
     onError: (error) => {
       console.error("Failed to validate solution:", error);
       setValidationResult({
         isValid: false,
-        message: error instanceof Error ? error.message : "Failed to validate solution",
+        // message: error instanceof Error ? error.message : "Failed to validate solution",
+        message: "Incorrect solution, try again",
       });
     },
   });
@@ -159,7 +171,7 @@ export function usePuzzleGame() {
       console.error("Failed to submit solution:", error);
       setValidationResult({
         isValid: false,
-        message: error instanceof Error ? error.message : "Failed to submit solution",
+        message: "Incorrect solution, try again",
       });
     },
   });

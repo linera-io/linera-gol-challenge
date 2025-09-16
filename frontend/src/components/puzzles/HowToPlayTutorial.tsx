@@ -89,7 +89,7 @@ export function HowToPlayTutorial() {
                     className="text-gray-500 mt-0.5 flex-shrink-0 sm:w-[18px] sm:h-[18px]"
                   />
                   <span>
-                    Click <strong>"Start Evolving"</strong> to see how the puzzle changes after
+                    Click <strong>"Start"</strong> to see how the puzzle changes after
                     generations
                   </span>
                 </p>
