@@ -187,6 +187,13 @@ export function usePuzzleGame() {
     setStepCount((prev) => prev + 1);
   }, [originalNext]);
 
+  // Override the previous function to track steps
+  const originalPrevious = game.previous;
+  const previous = useCallback(() => {
+    originalPrevious();
+    setStepCount((prev) => Math.max(0, prev - 1));
+  }, [originalPrevious]);
+
   const originalClear = game.clear;
   const clear = useCallback(() => {
     originalClear();
@@ -205,6 +212,7 @@ export function usePuzzleGame() {
   return {
     ...game,
     next,
+    previous,
     clear,
     currentPuzzle: currentPuzzle || null,
     currentPuzzleId,

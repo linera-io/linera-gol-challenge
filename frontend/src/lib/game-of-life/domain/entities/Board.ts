@@ -85,6 +85,21 @@ export class Board {
     this.currentHistoryIndex++;
   }
 
+  replaceCurrentState(): void {
+    const state = new Map<string, Cell>();
+    this.cells.forEach((cell, key) => {
+      if (cell.alive) {
+        state.set(key, new Cell(cell.x, cell.y, true));
+      }
+    });
+
+    if (this.currentHistoryIndex >= 0 && this.currentHistoryIndex < this.history.length) {
+      this.history[this.currentHistoryIndex] = state;
+    } else {
+      this.saveState();
+    }
+  }
+
   canUndo(): boolean {
     return this.currentHistoryIndex > 0;
   }
@@ -95,6 +110,10 @@ export class Board {
 
   hasInitialState(): boolean {
     return this.currentHistoryIndex > -1;
+  }
+
+  isAtEndOfHistory(): boolean {
+    return this.currentHistoryIndex === this.history.length - 1;
   }
 
   undo(): void {
