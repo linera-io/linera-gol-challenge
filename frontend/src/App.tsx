@@ -1,4 +1,3 @@
-import { Routes, Route } from "react-router-dom";
 import clsx from "clsx";
 import { Providers } from "./providers";
 import { fontSans } from "./config/fonts";
