@@ -5,7 +5,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
-import { DYNAMIC_ENVIRONMENT_ID } from "@/lib/linera/constants";
+import { DYNAMIC_LIVE_ENVIRONMENT_ID, DYNAMIC_SANDBOX_ENVIRONMENT_ID } from "@/lib/linera/constants";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     <DynamicContextProvider
       theme="auto"
       settings={{
-        environmentId: DYNAMIC_ENVIRONMENT_ID,
+        environmentId: import.meta.env.PROD ? DYNAMIC_LIVE_ENVIRONMENT_ID : DYNAMIC_SANDBOX_ENVIRONMENT_ID,
         walletConnectors: [EthereumWalletConnectors],
       }}
     >
