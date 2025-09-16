@@ -4,7 +4,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  base: "",
+  base: process.env.VITE_BASE_PATH || "/",
   plugins: [react(), tsconfigPaths()],
   server: {
     fs: {
@@ -26,7 +26,11 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ["@linera/client"],
+      input: {
+        index: "index.html",
+        linera: "@linera/client",
+      },
+      preserveEntrySignatures: "strict",
     },
   },
 });
