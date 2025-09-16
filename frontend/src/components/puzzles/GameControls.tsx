@@ -1,5 +1,5 @@
 import { Button } from "@heroui/button";
-import { Play, Pause, ChevronRight, ChevronLeft, Lightbulb, Target } from "lucide-react";
+import { Play, Pause, ChevronRight, ChevronLeft, Lightbulb, Target, X } from "lucide-react";
 import { Tooltip } from "@heroui/tooltip";
 
 interface GameControlsProps {
@@ -31,7 +31,6 @@ export function GameControls({
   onToggleGoals,
   hasConditions = false,
 }: GameControlsProps) {
-
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="flex gap-6 items-center">
@@ -65,40 +64,41 @@ export function GameControls({
           <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
         </button>
       </div>
-      <div className="flex gap-3 items-center">
+      <div className="flex gap-3 items-center flex-wrap justify-center">
         {hasConditions && (
           <>
-            <Tooltip content="Show starting position hints">
-              <button
-                onClick={onToggleHints}
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-colors ${
-                  showHints
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 hover:bg-gray-300 text-gray-600"
-                }`}
-              >
-                <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </Tooltip>
-            <Tooltip content="Show goal pattern">
-              <button
-                onClick={onToggleGoals}
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-colors ${
-                  showGoals
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 hover:bg-gray-300 text-gray-600"
-                }`}
-              >
-                <Target className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </Tooltip>
+            <Button
+              variant="flat"
+              onPress={onToggleHints}
+              className={`font-medium text-xs sm:text-base px-4 py-2 sm:px-6 sm:py-2.5 min-w-[120px] sm:min-w-[140px] rounded-full transition-colors flex items-center gap-2 ${
+                showHints
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+              }`}
+            >
+              <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
+              Show Hints
+            </Button>
+            <Button
+              variant="flat"
+              onPress={onToggleGoals}
+              className={`font-medium text-xs sm:text-base px-4 py-2 sm:px-6 sm:py-2.5 min-w-[120px] sm:min-w-[140px] rounded-full transition-colors flex items-center gap-2 ${
+                showGoals
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+              }`}
+            >
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+              Show Goal
+            </Button>
           </>
         )}
         <Button
           variant="flat"
           onPress={onClear}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium text-xs sm:text-base px-4 py-2 sm:px-6 sm:py-2.5 min-w-[120px] sm:min-w-[140px] rounded-full"
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium text-xs sm:text-base px-4 py-2 sm:px-6 sm:py-2.5 min-w-[120px] sm:min-w-[140px] rounded-full flex items-center gap-2"
         >
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
           Reset Generations
         </Button>
       </div>
