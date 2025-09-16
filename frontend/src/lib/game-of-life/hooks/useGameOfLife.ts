@@ -103,6 +103,18 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
     updateCells();
   }, [board, updateCells]);
 
+  const resetToInitial = useCallback(() => {
+    // Go back to generation 0 without clearing
+    if (board.hasInitialState()) {
+      // Reset to the first state in history
+      while (board.canUndo()) {
+        board.undo();
+      }
+      setGeneration(0);
+      updateCells();
+    }
+  }, [board, updateCells]);
+
   const play = useCallback(() => {
     setIsPlaying(true);
   }, []);
@@ -179,6 +191,7 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
     next,
     previous,
     clear,
+    resetToInitial,
     play,
     pause,
     setSpeed,

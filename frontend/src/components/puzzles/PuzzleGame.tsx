@@ -51,6 +51,7 @@ export function PuzzleGame() {
             onNext={game.next}
             onPrevious={game.previous}
             onClear={game.clear}
+            onResetToInitial={game.resetToInitial}
             onSubmit={game.submitSolution}
             onNextPuzzle={game.loadNextPuzzle}
             onPreviousPuzzle={game.loadPreviousPuzzle}

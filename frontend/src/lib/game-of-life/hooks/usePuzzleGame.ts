@@ -202,6 +202,13 @@ export function usePuzzleGame() {
     setValidationResult(null);
   }, [originalClear]);
 
+  const originalResetToInitial = game.resetToInitial;
+  const resetToInitial = useCallback(() => {
+    originalResetToInitial();
+    setStepCount(0);
+    setValidationResult(null);
+  }, [originalResetToInitial]);
+
   const backToPuzzleList = useCallback(() => {
     setShowPuzzleList(true);
     setCurrentPuzzleId(null);
@@ -250,6 +257,7 @@ export function usePuzzleGame() {
     next,
     previous,
     clear,
+    resetToInitial,
     currentPuzzle: currentPuzzle || null,
     currentPuzzleId,
     isPuzzleLoading,

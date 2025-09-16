@@ -31,6 +31,7 @@ interface GamePlayingViewProps {
   onNext: () => void;
   onPrevious: () => void;
   onClear: () => void;
+  onResetToInitial: () => void;
   onSubmit: () => void;
   onNextPuzzle?: () => void;
   onPreviousPuzzle?: () => void;
@@ -55,6 +56,7 @@ export function GamePlayingView({
   onNext,
   onPrevious,
   onClear,
+  onResetToInitial,
   onSubmit,
   onNextPuzzle,
   onPreviousPuzzle,
@@ -217,6 +219,7 @@ export function GamePlayingView({
                   onNext={onNext}
                   onPrevious={onPrevious}
                   onClear={onClear}
+                  onResetToInitial={onResetToInitial}
                   showHints={showInitialConditions}
                   showGoals={showFinalConditions}
                   onToggleHints={() => setShowInitialConditions(!showInitialConditions)}

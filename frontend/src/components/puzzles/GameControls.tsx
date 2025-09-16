@@ -1,5 +1,14 @@
 import { Button } from "@heroui/button";
-import { Play, Pause, ChevronRight, ChevronLeft, Lightbulb, Target, X } from "lucide-react";
+import {
+  Play,
+  Pause,
+  ChevronRight,
+  ChevronLeft,
+  Lightbulb,
+  Target,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { Tooltip } from "@heroui/tooltip";
 
 interface GameControlsProps {
@@ -10,6 +19,7 @@ interface GameControlsProps {
   onNext: () => void;
   onPrevious: () => void;
   onClear: () => void;
+  onResetToInitial: () => void;
   showHints?: boolean;
   showGoals?: boolean;
   onToggleHints?: () => void;
@@ -25,6 +35,7 @@ export function GameControls({
   onNext,
   onPrevious,
   onClear,
+  onResetToInitial,
   showHints = false,
   showGoals = false,
   onToggleHints,
@@ -33,34 +44,53 @@ export function GameControls({
 }: GameControlsProps) {
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="flex gap-6 items-center">
-        <button
-          onClick={onPrevious}
-          disabled={!canUndo}
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-        </button>
-        <button
-          onClick={isPlaying ? onPause : onPlay}
-          className="flex items-center gap-1.5 sm:gap-2 p-3  sm:p-5  rounded-full bg-linera-primary hover:bg-linera-primary-dark text-white transition-colors shadow-lg"
-        >
-          {isPlaying ? (
-            <>
-              <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-white" />
-            </>
-          ) : (
-            <>
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5 fill-white" />
-            </>
-          )}
-        </button>
-        <button
-          onClick={onNext}
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
-        >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-        </button>
+      <div className="flex gap-3 items-center">
+        <Tooltip content="Previous generation">
+          <button
+            onClick={onPrevious}
+            disabled={!canUndo}
+            className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-600" />
+          </button>
+        </Tooltip>
+        <Tooltip content={isPlaying ? "Pause" : "Play"}>
+          <button
+            onClick={isPlaying ? onPause : onPlay}
+            className="p-3 rounded-full bg-linera-primary hover:bg-linera-primary-dark text-white transition-colors shadow-lg"
+          >
+            {isPlaying ? (
+              <Pause className="w-5 h-5 fill-white" />
+            ) : (
+              <Play className="w-5 h-5 ml-0.5 fill-white" />
+            )}
+          </button>
+        </Tooltip>
+        <Tooltip content="Next generation">
+          <button
+            onClick={onNext}
+            className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-600" />
+          </button>
+        </Tooltip>
+        <div className="w-px h-8 bg-gray-300 mx-2" /> {/* Divider */}
+        <Tooltip content="Reset to generation 0">
+          <button
+            onClick={onResetToInitial}
+            className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+          >
+            <RotateCcw className="w-5 h-5 text-gray-600" />
+          </button>
+        </Tooltip>
+        <Tooltip content="Clear all cells">
+          <button
+            onClick={onClear}
+            className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+          >
+            <Trash2 className="w-5 h-5 text-gray-600" />
+          </button>
+        </Tooltip>
       </div>
       <div className="flex gap-3 items-center flex-wrap justify-center">
         {hasConditions && (
@@ -91,14 +121,6 @@ export function GameControls({
             </Button>
           </>
         )}
-        <Button
-          variant="flat"
-          onPress={onClear}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium text-xs sm:text-base px-4 py-2 sm:px-6 sm:py-2.5 min-w-[120px] sm:min-w-[140px] rounded-full flex items-center gap-2"
-        >
-          <X className="w-4 h-4 sm:w-5 sm:h-5" />
-          Reset Generations
-        </Button>
       </div>
     </div>
   );
