@@ -49,11 +49,16 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
 
   const toggleCell = useCallback(
     (x: number, y: number) => {
-      // If we're at generation 0 and no history exists, save the initial empty state
-      if (generation === 0 && !board.hasInitialState()) {
-        board.saveState();
-      }
       board.toggleCell(x, y);
+      // Save or update state after toggling at generation 0
+      if (generation === 0) {
+        if (!board.hasInitialState()) {
+          board.saveState();
+        } else {
+          // Replace the current state instead of adding new one
+          board.replaceCurrentState();
+        }
+      }
       updateCells();
     },
     [board, updateCells, generation]
@@ -61,12 +66,28 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
 
   const next = useCallback(() => {
     if (!engine || !board) return;
-    // Save current state before generating next one
-    board.saveState();
-    engine.nextGeneration();
-    setGeneration((g) => g + 1);
-    updateCells();
-  }, [engine, board, updateCells]);
+
+    // Only compute new generation if we're at the end of history
+    if (board.isAtEndOfHistory()) {
+      // Make sure we have an initial state saved
+      if (generation === 0 && !board.hasInitialState()) {
+        board.saveState(); // Save generation 0 if not already saved
+      }
+
+      // Compute next generation
+      engine.nextGeneration();
+      setGeneration((g) => g + 1);
+
+      // Save the NEW state after computing
+      board.saveState();
+      updateCells();
+    } else if (board.canRedo()) {
+      // If we're in the middle of history, just move forward
+      board.redo();
+      setGeneration((g) => g + 1);
+      updateCells();
+    }
+  }, [engine, board, updateCells, generation]);
 
   const previous = useCallback(() => {
     if (board.canUndo()) {
@@ -80,6 +101,18 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
     board.clear();
     setGeneration(0);
     updateCells();
+  }, [board, updateCells]);
+
+  const resetToInitial = useCallback(() => {
+    // Go back to generation 0 without clearing
+    if (board.hasInitialState()) {
+      // Reset to the first state in history
+      while (board.canUndo()) {
+        board.undo();
+      }
+      setGeneration(0);
+      updateCells();
+    }
   }, [board, updateCells]);
 
   const play = useCallback(() => {
@@ -158,6 +191,7 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
     next,
     previous,
     clear,
+    resetToInitial,
     play,
     pause,
     setSpeed,

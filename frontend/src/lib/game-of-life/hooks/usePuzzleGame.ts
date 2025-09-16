@@ -4,6 +4,7 @@ import { LineraService } from "@/lib/linera/services/LineraService";
 import { LineraBoard } from "@/lib/types/puzzle.types";
 import { useGameOfLife } from "./useGameOfLife";
 import { useLineraInitialization } from "@/lib/linera/hooks/useLineraQueries";
+import { KNOWN_PUZZLES } from "../data/puzzles";
 
 const QUERY_KEYS = {
   puzzle: (id: string) => ["puzzle", id],
@@ -110,17 +111,29 @@ export function usePuzzleGame() {
       return lineraService.validateSolution(board, currentPuzzle.id);
     },
     onSuccess: (result) => {
-      setValidationResult({
-        isValid: result.isValid,
-        message:
-          result.errorMessage || (result.isValid ? "Solution is valid!" : "Solution is not valid"),
-      });
+      if (result.isValid) {
+        setValidationResult({
+          isValid: result.isValid,
+          message: "Solution is valid!",
+        });
+      } else {
+        setValidationResult({
+          isValid: result.isValid,
+          message: "Solution is not valid",
+        });
+      }
+      // setValidationResult({
+      //   isValid: result.isValid,
+      //   message:
+      //     result.errorMessage || (result.isValid ? "Solution is valid!" : "Solution is not valid"),
+      // });
     },
     onError: (error) => {
       console.error("Failed to validate solution:", error);
       setValidationResult({
         isValid: false,
-        message: error instanceof Error ? error.message : "Failed to validate solution",
+        // message: error instanceof Error ? error.message : "Failed to validate solution",
+        message: "Incorrect solution, try again",
       });
     },
   });
@@ -159,7 +172,7 @@ export function usePuzzleGame() {
       console.error("Failed to submit solution:", error);
       setValidationResult({
         isValid: false,
-        message: error instanceof Error ? error.message : "Failed to submit solution",
+        message: "Incorrect solution, try again",
       });
     },
   });
@@ -175,12 +188,26 @@ export function usePuzzleGame() {
     setStepCount((prev) => prev + 1);
   }, [originalNext]);
 
+  // Override the previous function to track steps
+  const originalPrevious = game.previous;
+  const previous = useCallback(() => {
+    originalPrevious();
+    setStepCount((prev) => Math.max(0, prev - 1));
+  }, [originalPrevious]);
+
   const originalClear = game.clear;
   const clear = useCallback(() => {
     originalClear();
     setStepCount(0);
     setValidationResult(null);
   }, [originalClear]);
+
+  const originalResetToInitial = game.resetToInitial;
+  const resetToInitial = useCallback(() => {
+    originalResetToInitial();
+    setStepCount(0);
+    setValidationResult(null);
+  }, [originalResetToInitial]);
 
   const backToPuzzleList = useCallback(() => {
     setShowPuzzleList(true);
@@ -190,10 +217,47 @@ export function usePuzzleGame() {
     game.clear();
   }, [game]);
 
+  // Navigation functions
+  const loadNextPuzzle = useCallback(() => {
+    if (!currentPuzzleId) return false;
+
+    const currentIndex = KNOWN_PUZZLES.findIndex(p => p.id === currentPuzzleId);
+    if (currentIndex === -1) return false;
+
+    // Get next puzzle (cycle to beginning if at end)
+    const nextIndex = (currentIndex + 1) % KNOWN_PUZZLES.length;
+    const nextPuzzle = KNOWN_PUZZLES[nextIndex];
+
+    if (nextPuzzle) {
+      loadPuzzle(nextPuzzle.id);
+      return true;
+    }
+    return false;
+  }, [currentPuzzleId, loadPuzzle]);
+
+  const loadPreviousPuzzle = useCallback(() => {
+    if (!currentPuzzleId) return false;
+
+    const currentIndex = KNOWN_PUZZLES.findIndex(p => p.id === currentPuzzleId);
+    if (currentIndex === -1) return false;
+
+    // Get previous puzzle (cycle to end if at beginning)
+    const prevIndex = currentIndex === 0 ? KNOWN_PUZZLES.length - 1 : currentIndex - 1;
+    const prevPuzzle = KNOWN_PUZZLES[prevIndex];
+
+    if (prevPuzzle) {
+      loadPuzzle(prevPuzzle.id);
+      return true;
+    }
+    return false;
+  }, [currentPuzzleId, loadPuzzle]);
+
   return {
     ...game,
     next,
+    previous,
     clear,
+    resetToInitial,
     currentPuzzle: currentPuzzle || null,
     currentPuzzleId,
     isPuzzleLoading,
@@ -202,6 +266,8 @@ export function usePuzzleGame() {
     validationResult,
     isSubmitting: submitMutation.isPending,
     loadPuzzle,
+    loadNextPuzzle,
+    loadPreviousPuzzle,
     validateSolution,
     submitSolution,
     advanceBoardOnChain,

@@ -1,4 +1,5 @@
 import { usePuzzleGame } from "@/lib/game-of-life/hooks/usePuzzleGame";
+import { useCompletedPuzzles } from "@/lib/game-of-life/hooks/useCompletedPuzzles";
 import { GameHeader } from "./GameHeader";
 import { PuzzleSelectionView } from "./PuzzleSelectionView";
 import { GamePlayingView } from "./GamePlayingView";
@@ -6,6 +7,7 @@ import { useState } from "react";
 
 export function PuzzleGame() {
   const game = usePuzzleGame();
+  const { isPuzzleCompleted, isLoadingFromBlockchain: areCompletedPuzzlesLoading} = useCompletedPuzzles();
   const [showTutorial, setShowTutorial] = useState(true);
 
   const handleCellClick = (x: number, y: number) => {
@@ -28,8 +30,12 @@ export function PuzzleGame() {
           />
         ) : (
           <GamePlayingView
+            areCompletedPuzzlesLoading={areCompletedPuzzlesLoading}
             puzzle={game.currentPuzzle}
             isPuzzleLoading={game.isPuzzleLoading}
+            isPuzzleCompleted={
+              game.currentPuzzleId ? isPuzzleCompleted(game.currentPuzzleId) : false
+            }
             generation={game.generation}
             cells={game.cells}
             validationResult={game.validationResult}
@@ -45,7 +51,10 @@ export function PuzzleGame() {
             onNext={game.next}
             onPrevious={game.previous}
             onClear={game.clear}
+            onResetToInitial={game.resetToInitial}
             onSubmit={game.submitSolution}
+            onNextPuzzle={game.loadNextPuzzle}
+            onPreviousPuzzle={game.loadPreviousPuzzle}
             onCloseTutorial={() => setShowTutorial(false)}
           />
         )}

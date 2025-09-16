@@ -9,31 +9,6 @@ interface PuzzleListProps {
   currentPuzzleId?: string;
 }
 
-const difficultyConfig: Record<
-  DifficultyLevel,
-  {
-    icon: string;
-    bgColor: string;
-    textColor: string;
-  }
-> = {
-  EASY: {
-    icon: "🌱",
-    bgColor: "bg-green-50",
-    textColor: "text-green-700",
-  },
-  MEDIUM: {
-    icon: "🔥",
-    bgColor: "bg-amber-50",
-    textColor: "text-amber-700",
-  },
-  HARD: {
-    icon: "💀",
-    bgColor: "bg-red-50",
-    textColor: "text-red-700",
-  },
-};
-
 export function PuzzleList({ onSelectPuzzle, currentPuzzleId }: PuzzleListProps) {
   const { isPuzzleCompleted, isLoadingFromBlockchain } = useCompletedPuzzles();
 
@@ -51,8 +26,6 @@ export function PuzzleList({ onSelectPuzzle, currentPuzzleId }: PuzzleListProps)
   return (
     <div className="space-y-2 sm:space-y-3">
       {Object.entries(groupedPuzzles).map(([difficulty, puzzles]) => {
-        const config = difficultyConfig[difficulty as DifficultyLevel];
-
         return (
           <div key={difficulty} className="space-y-1.5 sm:space-y-2">
             {puzzles.map((puzzle) => (
@@ -64,7 +37,6 @@ export function PuzzleList({ onSelectPuzzle, currentPuzzleId }: PuzzleListProps)
                 isLoading={isLoadingFromBlockchain}
                 onSelect={() => onSelectPuzzle(puzzle.id)}
                 difficulty={difficulty as DifficultyLevel}
-                difficultyConfig={config}
               />
             ))}
           </div>

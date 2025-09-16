@@ -2,7 +2,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Badge } from "@heroui/badge";
 import { ChevronRight, CheckCircle } from "lucide-react";
 import { PuzzleMetadata, DifficultyLevel } from "@/lib/types/puzzle.types";
-import { formatDifficulty } from "@/lib/types/puzzle.types";
+import { DifficultyBadge } from "@/components/common/DifficultyBadge";
 
 interface PuzzleCardProps {
   puzzle: PuzzleMetadata;
@@ -11,11 +11,6 @@ interface PuzzleCardProps {
   isLoading: boolean;
   onSelect: () => void;
   difficulty: DifficultyLevel;
-  difficultyConfig: {
-    icon: string;
-    bgColor: string;
-    textColor: string;
-  };
 }
 
 export function PuzzleCard({
@@ -25,7 +20,6 @@ export function PuzzleCard({
   isLoading,
   onSelect,
   difficulty,
-  difficultyConfig,
 }: PuzzleCardProps) {
   return (
     <Card
@@ -64,16 +58,7 @@ export function PuzzleCard({
             <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{puzzle.summary}</p>
 
             <div className="flex items-center gap-2">
-              <span
-                className={`
-                  inline-flex items-center gap-1
-                  px-1.5 sm:px-2 py-0.5 text-xs rounded-full font-medium
-                  ${difficultyConfig.bgColor} ${difficultyConfig.textColor}
-                `}
-              >
-                <span className="text-xs sm:text-sm">{difficultyConfig.icon}</span>
-                <span>{formatDifficulty(difficulty)}</span>
-              </span>
+              <DifficultyBadge difficulty={difficulty} size="sm" />
             </div>
           </div>
 
