@@ -116,6 +116,20 @@ export class Board {
     return this.currentHistoryIndex === this.history.length - 1;
   }
 
+  resetToInitialState(): void {
+    // Go back to the first state and clear future history
+    if (this.history.length > 0) {
+      const initialState = this.history[0];
+      this.cells.clear();
+      initialState.forEach((cell, key) => {
+        this.cells.set(key, new Cell(cell.x, cell.y, true));
+      });
+      // Keep only the initial state in history
+      this.history = [initialState];
+      this.currentHistoryIndex = 0;
+    }
+  }
+
   undo(): void {
     if (!this.canUndo()) return;
 

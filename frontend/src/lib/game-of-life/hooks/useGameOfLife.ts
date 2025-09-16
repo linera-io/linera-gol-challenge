@@ -104,12 +104,9 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
   }, [board, updateCells]);
 
   const resetToInitial = useCallback(() => {
-    // Go back to generation 0 without clearing
+    // Go back to generation 0 and clear future history
     if (board.hasInitialState()) {
-      // Reset to the first state in history
-      while (board.canUndo()) {
-        board.undo();
-      }
+      board.resetToInitialState();
       setGeneration(0);
       updateCells();
     }
