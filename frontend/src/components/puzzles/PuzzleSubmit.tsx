@@ -11,8 +11,15 @@ interface PuzzleSubmitProps {
   onSubmit: () => void;
 }
 
-export function PuzzleSubmit({ puzzle, generation, validationResult, isSubmitting, onSubmit }: PuzzleSubmitProps) {
-  const hasStepRequirement = puzzle?.minimalSteps !== undefined && puzzle?.maximalSteps !== undefined;
+export function PuzzleSubmit({
+  puzzle,
+  generation,
+  validationResult,
+  isSubmitting,
+  onSubmit,
+}: PuzzleSubmitProps) {
+  const hasStepRequirement =
+    puzzle?.minimalSteps !== undefined && puzzle?.maximalSteps !== undefined;
   const hasConditions = !!(
     (puzzle?.initialConditions && puzzle.initialConditions.length > 0) ||
     (puzzle?.finalConditions && puzzle.finalConditions.length > 0)
@@ -21,23 +28,11 @@ export function PuzzleSubmit({ puzzle, generation, validationResult, isSubmittin
     <Card className="bg-white shadow-lg">
       <CardBody className="p-6">
         <div className="space-y-4">
-          {hasStepRequirement && (
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🎯</span>
-                <span className="text-gray-700 font-medium">
-                  {puzzle?.minimalSteps === puzzle?.maximalSteps
-                    ? `Reach goal pattern in exactly ${puzzle.minimalSteps} generation${puzzle.minimalSteps !== 1 ? "s" : ""}`
-                    : `Reach goal pattern in ${puzzle?.minimalSteps}-${puzzle?.maximalSteps} generations`}
-                </span>
-              </div>
-              <span className="text-2xl font-bold text-linera-primary">{generation}</span>
-            </div>
-          )}
-
           {hasConditions ? (
             <div className="text-sm text-gray-600 space-y-2">
-              <p>Place cells on the grid, experiment, and submit your solution when you believe that:</p>
+              <p>
+                Place cells on the grid, experiment, and submit your solution when you believe that:
+              </p>
               <ol className="space-y-2 ml-4">
                 <li className="flex items-start gap-2">
                   <span className="font-medium text-gray-700">1)</span>
@@ -51,12 +46,13 @@ export function PuzzleSubmit({ puzzle, generation, validationResult, isSubmittin
                 <li className="flex items-start gap-2">
                   <span className="font-medium text-gray-700">2)</span>
                   <span>
-                    after {hasStepRequirement
-                      ? (puzzle?.minimalSteps === puzzle?.maximalSteps
+                    after{" "}
+                    {hasStepRequirement
+                      ? puzzle?.minimalSteps === puzzle?.maximalSteps
                         ? `${puzzle.minimalSteps} generation${puzzle.minimalSteps !== 1 ? "s" : ""}`
-                        : `${puzzle?.minimalSteps}-${puzzle?.maximalSteps} generations`)
-                      : "N generations"
-                    }, the result will satisfy all the final conditions{" "}
+                        : `${puzzle?.minimalSteps}-${puzzle?.maximalSteps} generations`
+                      : "N generations"}
+                    , the result will satisfy all the final conditions{" "}
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 align-middle">
                       <Target size={14} className="text-gray-600" />
                     </span>

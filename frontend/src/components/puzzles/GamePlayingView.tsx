@@ -129,9 +129,6 @@ export function GamePlayingView({
             // remove them from small screens to have another layout order
             <>
               <div className="hidden lg:block">
-                <PuzzleTutorial />
-              </div>
-              <div className="hidden lg:block">
                 <PuzzleSubmit
                   puzzle={puzzle}
                   generation={generation}
@@ -139,6 +136,9 @@ export function GamePlayingView({
                   isSubmitting={isSubmitting}
                   onSubmit={onSubmit}
                 />
+              </div>
+              <div className="hidden lg:block">
+                <PuzzleTutorial />
               </div>
             </>
           )}
@@ -166,12 +166,14 @@ export function GamePlayingView({
                           initialConditions={
                             showInitialConditions ? puzzle?.initialConditions : undefined
                           }
-                          finalConditions={showFinalConditions ? puzzle?.finalConditions : undefined}
+                          finalConditions={
+                            showFinalConditions ? puzzle?.finalConditions : undefined
+                          }
                         />
                       </div>
                     </div>
                     <div className="flex justify-center">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-black rounded-full">
+                      <div className="flex items-center gap-2 text-gray-700">
                         <span className="text-sm font-medium">Generation:</span>
                         <span className="text-lg font-bold">{generation}</span>
                       </div>
