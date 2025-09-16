@@ -1,4 +1,3 @@
-import { Routes, Route } from "react-router-dom";
 import clsx from "clsx";
 import { Providers } from "./providers";
 import { fontSans } from "./config/fonts";
@@ -56,11 +55,7 @@ function AppContent() {
   }
 
   // Everything is ready, show the game
-  return (
-    <Routes>
-      <Route path="/" element={<PuzzleGame />} />
-    </Routes>
-  );
+  return <PuzzleGame />;
 }
 
 function App() {
