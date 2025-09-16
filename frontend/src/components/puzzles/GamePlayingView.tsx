@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { GameBoardWrapper } from "@/components/game-of-life/GameBoardWrapper";
 import { PuzzleHeader } from "./PuzzleHeader";
 import { PuzzleSubmit } from "./PuzzleSubmit";
@@ -32,6 +32,8 @@ interface GamePlayingViewProps {
   onPrevious: () => void;
   onClear: () => void;
   onSubmit: () => void;
+  onNextPuzzle?: () => void;
+  onPreviousPuzzle?: () => void;
   onCloseTutorial?: () => void;
 }
 
@@ -54,6 +56,8 @@ export function GamePlayingView({
   onPrevious,
   onClear,
   onSubmit,
+  onNextPuzzle,
+  onPreviousPuzzle,
 }: GamePlayingViewProps) {
   const [showInitialConditions, setShowInitialConditions] = useState(false);
   const [showFinalConditions, setShowFinalConditions] = useState(true);
@@ -123,7 +127,25 @@ export function GamePlayingView({
           <div className="w-64 h-9 bg-gray-200 rounded-lg animate-pulse" />
         </div>
       ) : (
-        puzzle && <h1 className="text-3xl font-bold text-gray-900 text-center">{puzzle.title}</h1>
+        puzzle && (
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={onPreviousPuzzle}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              aria-label="Previous puzzle"
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-600" />
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900">{puzzle.title}</h1>
+            <button
+              onClick={onNextPuzzle}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              aria-label="Next puzzle"
+            >
+              <ChevronRight className="w-6 h-6 text-gray-600" />
+            </button>
+          </div>
+        )
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

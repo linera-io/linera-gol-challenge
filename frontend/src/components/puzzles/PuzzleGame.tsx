@@ -52,6 +52,8 @@ export function PuzzleGame() {
             onPrevious={game.previous}
             onClear={game.clear}
             onSubmit={game.submitSolution}
+            onNextPuzzle={game.loadNextPuzzle}
+            onPreviousPuzzle={game.loadPreviousPuzzle}
             onCloseTutorial={() => setShowTutorial(false)}
           />
         )}

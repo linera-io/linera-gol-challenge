@@ -4,6 +4,7 @@ import { LineraService } from "@/lib/linera/services/LineraService";
 import { LineraBoard } from "@/lib/types/puzzle.types";
 import { useGameOfLife } from "./useGameOfLife";
 import { useLineraInitialization } from "@/lib/linera/hooks/useLineraQueries";
+import { KNOWN_PUZZLES } from "../data/puzzles";
 
 const QUERY_KEYS = {
   puzzle: (id: string) => ["puzzle", id],
@@ -209,6 +210,41 @@ export function usePuzzleGame() {
     game.clear();
   }, [game]);
 
+  // Navigation functions
+  const loadNextPuzzle = useCallback(() => {
+    if (!currentPuzzleId) return false;
+
+    const currentIndex = KNOWN_PUZZLES.findIndex(p => p.id === currentPuzzleId);
+    if (currentIndex === -1) return false;
+
+    // Get next puzzle (cycle to beginning if at end)
+    const nextIndex = (currentIndex + 1) % KNOWN_PUZZLES.length;
+    const nextPuzzle = KNOWN_PUZZLES[nextIndex];
+
+    if (nextPuzzle) {
+      loadPuzzle(nextPuzzle.id);
+      return true;
+    }
+    return false;
+  }, [currentPuzzleId, loadPuzzle]);
+
+  const loadPreviousPuzzle = useCallback(() => {
+    if (!currentPuzzleId) return false;
+
+    const currentIndex = KNOWN_PUZZLES.findIndex(p => p.id === currentPuzzleId);
+    if (currentIndex === -1) return false;
+
+    // Get previous puzzle (cycle to end if at beginning)
+    const prevIndex = currentIndex === 0 ? KNOWN_PUZZLES.length - 1 : currentIndex - 1;
+    const prevPuzzle = KNOWN_PUZZLES[prevIndex];
+
+    if (prevPuzzle) {
+      loadPuzzle(prevPuzzle.id);
+      return true;
+    }
+    return false;
+  }, [currentPuzzleId, loadPuzzle]);
+
   return {
     ...game,
     next,
@@ -222,6 +258,8 @@ export function usePuzzleGame() {
     validationResult,
     isSubmitting: submitMutation.isPending,
     loadPuzzle,
+    loadNextPuzzle,
+    loadPreviousPuzzle,
     validateSolution,
     submitSolution,
     advanceBoardOnChain,
