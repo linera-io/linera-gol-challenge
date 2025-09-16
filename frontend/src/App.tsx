@@ -56,11 +56,7 @@ function AppContent() {
   }
 
   // Everything is ready, show the game
-  return (
-    <Routes>
-      <Route path="/" element={<PuzzleGame />} />
-    </Routes>
-  );
+  return <PuzzleGame />;
 }
 
 function App() {
