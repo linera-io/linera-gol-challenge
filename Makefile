@@ -1,5 +1,5 @@
 # Makefile for Game of Life Challenge
-.PHONY: help install build deploy-frontend dev clean
+.PHONY: help install build deploy-frontend dev clean invalidate-cache
 
 # Set the default target to help
 .DEFAULT_GOAL := help
@@ -9,6 +9,7 @@ ENV ?= development
 BUCKET := gs://apps.linera.net/gol/
 URL_MAP := linera-apps-url-map
 FRONTEND_DIR := frontend
+CACHE_PATH ?= /*
 
 # Determine base path based on ENV variable
 ifeq ($(filter $(ENV),production prod),$(ENV))
@@ -40,6 +41,13 @@ build: # Build frontend with current ENV setting
 dev: # Run frontend development server
 	cd $(FRONTEND_DIR) && pnpm dev
 
+invalidate-cache: # Invalidate CDN cache
+	@echo "Invalidating CDN cache for path: $(CACHE_PATH)..."
+	@gcloud compute url-maps invalidate-cdn-cache $(URL_MAP) \
+	  --path "$(CACHE_PATH)" \
+	  --global --async
+	@echo "Cache invalidation initiated for $(CACHE_PATH)"
+
 deploy-frontend: # Build and deploy frontend to GCS
 	@echo "Building and deploying frontend to $(BUCKET) with ENV=$(ENV), BASE_PATH=$(BASE_PATH)..."
 	@( cd $(FRONTEND_DIR) && \
@@ -47,22 +55,18 @@ deploy-frontend: # Build and deploy frontend to GCS
 	  VITE_BASE_PATH=$(BASE_PATH) pnpm build -v && \
 	  gcloud storage rsync -r --delete-unmatched-destination-objects \
 	    ./dist/ '$(BUCKET)' && \
-	  gcloud compute url-maps invalidate-cdn-cache $(URL_MAP) \
-	    --path "/*" \
-	    --global --async && \
-	  echo "Deployment complete! Cache invalidation in progress." \
+	  echo "Deployment complete!" \
 	)
+	@$(MAKE) invalidate-cache
 
 deploy-quick: # Deploy without installing dependencies (assumes already built)
 	@echo "Deploying frontend to $(BUCKET)..."
 	@( cd $(FRONTEND_DIR) && \
 	  gcloud storage rsync -r --delete-unmatched-destination-objects \
 	    ./dist/ '$(BUCKET)' && \
-	  gcloud compute url-maps invalidate-cdn-cache $(URL_MAP) \
-	    --path "/*" \
-	    --global --async && \
-	  echo "Deployment complete! Cache invalidation in progress." \
+	  echo "Deployment complete!" \
 	)
+	@$(MAKE) invalidate-cache
 
 clean: # Clean build artifacts
 	rm -rf $(FRONTEND_DIR)/dist $(FRONTEND_DIR)/node_modules
