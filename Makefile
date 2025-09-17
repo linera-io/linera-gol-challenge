@@ -67,9 +67,10 @@ deploy-quick: # Deploy without installing dependencies (assumes already built)
 clean: # Clean build artifacts
 	rm -rf $(FRONTEND_DIR)/dist $(FRONTEND_DIR)/node_modules
 
-# Backend targets (placeholder for future)
+# Backend targets
 build-backend: # Build backend
 	cargo build --release
+
 
 test: # Run tests
 	cargo test
