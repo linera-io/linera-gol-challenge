@@ -4,11 +4,16 @@ import { GameHeader } from "./GameHeader";
 import { PuzzleSelectionView } from "./PuzzleSelectionView";
 import { GamePlayingView } from "./GamePlayingView";
 import { useState } from "react";
+import { useLineraNotifications } from "@/lib/linera/hooks/useLineraNotifications";
 
 export function PuzzleGame() {
   const game = usePuzzleGame();
   const { isPuzzleCompleted, isLoadingFromBlockchain: areCompletedPuzzlesLoading} = useCompletedPuzzles();
   const [showTutorial, setShowTutorial] = useState(true);
+
+  // Set up notification handling for React Query invalidation
+  useLineraNotifications();
+
 
   const handleCellClick = (x: number, y: number) => {
     game.toggleCell(x, y);

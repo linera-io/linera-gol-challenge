@@ -13,6 +13,7 @@ export class LineraService {
   private initialized = false;
   private isInitializing = false;
   private walletInfo: WalletInfo | null = null;
+  private notificationUnsubscribe: (() => void) | null = null;
 
   private constructor() {}
 
@@ -187,6 +188,7 @@ export class LineraService {
       };
 
       const result = await lineraAdapter.queryApplication<any>(query);
+      console.log("[GOL] Query sent using address: ", lineraAdapter.getAddress());
       console.log("[GOL] Got response from getPuzzle", result);
 
       if (result.errors) {
@@ -280,7 +282,8 @@ export class LineraService {
       };
 
       const result = await lineraAdapter.queryApplication<any>(query);
-      console.log("[GOL] Got completed puzzle IDs", result);
+      // console.log("[GOL] Got completed puzzle IDs", result);
+      console.log("[GOL] Query sent using address: ", lineraAdapter.getAddress());
 
       if (result.errors) {
         console.error("GraphQL errors:", result.errors);
@@ -295,12 +298,17 @@ export class LineraService {
     }
   }
 
-  onNotification(_callback: (notification: any) => void): void {
-    // Notifications not supported with Dynamic wallet yet
-    console.warn("Notifications not yet supported with Dynamic wallet");
+  onNotification(callback: (notification: any) => void): void {
+    this.notificationUnsubscribe = lineraAdapter.onNewBlockNotification(callback);
   }
 
   async disconnect(): Promise<void> {
+    // Unsubscribe from notifications
+    if (this.notificationUnsubscribe) {
+      this.notificationUnsubscribe();
+      this.notificationUnsubscribe = null;
+    }
+    
     lineraAdapter.reset();
     this.initialized = false;
     this.isInitializing = false;

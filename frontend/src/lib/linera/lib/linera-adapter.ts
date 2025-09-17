@@ -18,6 +18,7 @@ export class LineraAdapter {
   private wasmInitPromise: Promise<unknown> | null = null;
   private connectPromise: Promise<LineraProvider> | null = null;
   private onConnectionChange?: () => void;
+  private notificationCallbacks: Set<(notification: any) => void> = new Set();
 
   private constructor() {}
 
@@ -60,6 +61,20 @@ export class LineraAdapter {
         const signer = await new DynamicSigner(dynamicWallet);
         const client = await new Client(wallet, signer);
         console.log("✅ Linera wallet created successfully!");
+
+        client.onNotification(notification => {
+          let newBlock = notification.reason.NewBlock;
+          if (!newBlock) return;
+          
+          // Notify all registered callbacks
+          this.notificationCallbacks.forEach(callback => {
+            try {
+              callback(notification);
+            } catch (error) {
+              console.error("Error in notification callback:", error);
+            }
+          });
+        });
 
         this.provider = {
           client,
@@ -145,11 +160,25 @@ export class LineraAdapter {
     this.onConnectionChange = undefined;
   }
 
+  getAddress(): string {
+    if (!this.provider) throw new Error("Provider not set");
+    return this.provider.address;
+  }
+
   reset(): void {
     this.application = null;
     this.provider = null;
     this.connectPromise = null;
     this.onConnectionChange?.();
+  }
+
+  onNewBlockNotification(callback: (notification: any) => void): () => void {
+    this.notificationCallbacks.add(callback);
+    
+    // Return unsubscribe function
+    return () => {
+      this.notificationCallbacks.delete(callback);
+    };
   }
 }
 
