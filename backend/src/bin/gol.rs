@@ -644,7 +644,7 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
     let final_conditions = final_board.to_exactly_matching_conditions();
 
     let puzzle = Puzzle {
-        title: "Four blinkers".to_string(),
+        title: "Four Blinkers".to_string(),
         summary: "Create four blinkers from very few cells".to_string(),
         difficulty: Difficulty::Easy,
         size,
