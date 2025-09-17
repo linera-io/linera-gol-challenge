@@ -282,12 +282,15 @@ fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
         ],
     );
 
-    // Create initial conditions: target pattern minus one cell
-    let mut initial_conditions = target_board.to_exactly_matching_conditions();
-    initial_conditions.remove(3);
+    let initial_conditions = vec![Condition::TestRectangle {
+        x_range: 0..8,
+        y_range: 0..8,
+        min_live_count: 4,
+        max_live_count: 4,
+    }];
 
     let puzzle = Puzzle {
-        title: "Block Formation".to_string(),
+        title: "Block".to_string(),
         summary: "Create a stable 2x2 block pattern in the center of the board".to_string(),
         difficulty: Difficulty::Easy,
         size: 8,
@@ -326,7 +329,7 @@ fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(4);
 
     let puzzle = Puzzle {
-        title: "Beehive Formation".to_string(),
+        title: "Beehive".to_string(),
         summary: "Create a stable beehive pattern (6-cell hexagonal shape)".to_string(),
         difficulty: Difficulty::Easy,
         size: 9,
@@ -367,7 +370,7 @@ fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(5);
 
     let puzzle = Puzzle {
-        title: "Loaf Formation".to_string(),
+        title: "Loaf".to_string(),
         summary: "Create a stable loaf pattern (7-cell bread loaf shape)".to_string(),
         difficulty: Difficulty::Easy,
         size: 10,
@@ -405,7 +408,7 @@ fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(3);
 
     let puzzle = Puzzle {
-        title: "Boat Formation".to_string(),
+        title: "Boat".to_string(),
         summary: "Create a stable boat pattern (5-cell boat shape)".to_string(),
         difficulty: Difficulty::Easy,
         size: 8,
@@ -442,7 +445,7 @@ fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(2);
 
     let puzzle = Puzzle {
-        title: "Tub Formation".to_string(),
+        title: "Tub".to_string(),
         summary: "Create a stable tub pattern (4-cell hollow square)".to_string(),
         difficulty: Difficulty::Easy,
         size: 7,
@@ -480,7 +483,7 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(0);
 
     let puzzle = Puzzle {
-        title: "Blinker Formation".to_string(),
+        title: "Blinker".to_string(),
         summary: "Create a blinker oscillator pattern (3-cell vertical line that oscillates)"
             .to_string(),
         difficulty: Difficulty::Easy,
@@ -524,7 +527,7 @@ fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(0);
 
     let puzzle = Puzzle {
-        title: "Beacon Formation".to_string(),
+        title: "Beacon".to_string(),
         summary: "Create a beacon oscillator pattern (two 2x2 blocks that blink diagonally)"
             .to_string(),
         difficulty: Difficulty::Easy,
@@ -566,9 +569,9 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(0);
 
     let puzzle = Puzzle {
-        title: "Clock Formation".to_string(),
+        title: "Clock".to_string(),
         summary: "Create a clock oscillator pattern (period-4 oscillator)".to_string(),
-        difficulty: Difficulty::Medium,
+        difficulty: Difficulty::Easy,
         size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
@@ -729,7 +732,7 @@ fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Glider Collision".to_string(),
         summary: "Make two gliders collide and cancel each other out".to_string(),
-        difficulty: Difficulty::Medium,
+        difficulty: Difficulty::Easy,
         size: 12,
         minimal_steps: 16,
         maximal_steps: 16,
@@ -775,7 +778,7 @@ fn create_glider_migration_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Glider Migration".to_string(),
         summary: "Guide a glider from the top-left square to the bottom-right square".to_string(),
-        difficulty: Difficulty::Medium,
+        difficulty: Difficulty::Easy,
         size: 16,
         minimal_steps: 40,
         maximal_steps: 40,
