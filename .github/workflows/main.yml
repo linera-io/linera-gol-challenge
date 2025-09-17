@@ -26,6 +26,19 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 'Install linera-storage-service'
+        uses: taiki-e/cache-cargo-install-action@v2
+        with:
+          tool: linera-storage-service@0.15.3
+
+      - name: 'Install linera-service'
+        uses: taiki-e/cache-cargo-install-action@v2
+        with:
+          tool: linera-service@0.15.3
+
+      - run: |
+          ln -s /opt/hostedtoolcache/linera-storage-service/bin/linera-storage-server /opt/hostedtoolcache/linera-service/bin/
+
       - name: Run clippy
         run: cargo clippy --locked --all-targets --all-features
 
@@ -40,9 +53,6 @@ jobs:
 
       - name: 'Generate puzzles'
         run: cargo run --locked --bin gol -- create-puzzles
-
-      - name: 'Install Linera CLI'
-        run: cargo install --locked linera-storage-service@0.15.3 linera-service@0.15.3
 
       - name: 'Run code in README including code-generation'
         run: linera extract-script-from-markdown backend/README.md | bash -ex
