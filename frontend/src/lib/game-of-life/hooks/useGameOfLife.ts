@@ -50,43 +50,28 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
   const toggleCell = useCallback(
     (x: number, y: number) => {
       board.toggleCell(x, y);
-      // Save or update state after toggling at generation 0
-      if (generation === 0) {
-        if (!board.hasInitialState()) {
-          board.saveState();
-        } else {
-          // Replace the current state instead of adding new one
-          board.replaceCurrentState();
-        }
-      }
+      // Always save/replace the current state after modification
+      board.replaceCurrentState();
       updateCells();
     },
-    [board, updateCells, generation]
+    [board, updateCells]
   );
 
   const next = useCallback(() => {
     if (!engine || !board) return;
 
-    // Only compute new generation if we're at the end of history
-    if (board.isAtEndOfHistory()) {
-      // Make sure we have an initial state saved
-      if (generation === 0 && !board.hasInitialState()) {
-        board.saveState(); // Save generation 0 if not already saved
-      }
-
-      // Compute next generation
-      engine.nextGeneration();
-      setGeneration((g) => g + 1);
-
-      // Save the NEW state after computing
-      board.saveState();
-      updateCells();
-    } else if (board.canRedo()) {
-      // If we're in the middle of history, just move forward
-      board.redo();
-      setGeneration((g) => g + 1);
-      updateCells();
+    // Make sure we have an initial state saved to prevent bugs where you would reset to generation 0
+    if (generation === 0 && !board.hasInitialState()) {
+      board.saveState(); // Save generation 0 if not already saved
     }
+
+    // Always compute fresh generation from current board state
+    engine.nextGeneration();
+    setGeneration((g) => g + 1);
+
+    // Save the newly computed state
+    board.saveState();
+    updateCells();
   }, [engine, board, updateCells, generation]);
 
   const previous = useCallback(() => {
@@ -183,7 +168,6 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
     isPlaying,
     speed,
     canUndo: board.canUndo(),
-    canRedo: board.canRedo(),
     toggleCell,
     next,
     previous,
