@@ -242,7 +242,7 @@ fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>
         println!("{puzzle:#}");
         println!("Created solution: {}", solution_path.display());
         println!("{solution:#}");
-        let steps = solution.check_puzzle(&puzzle)?;
+        let steps = puzzle.check_solution(&solution)?;
         println!("Verified solution: {steps} steps");
         println!();
     }
@@ -711,7 +711,7 @@ fn check_solution(
     let board: Board = bcs::from_bytes(&board_bytes)?;
 
     // Check if board solves the puzzle
-    match board.check_puzzle(&puzzle) {
+    match puzzle.check_solution(&board) {
         Ok(steps) => {
             println!("✅ Solution is VALID!");
             println!("   Initial board passes all initial conditions");
