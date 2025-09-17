@@ -107,10 +107,15 @@ fn get_all_puzzles(draft: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> 
             "20_glider_migration",
             create_glider_migration_puzzle_and_solution,
         ),
+        ("21_four_blinkers", create_four_blinkers_puzzle_and_solution),
     ];
 
     if draft {
-        puzzles.push(("21_robot_face", create_robot_face_puzzle_and_solution));
+        puzzles.push((
+            "21_glider_collision",
+            create_glider_collision_puzzle_and_solution,
+        ));
+        puzzles.push(("22_robot_face", create_robot_face_puzzle_and_solution));
     }
     puzzles
 }
@@ -576,6 +581,63 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
     (puzzle, initial_board)
 }
 
+fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 16;
+    let offset = size / 2 - 1;
+    // Define the initial board.
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            Position {
+                x: offset,
+                y: offset - 1,
+            },
+            Position {
+                x: offset - 2,
+                y: offset,
+            },
+            Position {
+                x: offset - 1,
+                y: offset,
+            },
+            Position {
+                x: offset + 1,
+                y: offset,
+            },
+            Position {
+                x: offset + 2,
+                y: offset,
+            },
+            Position {
+                x: offset,
+                y: offset + 1,
+            },
+        ],
+    );
+    let mut initial_conditions = initial_board.to_exactly_matching_conditions();
+    // Drop a point to force a lucky guess.
+    initial_conditions.remove(3);
+    initial_conditions.remove(0);
+
+    // Define the final board.
+    let final_board = initial_board.advance(10);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let puzzle = Puzzle {
+        title: "Four blinkers".to_string(),
+        summary: "Create four blinkers from very few cells".to_string(),
+        difficulty: Difficulty::Easy,
+        size,
+        minimal_steps: 10,
+        maximal_steps: 10,
+        is_strict: false,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
 #[allow(clippy::identity_op)]
 fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
     let size = 60;
@@ -625,12 +687,69 @@ fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Robot face".to_string(),
         summary: "Create a robot-like face from very few cells".to_string(),
-        difficulty: Difficulty::Medium,
+        difficulty: Difficulty::Easy,
         size,
         minimal_steps: 170,
         maximal_steps: 200,
         is_strict: false,
         initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
+    // Create two gliders on a collision course that will cancel each other out
+    // First glider (moving down-right) starting at top-left
+    // Second glider (moving up-left) starting at bottom-right
+    let initial_board = Board::with_live_cells(
+        12,
+        vec![
+            // First glider (top-left, moving down-right)
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 2 },
+            Position { x: 1, y: 3 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 3 },
+            // Second glider (bottom-right, moving up-left)
+            // Glider pattern rotated 180 degrees
+            Position { x: 8, y: 9 },
+            Position { x: 7, y: 8 },
+            Position { x: 9, y: 7 },
+            Position { x: 8, y: 7 },
+            Position { x: 7, y: 7 },
+        ],
+    );
+
+    // After collision, the board should be empty or nearly empty
+    let final_board = initial_board.advance(16);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let puzzle = Puzzle {
+        title: "Glider Collision".to_string(),
+        summary: "Make two gliders collide and cancel each other out".to_string(),
+        difficulty: Difficulty::Medium,
+        size: 12,
+        minimal_steps: 16,
+        maximal_steps: 16,
+        is_strict: true,
+        initial_conditions: vec![
+            // First glider should be in top-left area
+            Condition::TestRectangle {
+                x_range: 0..5,
+                y_range: 0..5,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+            // Second glider should be in bottom-right area
+            Condition::TestRectangle {
+                x_range: 7..12,
+                y_range: 7..12,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+        ],
         final_conditions,
     };
 

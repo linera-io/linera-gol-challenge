@@ -75,6 +75,13 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     difficulty: "MEDIUM",
     size: 16,
   },
+  {
+    id: "b8b3141d3814b078f31249c9cbf4b4a7e5f62659a32f944e9864117826647ca0",
+    title: "Four blinkers",
+    summary: "Create four blinkers from very few cells",
+    difficulty: "EASY",
+    size: 16,
+  },
 ];
 
 // Helper to get puzzle by ID
