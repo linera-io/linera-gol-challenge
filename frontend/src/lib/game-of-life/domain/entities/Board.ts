@@ -93,9 +93,15 @@ export class Board {
       }
     });
 
+    // If we have a valid history position, replace it
     if (this.currentHistoryIndex >= 0 && this.currentHistoryIndex < this.history.length) {
       this.history[this.currentHistoryIndex] = state;
+    } else if (this.currentHistoryIndex === -1) {
+      // No history yet, save as initial state
+      this.history = [state];
+      this.currentHistoryIndex = 0;
     } else {
+      // Shouldn't happen, but save state as fallback
       this.saveState();
     }
   }
@@ -104,9 +110,6 @@ export class Board {
     return this.currentHistoryIndex > 0;
   }
 
-  canRedo(): boolean {
-    return this.currentHistoryIndex < this.history.length - 1;
-  }
 
   hasInitialState(): boolean {
     return this.currentHistoryIndex > -1;
@@ -130,13 +133,6 @@ export class Board {
     }
   }
 
-  // flush any histor state after the current position
-  truncateFutureHistory(): void {
-    if (!this.isAtEndOfHistory()) {
-      this.history = this.history.slice(0, this.currentHistoryIndex + 1);
-    }
-  }
-
   undo(): void {
     if (!this.canUndo()) return;
 
@@ -144,12 +140,6 @@ export class Board {
     this.restoreState(this.history[this.currentHistoryIndex]);
   }
 
-  redo(): void {
-    if (!this.canRedo()) return;
-
-    this.currentHistoryIndex++;
-    this.restoreState(this.history[this.currentHistoryIndex]);
-  }
 
   private restoreState(state: Map<string, Cell>): void {
     this.cells.clear();

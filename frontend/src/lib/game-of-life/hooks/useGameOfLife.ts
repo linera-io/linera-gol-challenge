@@ -50,16 +50,8 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
   const toggleCell = useCallback(
     (x: number, y: number) => {
       board.toggleCell(x, y);
-
-      // After modifying the board, update the current state in history
-      if (board.hasInitialState()) {
-        // Replace the current state in history with the modified version
-        board.replaceCurrentState();
-      } else {
-        // If no history exists yet, save the initial state
-        board.saveState();
-      }
-
+      // Always save/replace the current state after modification
+      board.replaceCurrentState();
       updateCells();
     },
     [board, updateCells]
@@ -67,9 +59,6 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
 
   const next = useCallback(() => {
     if (!engine || !board) return;
-
-    // This is needed when we've gone back and are now moving forward again to flush the old future history
-    board.truncateFutureHistory();
 
     // Make sure we have an initial state saved to prevent bugs where you would reset to generation 0
     if (generation === 0 && !board.hasInitialState()) {
@@ -179,7 +168,6 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
     isPlaying,
     speed,
     canUndo: board.canUndo(),
-    canRedo: board.canRedo(),
     toggleCell,
     next,
     previous,
