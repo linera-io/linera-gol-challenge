@@ -54,14 +54,13 @@ Run the commands below using `bash -e -x <(linera extract-script-from-markdown R
 
 ```bash
 # Production app
-APP_ID="c5b78269c7dfe9d121eab606c8f3ecd240de64d25b533b6f1009ac51c03d78ab"
+APP_ID="27145fa604adf9996647a9a2add1dafe8f80f1a547835edf62ee408cd8903dd3"
+
+# Test user
+MATHIEU_CLI="0x359C1a2203aE35adBFA85bC9C1EAB540bF8797a7"
 
 # Scoring chain
 CHAIN="e71636fde3a70cdbfdb7fd9bef6cb1ba632af8b0567b8f76df47b35489972dd3"
-
-# Test users
-MATHIEU_WEB="0x9f48844812B32aF52822363f4e14A4b849c9c95b"
-MATHIEU_CLI="0xc271f3fe7ce54619f5eb427bb77948097e76fcbfe7b0f82d9d88697d88accd19"
 
 # Getting a chain and tracking the scores
 FAUCET_URL=https://faucet.testnet-conway.linera.net
@@ -80,7 +79,7 @@ linera service --port 8080 &
 ```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
 query {
     reportedSolutions {
-        entry(key: "$MATHIEU_WEB") {
+        entry(key: "$MATHIEU_CLI") {
             key
             value {
                 entries(input: {}) {

@@ -202,7 +202,7 @@ export class LineraService {
       console.log("[GOL] Parsed puzzle data:", puzzleData);
 
       // Ensure difficulty is valid, default to "EASY" if not
-      const validDifficulties = ["EASY", "MEDIUM", "HARD"];
+      const validDifficulties = ["TUTORIAL", "EASY", "MEDIUM", "HARD", "EXPERT"];
       const difficulty = validDifficulties.includes(puzzleData.difficulty)
         ? (puzzleData.difficulty as DifficultyLevel)
         : "EASY";

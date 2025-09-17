@@ -1,6 +1,6 @@
 // Centralized puzzle-related type definitions
 
-export type DifficultyLevel = "EASY" | "MEDIUM" | "HARD";
+export type DifficultyLevel = "TUTORIAL" | "EASY" | "MEDIUM" | "HARD" | "EXPERT";
 
 export interface Position {
   x: number;
@@ -61,11 +61,15 @@ export function formatDifficulty(difficulty: DifficultyLevel): string {
 
 export function getDifficultyColor(difficulty: DifficultyLevel): string {
   switch (difficulty) {
+    case "TUTORIAL":
+      return "success";
     case "EASY":
       return "success";
     case "MEDIUM":
       return "warning";
     case "HARD":
+      return "danger";
+    case "EXPERT":
       return "danger";
     default:
       return "default";

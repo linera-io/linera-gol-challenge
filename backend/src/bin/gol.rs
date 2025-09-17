@@ -247,7 +247,7 @@ fn create_puzzles(output_dir: &PathBuf, draft: bool) -> Result<(), Box<dyn std::
     let puzzles = get_all_puzzles(draft);
 
     for (name, puzzle_and_solution_creator) in puzzles {
-        let (puzzle, solution) = puzzle_and_solution_creator();
+        let (mut puzzle, solution) = puzzle_and_solution_creator();
 
         let puzzle_path = output_dir.join(format!("{}_puzzle.bcs", name));
         let solution_path = output_dir.join(format!("{}_solution.bcs", name));
@@ -262,8 +262,9 @@ fn create_puzzles(output_dir: &PathBuf, draft: bool) -> Result<(), Box<dyn std::
         println!("{puzzle:#}");
         println!("Created solution: {}", solution_path.display());
         println!("{solution:#}");
+        puzzle.enforce_initial_conditions = true;
         let steps = puzzle.check_solution(&solution)?;
-        println!("Verified solution: {steps} steps");
+        println!("Verified solution (and hints): {steps} steps");
         println!();
     }
 
@@ -292,10 +293,12 @@ fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Block".to_string(),
         summary: "Create a stable 2x2 block pattern in the center of the board".to_string(),
-        difficulty: Difficulty::Easy,
+        difficulty: Difficulty::Tutorial,
         size: 8,
+        metadata: String::new(),
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -331,10 +334,12 @@ fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Beehive".to_string(),
         summary: "Create a stable beehive pattern (6-cell hexagonal shape)".to_string(),
-        difficulty: Difficulty::Easy,
+        difficulty: Difficulty::Tutorial,
         size: 9,
+        metadata: String::new(),
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -372,10 +377,12 @@ fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Loaf".to_string(),
         summary: "Create a stable loaf pattern (7-cell bread loaf shape)".to_string(),
-        difficulty: Difficulty::Easy,
+        difficulty: Difficulty::Tutorial,
         size: 10,
+        metadata: String::new(),
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -410,10 +417,12 @@ fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Boat".to_string(),
         summary: "Create a stable boat pattern (5-cell boat shape)".to_string(),
-        difficulty: Difficulty::Easy,
+        difficulty: Difficulty::Tutorial,
         size: 8,
+        metadata: String::new(),
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -447,10 +456,12 @@ fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Tub".to_string(),
         summary: "Create a stable tub pattern (4-cell hollow square)".to_string(),
-        difficulty: Difficulty::Easy,
+        difficulty: Difficulty::Tutorial,
         size: 7,
+        metadata: String::new(),
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -486,10 +497,12 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
         title: "Blinker".to_string(),
         summary: "Create a blinker oscillator pattern (3-cell vertical line that oscillates)"
             .to_string(),
-        difficulty: Difficulty::Easy,
+        difficulty: Difficulty::Tutorial,
         size: 7,
+        metadata: String::new(),
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -532,8 +545,10 @@ fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
             .to_string(),
         difficulty: Difficulty::Easy,
         size: 8,
+        metadata: String::new(),
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -573,8 +588,10 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
         summary: "Create a clock oscillator pattern (period-4 oscillator)".to_string(),
         difficulty: Difficulty::Easy,
         size: 8,
+        metadata: String::new(),
         minimal_steps: 1,
         maximal_steps: 1,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         // Final conditions: exactly match the target pattern
@@ -627,12 +644,14 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
     let final_conditions = final_board.to_exactly_matching_conditions();
 
     let puzzle = Puzzle {
-        title: "Four blinkers".to_string(),
+        title: "Four Blinkers".to_string(),
         summary: "Create four blinkers from very few cells".to_string(),
         difficulty: Difficulty::Easy,
         size,
+        metadata: String::new(),
         minimal_steps: 10,
         maximal_steps: 10,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         final_conditions,
@@ -692,8 +711,10 @@ fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
         summary: "Create a robot-like face from very few cells".to_string(),
         difficulty: Difficulty::Easy,
         size,
+        metadata: String::new(),
         minimal_steps: 170,
         maximal_steps: 200,
+        enforce_initial_conditions: false,
         is_strict: false,
         initial_conditions,
         final_conditions,
@@ -734,8 +755,10 @@ fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
         summary: "Make two gliders collide and cancel each other out".to_string(),
         difficulty: Difficulty::Easy,
         size: 12,
+        metadata: String::new(),
         minimal_steps: 16,
         maximal_steps: 16,
+        enforce_initial_conditions: true,
         is_strict: true,
         initial_conditions: vec![
             // First glider should be in top-left area
@@ -780,9 +803,11 @@ fn create_glider_migration_puzzle_and_solution() -> (Puzzle, Board) {
         summary: "Guide a glider from the top-left square to the bottom-right square".to_string(),
         difficulty: Difficulty::Easy,
         size: 16,
+        metadata: String::new(),
         minimal_steps: 40,
         maximal_steps: 40,
-        is_strict: true,
+        enforce_initial_conditions: false,
+        is_strict: false,
         initial_conditions: vec![
             // Hint.
             Condition::TestPosition {
