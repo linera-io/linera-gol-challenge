@@ -59,13 +59,13 @@ export class LineraAdapter {
         const chainId = await faucet.claimChain(wallet, address);
 
         const signer = await new DynamicSigner(dynamicWallet);
-        const client = await new Client(wallet, signer);
+        const client = await new Client(wallet, signer, true);
         console.log("✅ Linera wallet created successfully!");
 
         client.onNotification((notification : any) => {
           let newBlock = notification.reason.NewBlock;
           if (!newBlock) return;
-          
+
           // Notify all registered callbacks
           this.notificationCallbacks.forEach(callback => {
             try {
@@ -174,7 +174,7 @@ export class LineraAdapter {
 
   onNewBlockNotification(callback: (notification: any) => void): () => void {
     this.notificationCallbacks.add(callback);
-    
+
     // Return unsubscribe function
     return () => {
       this.notificationCallbacks.delete(callback);
