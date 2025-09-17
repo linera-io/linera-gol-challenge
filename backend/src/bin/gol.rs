@@ -25,6 +25,9 @@ enum Commands {
         /// Optional output directory (defaults to current directory)
         #[arg(short, long)]
         output_dir: Option<PathBuf>,
+        /// Include draft puzzles
+        #[arg(long)]
+        draft: bool,
     },
     /// Generate TypeScript metadata for puzzles
     GenerateMetadata {
@@ -34,6 +37,9 @@ enum Commands {
         /// Path to JSON file mapping puzzle names to blob IDs
         #[arg(long)]
         blob_map: PathBuf,
+        /// Include draft puzzles
+        #[arg(long)]
+        draft: bool,
     },
     /// Print the contents of a puzzle file
     PrintPuzzle {
@@ -61,12 +67,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::CreatePuzzles { output_dir } => {
+        Commands::CreatePuzzles { output_dir, draft } => {
             let output_path = output_dir.unwrap_or_else(|| PathBuf::from("."));
-            create_puzzles(&output_path)?;
+            create_puzzles(&output_path, draft)?;
         }
-        Commands::GenerateMetadata { output, blob_map } => {
-            generate_metadata(&output, &blob_map)?;
+        Commands::GenerateMetadata {
+            output,
+            blob_map,
+            draft,
+        } => {
+            generate_metadata(&output, &blob_map, draft)?;
         }
         Commands::PrintPuzzle { path } => {
             print_puzzle(&path)?;
@@ -83,8 +93,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[allow(clippy::type_complexity)]
-fn get_all_puzzles() -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
-    vec![
+fn get_all_puzzles(draft: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
+    let mut puzzles: Vec<(&'static str, fn() -> (Puzzle, Board))> = vec![
         ("01_block_pattern", create_block_puzzle_and_solution),
         ("02_beehive_pattern", create_beehive_puzzle_and_solution),
         ("03_loaf_pattern", create_loaf_puzzle_and_solution),
@@ -93,20 +103,30 @@ fn get_all_puzzles() -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
         ("06_blinker_pattern", create_blinker_puzzle_and_solution),
         ("07_beacon_pattern", create_beacon_puzzle_and_solution),
         ("10_clock_pattern", create_clock_puzzle_and_solution),
-        ("20_robot_face", create_robot_face_puzzle_and_solution),
         (
-            "21_glider_migration",
+            "20_glider_migration",
             create_glider_migration_puzzle_and_solution,
         ),
-    ]
+        ("21_four_blinkers", create_four_blinkers_puzzle_and_solution),
+    ];
+
+    if draft {
+        puzzles.push((
+            "21_glider_collision",
+            create_glider_collision_puzzle_and_solution,
+        ));
+        puzzles.push(("22_robot_face", create_robot_face_puzzle_and_solution));
+    }
+    puzzles
 }
 
 fn generate_metadata(
     output_path: &PathBuf,
     blob_map_path: &PathBuf,
+    draft: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get all puzzle and solution creators
-    let puzzles_info = get_all_puzzles();
+    let puzzles_info = get_all_puzzles(draft);
 
     // Load blob mapping if provided
     let blob_map: HashMap<String, String> = {
@@ -219,12 +239,12 @@ fn generate_metadata(
     Ok(())
 }
 
-fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    // Create output directory if it doesn't exist
+fn create_puzzles(output_dir: &PathBuf, draft: bool) -> Result<(), Box<dyn std::error::Error>> {
+    // Create output directory if it doesn't exist.
     fs::create_dir_all(output_dir)?;
 
-    // Generate all pattern puzzles
-    let puzzles = get_all_puzzles();
+    // Generate puzzles.
+    let puzzles = get_all_puzzles(draft);
 
     for (name, puzzle_and_solution_creator) in puzzles {
         let (puzzle, solution) = puzzle_and_solution_creator();
@@ -262,12 +282,15 @@ fn create_block_puzzle_and_solution() -> (Puzzle, Board) {
         ],
     );
 
-    // Create initial conditions: target pattern minus one cell
-    let mut initial_conditions = target_board.to_exactly_matching_conditions();
-    initial_conditions.remove(3);
+    let initial_conditions = vec![Condition::TestRectangle {
+        x_range: 0..8,
+        y_range: 0..8,
+        min_live_count: 4,
+        max_live_count: 4,
+    }];
 
     let puzzle = Puzzle {
-        title: "Block Formation".to_string(),
+        title: "Block".to_string(),
         summary: "Create a stable 2x2 block pattern in the center of the board".to_string(),
         difficulty: Difficulty::Easy,
         size: 8,
@@ -306,7 +329,7 @@ fn create_beehive_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(4);
 
     let puzzle = Puzzle {
-        title: "Beehive Formation".to_string(),
+        title: "Beehive".to_string(),
         summary: "Create a stable beehive pattern (6-cell hexagonal shape)".to_string(),
         difficulty: Difficulty::Easy,
         size: 9,
@@ -347,7 +370,7 @@ fn create_loaf_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(5);
 
     let puzzle = Puzzle {
-        title: "Loaf Formation".to_string(),
+        title: "Loaf".to_string(),
         summary: "Create a stable loaf pattern (7-cell bread loaf shape)".to_string(),
         difficulty: Difficulty::Easy,
         size: 10,
@@ -385,7 +408,7 @@ fn create_boat_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(3);
 
     let puzzle = Puzzle {
-        title: "Boat Formation".to_string(),
+        title: "Boat".to_string(),
         summary: "Create a stable boat pattern (5-cell boat shape)".to_string(),
         difficulty: Difficulty::Easy,
         size: 8,
@@ -422,7 +445,7 @@ fn create_tub_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(2);
 
     let puzzle = Puzzle {
-        title: "Tub Formation".to_string(),
+        title: "Tub".to_string(),
         summary: "Create a stable tub pattern (4-cell hollow square)".to_string(),
         difficulty: Difficulty::Easy,
         size: 7,
@@ -460,7 +483,7 @@ fn create_blinker_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(0);
 
     let puzzle = Puzzle {
-        title: "Blinker Formation".to_string(),
+        title: "Blinker".to_string(),
         summary: "Create a blinker oscillator pattern (3-cell vertical line that oscillates)"
             .to_string(),
         difficulty: Difficulty::Easy,
@@ -504,7 +527,7 @@ fn create_beacon_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(0);
 
     let puzzle = Puzzle {
-        title: "Beacon Formation".to_string(),
+        title: "Beacon".to_string(),
         summary: "Create a beacon oscillator pattern (two 2x2 blocks that blink diagonally)"
             .to_string(),
         difficulty: Difficulty::Easy,
@@ -546,9 +569,9 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
     initial_conditions.remove(0);
 
     let puzzle = Puzzle {
-        title: "Clock Formation".to_string(),
+        title: "Clock".to_string(),
         summary: "Create a clock oscillator pattern (period-4 oscillator)".to_string(),
-        difficulty: Difficulty::Medium,
+        difficulty: Difficulty::Easy,
         size: 8,
         minimal_steps: 1,
         maximal_steps: 1,
@@ -556,6 +579,63 @@ fn create_clock_puzzle_and_solution() -> (Puzzle, Board) {
         initial_conditions,
         // Final conditions: exactly match the target pattern
         final_conditions: target_board.to_exactly_matching_conditions(),
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 16;
+    let offset = size / 2 - 1;
+    // Define the initial board.
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            Position {
+                x: offset,
+                y: offset - 1,
+            },
+            Position {
+                x: offset - 2,
+                y: offset,
+            },
+            Position {
+                x: offset - 1,
+                y: offset,
+            },
+            Position {
+                x: offset + 1,
+                y: offset,
+            },
+            Position {
+                x: offset + 2,
+                y: offset,
+            },
+            Position {
+                x: offset,
+                y: offset + 1,
+            },
+        ],
+    );
+    let mut initial_conditions = initial_board.to_exactly_matching_conditions();
+    // Drop a point to force a lucky guess.
+    initial_conditions.remove(3);
+    initial_conditions.remove(0);
+
+    // Define the final board.
+    let final_board = initial_board.advance(10);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let puzzle = Puzzle {
+        title: "Four blinkers".to_string(),
+        summary: "Create four blinkers from very few cells".to_string(),
+        difficulty: Difficulty::Easy,
+        size,
+        minimal_steps: 10,
+        maximal_steps: 10,
+        is_strict: false,
+        initial_conditions,
+        final_conditions,
     };
 
     (puzzle, initial_board)
@@ -610,12 +690,69 @@ fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Robot face".to_string(),
         summary: "Create a robot-like face from very few cells".to_string(),
-        difficulty: Difficulty::Medium,
+        difficulty: Difficulty::Easy,
         size,
         minimal_steps: 170,
         maximal_steps: 200,
         is_strict: false,
         initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
+    // Create two gliders on a collision course that will cancel each other out
+    // First glider (moving down-right) starting at top-left
+    // Second glider (moving up-left) starting at bottom-right
+    let initial_board = Board::with_live_cells(
+        12,
+        vec![
+            // First glider (top-left, moving down-right)
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 2 },
+            Position { x: 1, y: 3 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 3 },
+            // Second glider (bottom-right, moving up-left)
+            // Glider pattern rotated 180 degrees
+            Position { x: 8, y: 9 },
+            Position { x: 7, y: 8 },
+            Position { x: 9, y: 7 },
+            Position { x: 8, y: 7 },
+            Position { x: 7, y: 7 },
+        ],
+    );
+
+    // After collision, the board should be empty or nearly empty
+    let final_board = initial_board.advance(16);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let puzzle = Puzzle {
+        title: "Glider Collision".to_string(),
+        summary: "Make two gliders collide and cancel each other out".to_string(),
+        difficulty: Difficulty::Easy,
+        size: 12,
+        minimal_steps: 16,
+        maximal_steps: 16,
+        is_strict: true,
+        initial_conditions: vec![
+            // First glider should be in top-left area
+            Condition::TestRectangle {
+                x_range: 0..5,
+                y_range: 0..5,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+            // Second glider should be in bottom-right area
+            Condition::TestRectangle {
+                x_range: 7..12,
+                y_range: 7..12,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+        ],
         final_conditions,
     };
 
@@ -641,7 +778,7 @@ fn create_glider_migration_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Glider Migration".to_string(),
         summary: "Guide a glider from the top-left square to the bottom-right square".to_string(),
-        difficulty: Difficulty::Medium,
+        difficulty: Difficulty::Easy,
         size: 16,
         minimal_steps: 40,
         maximal_steps: 40,
