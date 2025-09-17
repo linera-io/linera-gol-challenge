@@ -75,7 +75,7 @@ APP_ID=$(linera --wait-for-outgoing-messages \
 ```bash
 cargo run --bin gol -- create-puzzles -o $LINERA_TMP_DIR
 
-BLOB_ID=$(linera publish-data-blob "$LINERA_TMP_DIR/02_beehive_pattern_puzzle.bcs")
+BLOB_ID=$(linera publish-data-blob "$LINERA_TMP_DIR/20_robot_face_solution.bcs")
 ```
 
 ### Publishing puzzles and running code-generation
@@ -122,8 +122,8 @@ query {
 ```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
 mutation {
     submitSolution(puzzleId: "$BLOB_ID", board: {
-        size: 9,
-        liveCells: [{x: 3, y: 2}, {x: 4, y: 2}, {x: 2, y: 3}, {x: 5, y: 3}, {x: 3, y: 4}, {x: 4, y: 4}]
+        size: 60,
+        liveCells: [{x: 28, y: 28}, {x: 28, y: 29}, {x: 28, y: 30}, {x: 29, y: 28}, {x: 30, y: 28}, {x: 30, y: 29}, {x: 30, y: 30}]
     })
 }
 ```
