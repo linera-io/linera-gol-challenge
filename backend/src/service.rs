@@ -81,9 +81,10 @@ impl GolChallengeState {
             .data::<Arc<ServiceRuntime<GolChallengeService>>>()
             .unwrap();
         let puzzle_bytes = runtime.read_data_blob(puzzle_id);
-        let puzzle = bcs::from_bytes(&puzzle_bytes).expect("Failed to deserialize puzzle");
+        let puzzle =
+            bcs::from_bytes::<Puzzle>(&puzzle_bytes).expect("Failed to deserialize puzzle");
 
-        match board.check_puzzle(&puzzle) {
+        match puzzle.check_solution(&board) {
             Ok(steps) => ValidationResult {
                 is_valid_after_steps: Some(steps),
                 error_message: None,
@@ -267,8 +268,10 @@ advanceBoardOnce(board: {size: 3, liveCells: [ {x: 1, y: 1}, {x: 1, y: 0}, {x: 1
             summary: "A single cell should die after one step".to_string(),
             difficulty: Difficulty::Easy,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![Condition::TestPosition {
                 position: Position { x: 1, y: 1 },
@@ -448,8 +451,10 @@ advanceBoardOnce(board: {size: 3, liveCells: [ {x: 1, y: 1}, {x: 1, y: 0}, {x: 1
             summary: "A simple test puzzle".to_string(),
             difficulty: Difficulty::Easy,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 2,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![Condition::TestPosition {
                 position: Position { x: 1, y: 1 },
@@ -549,8 +554,10 @@ advanceBoardOnce(board: {size: 3, liveCells: [ {x: 1, y: 1}, {x: 1, y: 0}, {x: 1
             summary: "A puzzle for testing print functionality".to_string(),
             difficulty: Difficulty::Easy,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {

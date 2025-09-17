@@ -23,11 +23,16 @@ pub struct Puzzle {
     pub difficulty: Difficulty,
     /// The grid size.
     pub size: u16,
+    /// Additional metadata for future frontend extensions.
+    pub metadata: String,
+
     /// A minimal number of steps for the final conditions to succeed.
     pub minimal_steps: u16,
     /// A maximal number of steps for the final conditions to succeed.
     pub maximal_steps: u16,
-    /// If true, the final conditions must not succeeed after `minimal_steps - 1` steps.
+    /// Whether the initial conditions are enforced or just hints.
+    pub enforce_initial_conditions: bool,
+    /// If true, the final conditions must not succeed after `minimal_steps - 1` steps.
     pub is_strict: bool,
     /// The initial conditions.
     pub initial_conditions: Vec<Condition>,
@@ -38,12 +43,16 @@ pub struct Puzzle {
 /// The difficulty of a puzzle.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Copy, Enum)]
 pub enum Difficulty {
+    /// Tutorial.
+    Tutorial,
     /// Easy.
     Easy,
     /// Medium difficulty.
     Medium,
     /// Hard.
     Hard,
+    /// Expert.
+    Expert,
 }
 
 /// A condition on a board.
@@ -251,6 +260,8 @@ pub struct DirectPuzzle {
     pub minimal_steps: u16,
     /// The maximum number of steps allowed to solve the puzzle.
     pub maximal_steps: u16,
+    /// Whether the initial conditions are enforced or just hints.
+    pub enforce_initial_conditions: bool,
     /// If true, the final conditions must not succeed after `minimal_steps - 1` steps.
     pub is_strict: bool,
     /// The width and height of the puzzle, in cells.
@@ -485,9 +496,14 @@ impl DirectPuzzle {
             ));
         }
 
+        // Add information on initial conditions
+        if self.enforce_initial_conditions {
+            result.push_str("Initial conditions are enforced\n");
+        }
+
         // Add strict mode information
         if self.is_strict {
-            result.push_str("Mode: Strict\n");
+            result.push_str("Must not exist one step early\n");
         }
 
         result.push('\n');
@@ -823,71 +839,74 @@ impl Board {
 
         conditions
     }
+}
 
+impl Puzzle {
     /// Check that the board satisfies the given puzzle.
-    pub fn check_puzzle(&self, puzzle: &Puzzle) -> Result<u16, InvalidSolution> {
-        if puzzle.minimal_steps > puzzle.maximal_steps {
+    pub fn check_solution(&self, board: &Board) -> Result<u16, InvalidSolution> {
+        if self.minimal_steps > self.maximal_steps {
             return Err(InvalidSolution::InvalidStepRange {
-                min_steps: puzzle.minimal_steps,
-                max_steps: puzzle.maximal_steps,
+                min_steps: self.minimal_steps,
+                max_steps: self.maximal_steps,
             });
         }
-        if self.size != puzzle.size {
+        if board.size != self.size {
             return Err(InvalidSolution::SizeMismatch {
-                board_size: self.size,
-                puzzle_size: puzzle.size,
+                board_size: board.size,
+                puzzle_size: self.size,
             });
         }
-        if let Err((condition_index, reason)) = self.check_conditions(&puzzle.initial_conditions) {
-            return Err(InvalidSolution::InitialConditionFailed {
-                condition_index,
-                reason,
-            });
-        }
-        if puzzle.is_strict {
-            if puzzle.minimal_steps == 0 {
-                return Err(InvalidSolution::InvalidStepRange {
-                    min_steps: puzzle.minimal_steps,
-                    max_steps: puzzle.maximal_steps,
+        if self.enforce_initial_conditions {
+            if let Err((condition_index, reason)) = board.check_conditions(&self.initial_conditions)
+            {
+                return Err(InvalidSolution::InitialConditionFailed {
+                    condition_index,
+                    reason,
                 });
             }
-            let board = self.advance(puzzle.minimal_steps - 1);
+        }
+        if self.is_strict {
+            if self.minimal_steps == 0 {
+                return Err(InvalidSolution::InvalidStepRange {
+                    min_steps: self.minimal_steps,
+                    max_steps: self.maximal_steps,
+                });
+            }
+            let board = board.advance(self.minimal_steps - 1);
             match board.advance_until(
-                &puzzle.final_conditions,
-                puzzle.maximal_steps - puzzle.minimal_steps + 1,
+                &self.final_conditions,
+                self.maximal_steps - self.minimal_steps + 1,
             ) {
                 Ok((steps, _)) => {
                     if steps == 0 {
                         return Err(InvalidSolution::FinalConditionsMustFailAt {
-                            steps: puzzle.minimal_steps - 1,
+                            steps: self.minimal_steps - 1,
                         });
                     }
-                    Ok(puzzle.minimal_steps - 1 + steps)
+                    Ok(self.minimal_steps - 1 + steps)
                 }
                 Err((condition_index, reason)) => Err(InvalidSolution::FinalConditionFailed {
                     condition_index,
-                    steps: puzzle.maximal_steps,
+                    steps: self.maximal_steps,
                     reason,
                 }),
             }
         } else {
-            let board = self.advance(puzzle.minimal_steps);
+            let board = board.advance(self.minimal_steps);
             match board.advance_until(
-                &puzzle.final_conditions,
-                puzzle.maximal_steps - puzzle.minimal_steps,
+                &self.final_conditions,
+                self.maximal_steps - self.minimal_steps,
             ) {
-                Ok((steps, _)) => Ok(puzzle.minimal_steps + steps),
+                Ok((steps, _)) => Ok(self.minimal_steps + steps),
                 Err((condition_index, reason)) => Err(InvalidSolution::FinalConditionFailed {
                     condition_index,
-                    steps: puzzle.maximal_steps,
+                    steps: self.maximal_steps,
                     reason,
                 }),
             }
         }
     }
-}
 
-impl Puzzle {
     /// Convert this puzzle to a DirectPuzzle representation for display.
     pub fn to_direct_puzzle(&self) -> DirectPuzzle {
         let mut initial_constraints =
@@ -924,6 +943,7 @@ impl Puzzle {
             difficulty: self.difficulty,
             minimal_steps: self.minimal_steps,
             maximal_steps: self.maximal_steps,
+            enforce_initial_conditions: self.enforce_initial_conditions,
             is_strict: self.is_strict,
             size: self.size,
             initial_constraints,
@@ -1257,15 +1277,17 @@ mod tests {
             summary: "Test puzzle".to_string(),
             difficulty: Difficulty::Easy,
             size: 10,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 5,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![],
             final_conditions: vec![],
         };
 
         assert_eq!(
-            board.check_puzzle(&puzzle),
+            puzzle.check_solution(&board),
             Err(InvalidSolution::SizeMismatch {
                 board_size: 5,
                 puzzle_size: 10
@@ -1281,15 +1303,17 @@ mod tests {
             summary: "Test puzzle".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 6,
             maximal_steps: 4,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![],
             final_conditions: vec![],
         };
 
         assert_eq!(
-            board.check_puzzle(&puzzle),
+            puzzle.check_solution(&board),
             Err(InvalidSolution::InvalidStepRange {
                 min_steps: 6,
                 max_steps: 4
@@ -1300,13 +1324,15 @@ mod tests {
     #[test]
     fn test_check_puzzle_initial_conditions_fail() {
         let board = Board::new(5);
-        let puzzle = Puzzle {
+        let mut puzzle = Puzzle {
             title: "Test".to_string(),
             summary: "Test puzzle".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 5,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![Condition::TestPosition {
                 position: Position { x: 0, y: 0 },
@@ -1316,7 +1342,7 @@ mod tests {
         };
 
         assert_eq!(
-            board.check_puzzle(&puzzle),
+            puzzle.check_solution(&board),
             Err(InvalidSolution::InitialConditionFailed {
                 condition_index: 0,
                 reason: ConditionFailureReason::PositionMismatch {
@@ -1327,6 +1353,9 @@ mod tests {
                 }
             })
         );
+
+        puzzle.enforce_initial_conditions = false;
+        puzzle.check_solution(&board).unwrap();
     }
 
     #[test]
@@ -1344,8 +1373,10 @@ mod tests {
             summary: "Test blinker oscillation".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 3,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1378,7 +1409,7 @@ mod tests {
         };
 
         // Test that after 2 steps (full blinker cycle), we get back to the initial pattern.
-        assert_eq!(board.check_puzzle(&puzzle), Ok(2));
+        assert_eq!(puzzle.check_solution(&board), Ok(2));
     }
 
     #[test]
@@ -1401,8 +1432,10 @@ mod tests {
             summary: "Glider travels from top-left to bottom-right square".to_string(),
             difficulty: Difficulty::Hard,
             size: 16,
+            metadata: String::new(),
             minimal_steps: 20,
             maximal_steps: 40,
+            enforce_initial_conditions: true,
             is_strict: true,
             initial_conditions: vec![
                 // All 5 cells should be in top-left square (0-7, 0-7).
@@ -1450,7 +1483,7 @@ mod tests {
             ],
         };
 
-        assert_eq!(board.check_puzzle(&puzzle), Ok(31));
+        assert_eq!(puzzle.check_solution(&board), Ok(31));
     }
 
     #[test]
@@ -1508,8 +1541,10 @@ mod tests {
             summary: "Test final conditions failure".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![Condition::TestPosition {
                 position: Position { x: 2, y: 2 },
@@ -1522,7 +1557,7 @@ mod tests {
         };
 
         assert_eq!(
-            board.check_puzzle(&puzzle),
+            puzzle.check_solution(&board),
             Err(InvalidSolution::FinalConditionFailed {
                 condition_index: 0,
                 steps: 1,
@@ -1551,8 +1586,10 @@ mod tests {
             summary: "Test detailed error reporting".to_string(),
             difficulty: Difficulty::Easy,
             size: 8,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 // This should pass.
@@ -1577,7 +1614,7 @@ mod tests {
         };
 
         // Test initial condition failure with detailed information.
-        match board.check_puzzle(&puzzle) {
+        match puzzle.check_solution(&board) {
             Err(InvalidSolution::InitialConditionFailed {
                 condition_index,
                 reason,
@@ -1610,8 +1647,10 @@ mod tests {
             summary: "Test rectangle error reporting".to_string(),
             difficulty: Difficulty::Easy,
             size: 8,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 2,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1628,7 +1667,7 @@ mod tests {
             final_conditions: vec![],
         };
 
-        match board2.check_puzzle(&puzzle2) {
+        match puzzle2.check_solution(&board2) {
             Err(InvalidSolution::InitialConditionFailed {
                 condition_index,
                 reason,
@@ -1666,8 +1705,10 @@ mod tests {
             summary: "Test puzzle for display functionality".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 2,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1730,8 +1771,10 @@ mod tests {
             summary: "Test display formatting".to_string(),
             difficulty: Difficulty::Easy,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1757,6 +1800,7 @@ Title: Display Test
 Summary: Test display formatting
 Difficulty: Easy
 Steps: exactly 1
+Initial conditions are enforced
 
 Initial:
 ●··
@@ -1777,6 +1821,7 @@ Title: Display Test
 Summary: Test display formatting
 Difficulty: Easy
 Steps: exactly 1
+Initial conditions are enforced
 
 Initial Conditions:
     0 1 2
@@ -1801,8 +1846,10 @@ Final Conditions:
             summary: "Test separate initial and final constraints".to_string(),
             difficulty: Difficulty::Easy,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![Condition::TestPosition {
                 position: Position { x: 1, y: 1 },
@@ -1833,8 +1880,10 @@ Final Conditions:
             summary: "No conditions".to_string(),
             difficulty: Difficulty::Easy,
             size: 2,
+            metadata: String::new(),
             minimal_steps: 0,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![],
             final_conditions: vec![],
@@ -1848,6 +1897,7 @@ Title: Empty
 Summary: No conditions
 Difficulty: Easy
 Steps: 0-1
+Initial conditions are enforced
 
 Initial:
 ··
@@ -1866,8 +1916,10 @@ Final:
             summary: "Test rectangle constraint visualization".to_string(),
             difficulty: Difficulty::Medium,
             size: 4,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: true,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1913,7 +1965,8 @@ Title: Rectangle Constraints Test
 Summary: Test rectangle constraint visualization
 Difficulty: Medium
 Steps: exactly 1
-Mode: Strict
+Initial conditions are enforced
+Must not exist one step early
 
 Initial:
 ●·▢▢
@@ -1939,8 +1992,10 @@ Final:
             summary: "Test cell with both position and rectangle constraints".to_string(),
             difficulty: Difficulty::Hard,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -1997,6 +2052,7 @@ Title: Multiple Constraints Test
 Summary: Test cell with both position and rectangle constraints
 Difficulty: Hard
 Steps: exactly 1
+Initial conditions are enforced
 
 Initial:
 ◦◦◦
@@ -2123,8 +2179,10 @@ Final:
             summary: "Test cell with conflicting constraints".to_string(),
             difficulty: Difficulty::Hard,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
+            enforce_initial_conditions: true,
             is_strict: false,
             initial_conditions: vec![
                 Condition::TestPosition {
@@ -2169,6 +2227,7 @@ Title: Conflicting Constraints Test
 Summary: Test cell with conflicting constraints
 Difficulty: Hard
 Steps: exactly 1
+Initial conditions are enforced
 
 Initial:
 ···
