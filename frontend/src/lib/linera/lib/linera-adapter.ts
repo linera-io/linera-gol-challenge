@@ -62,7 +62,7 @@ export class LineraAdapter {
         const client = await new Client(wallet, signer);
         console.log("✅ Linera wallet created successfully!");
 
-        client.onNotification(notification => {
+        client.onNotification((notification : any) => {
           let newBlock = notification.reason.NewBlock;
           if (!newBlock) return;
           
