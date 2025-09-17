@@ -23,6 +23,9 @@ pub struct Puzzle {
     pub difficulty: Difficulty,
     /// The grid size.
     pub size: u16,
+    /// Additional metadata for future frontend extensions.
+    pub metadata: String,
+
     /// A minimal number of steps for the final conditions to succeed.
     pub minimal_steps: u16,
     /// A maximal number of steps for the final conditions to succeed.
@@ -40,12 +43,16 @@ pub struct Puzzle {
 /// The difficulty of a puzzle.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Copy, Enum)]
 pub enum Difficulty {
+    /// Tutorial.
+    Tutorial,
     /// Easy.
     Easy,
     /// Medium difficulty.
     Medium,
     /// Hard.
     Hard,
+    /// Expert.
+    Expert,
 }
 
 /// A condition on a board.
@@ -1270,6 +1277,7 @@ mod tests {
             summary: "Test puzzle".to_string(),
             difficulty: Difficulty::Easy,
             size: 10,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 5,
             enforce_initial_conditions: true,
@@ -1295,6 +1303,7 @@ mod tests {
             summary: "Test puzzle".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 6,
             maximal_steps: 4,
             enforce_initial_conditions: true,
@@ -1320,6 +1329,7 @@ mod tests {
             summary: "Test puzzle".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 5,
             enforce_initial_conditions: true,
@@ -1363,6 +1373,7 @@ mod tests {
             summary: "Test blinker oscillation".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 3,
             enforce_initial_conditions: true,
@@ -1421,6 +1432,7 @@ mod tests {
             summary: "Glider travels from top-left to bottom-right square".to_string(),
             difficulty: Difficulty::Hard,
             size: 16,
+            metadata: String::new(),
             minimal_steps: 20,
             maximal_steps: 40,
             enforce_initial_conditions: true,
@@ -1529,6 +1541,7 @@ mod tests {
             summary: "Test final conditions failure".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
             enforce_initial_conditions: true,
@@ -1573,6 +1586,7 @@ mod tests {
             summary: "Test detailed error reporting".to_string(),
             difficulty: Difficulty::Easy,
             size: 8,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
             enforce_initial_conditions: true,
@@ -1633,6 +1647,7 @@ mod tests {
             summary: "Test rectangle error reporting".to_string(),
             difficulty: Difficulty::Easy,
             size: 8,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 2,
             enforce_initial_conditions: true,
@@ -1690,6 +1705,7 @@ mod tests {
             summary: "Test puzzle for display functionality".to_string(),
             difficulty: Difficulty::Easy,
             size: 5,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 2,
             enforce_initial_conditions: true,
@@ -1755,6 +1771,7 @@ mod tests {
             summary: "Test display formatting".to_string(),
             difficulty: Difficulty::Easy,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
             enforce_initial_conditions: true,
@@ -1829,6 +1846,7 @@ Final Conditions:
             summary: "Test separate initial and final constraints".to_string(),
             difficulty: Difficulty::Easy,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
             enforce_initial_conditions: true,
@@ -1862,6 +1880,7 @@ Final Conditions:
             summary: "No conditions".to_string(),
             difficulty: Difficulty::Easy,
             size: 2,
+            metadata: String::new(),
             minimal_steps: 0,
             maximal_steps: 1,
             enforce_initial_conditions: true,
@@ -1897,6 +1916,7 @@ Final:
             summary: "Test rectangle constraint visualization".to_string(),
             difficulty: Difficulty::Medium,
             size: 4,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
             enforce_initial_conditions: true,
@@ -1972,6 +1992,7 @@ Final:
             summary: "Test cell with both position and rectangle constraints".to_string(),
             difficulty: Difficulty::Hard,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
             enforce_initial_conditions: true,
@@ -2158,6 +2179,7 @@ Final:
             summary: "Test cell with conflicting constraints".to_string(),
             difficulty: Difficulty::Hard,
             size: 3,
+            metadata: String::new(),
             minimal_steps: 1,
             maximal_steps: 1,
             enforce_initial_conditions: true,

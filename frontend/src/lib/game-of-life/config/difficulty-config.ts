@@ -9,6 +9,12 @@ export const difficultyConfig: Record<
     borderColor: string;
   }
 > = {
+  TUTORIAL: {
+    icon: "📚",
+    bgColor: "bg-green-50",
+    textColor: "text-green-700",
+    borderColor: "border-green-200",
+  },
   EASY: {
     icon: "🌱",
     bgColor: "bg-green-50",
@@ -23,6 +29,12 @@ export const difficultyConfig: Record<
   },
   HARD: {
     icon: "💀",
+    bgColor: "bg-red-50",
+    textColor: "text-red-700",
+    borderColor: "border-red-200",
+  },
+  EXPERT: {
+    icon: "☠️",
     bgColor: "bg-red-50",
     textColor: "text-red-700",
     borderColor: "border-red-200",
