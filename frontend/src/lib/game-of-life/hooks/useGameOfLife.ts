@@ -50,43 +50,39 @@ export function useGameOfLife(options: UseGameOfLifeOptions) {
   const toggleCell = useCallback(
     (x: number, y: number) => {
       board.toggleCell(x, y);
-      // Save or update state after toggling at generation 0
-      if (generation === 0) {
-        if (!board.hasInitialState()) {
-          board.saveState();
-        } else {
-          // Replace the current state instead of adding new one
-          board.replaceCurrentState();
-        }
+
+      // After modifying the board, update the current state in history
+      if (board.hasInitialState()) {
+        // Replace the current state in history with the modified version
+        board.replaceCurrentState();
+      } else {
+        // If no history exists yet, save the initial state
+        board.saveState();
       }
+
       updateCells();
     },
-    [board, updateCells, generation]
+    [board, updateCells]
   );
 
   const next = useCallback(() => {
     if (!engine || !board) return;
 
-    // Only compute new generation if we're at the end of history
-    if (board.isAtEndOfHistory()) {
-      // Make sure we have an initial state saved
-      if (generation === 0 && !board.hasInitialState()) {
-        board.saveState(); // Save generation 0 if not already saved
-      }
+    // This is needed when we've gone back and are now moving forward again to flush the old future history
+    board.truncateFutureHistory();
 
-      // Compute next generation
-      engine.nextGeneration();
-      setGeneration((g) => g + 1);
-
-      // Save the NEW state after computing
-      board.saveState();
-      updateCells();
-    } else if (board.canRedo()) {
-      // If we're in the middle of history, just move forward
-      board.redo();
-      setGeneration((g) => g + 1);
-      updateCells();
+    // Make sure we have an initial state saved to prevent bugs where you would reset to generation 0
+    if (generation === 0 && !board.hasInitialState()) {
+      board.saveState(); // Save generation 0 if not already saved
     }
+
+    // Always compute fresh generation from current board state
+    engine.nextGeneration();
+    setGeneration((g) => g + 1);
+
+    // Save the newly computed state
+    board.saveState();
+    updateCells();
   }, [engine, board, updateCells, generation]);
 
   const previous = useCallback(() => {

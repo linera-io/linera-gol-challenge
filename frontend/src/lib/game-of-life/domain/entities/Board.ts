@@ -130,6 +130,13 @@ export class Board {
     }
   }
 
+  // flush any histor state after the current position
+  truncateFutureHistory(): void {
+    if (!this.isAtEndOfHistory()) {
+      this.history = this.history.slice(0, this.currentHistoryIndex + 1);
+    }
+  }
+
   undo(): void {
     if (!this.canUndo()) return;
 
