@@ -69,13 +69,6 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     size: 8,
   },
   {
-    id: "e7de932762b0a6a27d29097f20caa0084c87a61fb6e21d5f49cc88c1e5542479",
-    title: "Robot face",
-    summary: "Create a robot-like face from very few cells",
-    difficulty: "MEDIUM",
-    size: 60,
-  },
-  {
     id: "ffe62034f299c71d9fdc3e42bd5b8797f6c88983e03ff1f7b29cd710f8d5afe2",
     title: "Glider Migration",
     summary: "Guide a glider from the top-left square to the bottom-right square",

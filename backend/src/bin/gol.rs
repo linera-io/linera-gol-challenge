@@ -25,6 +25,9 @@ enum Commands {
         /// Optional output directory (defaults to current directory)
         #[arg(short, long)]
         output_dir: Option<PathBuf>,
+        /// Include draft puzzles
+        #[arg(long)]
+        draft: bool,
     },
     /// Generate TypeScript metadata for puzzles
     GenerateMetadata {
@@ -34,6 +37,9 @@ enum Commands {
         /// Path to JSON file mapping puzzle names to blob IDs
         #[arg(long)]
         blob_map: PathBuf,
+        /// Include draft puzzles
+        #[arg(long)]
+        draft: bool,
     },
     /// Print the contents of a puzzle file
     PrintPuzzle {
@@ -61,12 +67,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::CreatePuzzles { output_dir } => {
+        Commands::CreatePuzzles { output_dir, draft } => {
             let output_path = output_dir.unwrap_or_else(|| PathBuf::from("."));
-            create_puzzles(&output_path)?;
+            create_puzzles(&output_path, draft)?;
         }
-        Commands::GenerateMetadata { output, blob_map } => {
-            generate_metadata(&output, &blob_map)?;
+        Commands::GenerateMetadata {
+            output,
+            blob_map,
+            draft,
+        } => {
+            generate_metadata(&output, &blob_map, draft)?;
         }
         Commands::PrintPuzzle { path } => {
             print_puzzle(&path)?;
@@ -83,8 +93,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[allow(clippy::type_complexity)]
-fn get_all_puzzles() -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
-    vec![
+fn get_all_puzzles(draft: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
+    let mut puzzles: Vec<(&'static str, fn() -> (Puzzle, Board))> = vec![
         ("01_block_pattern", create_block_puzzle_and_solution),
         ("02_beehive_pattern", create_beehive_puzzle_and_solution),
         ("03_loaf_pattern", create_loaf_puzzle_and_solution),
@@ -93,20 +103,25 @@ fn get_all_puzzles() -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
         ("06_blinker_pattern", create_blinker_puzzle_and_solution),
         ("07_beacon_pattern", create_beacon_puzzle_and_solution),
         ("10_clock_pattern", create_clock_puzzle_and_solution),
-        ("20_robot_face", create_robot_face_puzzle_and_solution),
         (
-            "21_glider_migration",
+            "20_glider_migration",
             create_glider_migration_puzzle_and_solution,
         ),
-    ]
+    ];
+
+    if draft {
+        puzzles.push(("21_robot_face", create_robot_face_puzzle_and_solution));
+    }
+    puzzles
 }
 
 fn generate_metadata(
     output_path: &PathBuf,
     blob_map_path: &PathBuf,
+    draft: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get all puzzle and solution creators
-    let puzzles_info = get_all_puzzles();
+    let puzzles_info = get_all_puzzles(draft);
 
     // Load blob mapping if provided
     let blob_map: HashMap<String, String> = {
@@ -219,12 +234,12 @@ fn generate_metadata(
     Ok(())
 }
 
-fn create_puzzles(output_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    // Create output directory if it doesn't exist
+fn create_puzzles(output_dir: &PathBuf, draft: bool) -> Result<(), Box<dyn std::error::Error>> {
+    // Create output directory if it doesn't exist.
     fs::create_dir_all(output_dir)?;
 
-    // Generate all pattern puzzles
-    let puzzles = get_all_puzzles();
+    // Generate puzzles.
+    let puzzles = get_all_puzzles(draft);
 
     for (name, puzzle_and_solution_creator) in puzzles {
         let (puzzle, solution) = puzzle_and_solution_creator();
