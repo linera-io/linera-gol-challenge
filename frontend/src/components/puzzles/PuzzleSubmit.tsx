@@ -93,8 +93,9 @@ export function PuzzleSubmit({
   );
 
   const renderStatusMessage = () => {
-    // Don't show any status message if we have a validation result
-    if (validationResult) {
+    // Don't show any status message if we have a valid solution
+    // this is needed to avoid showing "Solution submitted successfully!" and "Puzzle already completed"
+    if (validationResult && validationResult.isValid) {
       return null;
     }
 
