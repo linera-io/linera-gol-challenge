@@ -41,12 +41,12 @@ function PuzzleInstructions({ puzzle }: { puzzle: Puzzle }) {
     <div className="text-sm text-gray-600 space-y-2">
       <div className="flex items-start gap-2">
         <Lightbulb size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
-        <span>Use the hint to create an initial condition.</span>
+        <span>Use the hint to create an initial pattern.</span>
       </div>
       <div className="flex items-start gap-2">
         <Target size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
         <span>
-          Submit your initial condition (generation 0) when the goal pattern is satisfied after{" "}
+          Submit your initial pattern when the goal is satisfied after{" "}
           <span className="font-semibold text-red-600">{generationText}</span>.
         </span>
       </div>
