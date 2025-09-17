@@ -54,7 +54,7 @@ Run the commands below using `bash -e -x <(linera extract-script-from-markdown R
 
 ```bash
 # Production app
-APP_ID="c5b78269c7dfe9d121eab606c8f3ecd240de64d25b533b6f1009ac51c03d78ab"
+APP_ID="27145fa604adf9996647a9a2add1dafe8f80f1a547835edf62ee408cd8903dd3"
 
 # Scoring chain
 CHAIN="e71636fde3a70cdbfdb7fd9bef6cb1ba632af8b0567b8f76df47b35489972dd3"
