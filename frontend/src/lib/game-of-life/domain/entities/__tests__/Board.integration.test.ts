@@ -1,100 +1,92 @@
-import { Board } from '../Board';
+import { Board } from "../Board";
+import {
+  expectBoardState,
+  expectCellCount,
+  setupBoardWithCells,
+  buildIncrementalHistory,
+  goBackGenerations,
+  createBlinker,
+  hasCellAt,
+  expectNoCellsAt,
+} from "../../../test-helpers";
 
-describe('Board - History Management Integration Tests', () => {
+describe("Board - History Management Integration Tests", () => {
   let board: Board;
 
   beforeEach(() => {
     board = new Board({ width: 10, height: 10, infinite: false });
   });
 
-  describe('Drawing persistence across generations', () => {
-    it('should preserve drawings when navigating forward then back', () => {
-      // Draw initial pattern at generation 0
-      board.toggleCell(1, 1);
-      board.toggleCell(2, 2);
-      board.saveState();
-
-      // Advance to generation 1
-      board.toggleCell(3, 3);
-      board.saveState();
-
-      // Advance to generation 2
-      board.toggleCell(4, 4);
-      board.saveState();
+  describe("Drawing persistence across generations", () => {
+    it("should preserve drawings when navigating forward then back", () => {
+      // Build incremental history
+      buildIncrementalHistory(board, [
+        [
+          [1, 1],
+          [2, 2],
+        ], // Gen 0
+        [[3, 3]], // Gen 1 adds (3,3)
+        [[4, 4]], // Gen 2 adds (4,4)
+      ]);
 
       // Go back to generation 1
-      board.undo();
+      goBackGenerations(board, 1);
 
       // Draw something new at generation 1
       board.toggleCell(5, 5);
       board.replaceCurrentState();
 
       // Cells at gen 1 should now be: (1,1), (2,2), (3,3), (5,5)
-      let cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(4);
-
-      const hasCellAt = (x: number, y: number) =>
-        cells.some(c => c.x === x && c.y === y);
-
-      expect(hasCellAt(1, 1)).toBe(true);
-      expect(hasCellAt(2, 2)).toBe(true);
-      expect(hasCellAt(3, 3)).toBe(true);
-      expect(hasCellAt(5, 5)).toBe(true);
+      expectBoardState(board, [
+        [1, 1],
+        [2, 2],
+        [3, 3],
+        [5, 5],
+      ]);
 
       // Go back to generation 0
-      board.undo();
-      cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(2);
-      expect(cells.some(c => c.x === 1 && c.y === 1)).toBe(true);
-      expect(cells.some(c => c.x === 2 && c.y === 2)).toBe(true);
+      goBackGenerations(board, 1);
+      expectBoardState(board, [
+        [1, 1],
+        [2, 2],
+      ]);
     });
 
-    it('should handle drawing at generation 0 after navigation', () => {
-      // Create initial state
-      board.toggleCell(1, 1);
-      board.saveState(); // Gen 0
-
-      // Advance
-      board.toggleCell(2, 2);
-      board.saveState(); // Gen 1
-
-      board.toggleCell(3, 3);
-      board.saveState(); // Gen 2
+    it("should handle drawing at generation 0 after navigation", () => {
+      // Build incremental history
+      buildIncrementalHistory(board, [
+        [[1, 1]], // Gen 0
+        [[2, 2]], // Gen 1
+        [[3, 3]], // Gen 2
+      ]);
 
       // Navigate back to gen 0
-      board.undo();
-      board.undo();
+      goBackGenerations(board, 2);
 
       // Draw at generation 0
       board.toggleCell(4, 4);
       board.replaceCurrentState();
 
       // Should have (1,1) and (4,4) at gen 0
-      const cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(2);
-      expect(cells.some(c => c.x === 1 && c.y === 1)).toBe(true);
-      expect(cells.some(c => c.x === 4 && c.y === 4)).toBe(true);
+      expectBoardState(board, [
+        [1, 1],
+        [4, 4],
+      ]);
     });
   });
 
-  describe('History truncation on forward navigation', () => {
-    it('should truncate future history when saving new state after undo', () => {
-      // Build history
-      board.toggleCell(1, 1);
-      board.saveState(); // Gen 0
-
-      board.toggleCell(2, 2);
-      board.saveState(); // Gen 1
-
-      board.toggleCell(3, 3);
-      board.saveState(); // Gen 2
-
-      board.toggleCell(4, 4);
-      board.saveState(); // Gen 3
+  describe("History truncation on forward navigation", () => {
+    it("should truncate future history when saving new state after undo", () => {
+      // Build incremental history
+      buildIncrementalHistory(board, [
+        [[1, 1]], // Gen 0
+        [[2, 2]], // Gen 1
+        [[3, 3]], // Gen 2
+        [[4, 4]], // Gen 3
+      ]);
 
       // Go back to gen 1
-      board.undo();
-      board.undo();
+      goBackGenerations(board, 2);
 
       // Create new branch from gen 1
       board.toggleCell(5, 5);
@@ -103,28 +95,30 @@ describe('Board - History Management Integration Tests', () => {
       // Should be at end of history now
       expect(board.isAtEndOfHistory()).toBe(true);
 
-      // Old gen 2 and 3 should be gone
-      const cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(3); // (1,1), (2,2), (5,5)
-      expect(cells.some(c => c.x === 3 && c.y === 3)).toBe(false);
-      expect(cells.some(c => c.x === 4 && c.y === 4)).toBe(false);
+      // Old gen 2 and 3 should be gone, should have (1,1), (2,2), (5,5)
+      expectBoardState(board, [
+        [1, 1],
+        [2, 2],
+        [5, 5],
+      ]);
+      expectNoCellsAt(board, [
+        [3, 3],
+        [4, 4],
+      ]);
     });
   });
 
-  describe('Reset to initial state', () => {
-    it('should properly reset and clear future history', () => {
+  describe("Reset to initial state", () => {
+    it("should properly reset and clear future history", () => {
       // Create complex history
-      board.toggleCell(1, 1);
-      board.saveState(); // Gen 0
-
-      board.toggleCell(2, 2);
-      board.saveState(); // Gen 1
-
-      board.toggleCell(3, 3);
-      board.saveState(); // Gen 2
+      buildIncrementalHistory(board, [
+        [[1, 1]], // Gen 0
+        [[2, 2]], // Gen 1
+        [[3, 3]], // Gen 2
+      ]);
 
       // Go back to gen 1
-      board.undo();
+      goBackGenerations(board, 1);
 
       // Modify gen 1
       board.toggleCell(4, 4);
@@ -134,10 +128,7 @@ describe('Board - History Management Integration Tests', () => {
       board.resetToInitialState();
 
       // Should be at gen 0 with only initial cell
-      const cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(1);
-      expect(cells[0].x).toBe(1);
-      expect(cells[0].y).toBe(1);
+      expectBoardState(board, [[1, 1]]);
 
       // Should be at end of history (future cleared)
       expect(board.isAtEndOfHistory()).toBe(true);
@@ -148,87 +139,89 @@ describe('Board - History Management Integration Tests', () => {
       board.saveState();
 
       expect(board.canUndo()).toBe(true);
-      expect(board.getAllAliveCells()).toHaveLength(2);
+      expectCellCount(board, 2);
     });
   });
 
-  describe('Complex navigation scenarios', () => {
-    it('should handle rapid back and forth navigation with modifications', () => {
+  describe("Complex navigation scenarios", () => {
+    it("should handle rapid back and forth navigation with modifications", () => {
       // Create initial states
-      board.toggleCell(1, 1);
-      board.saveState(); // Gen 0
-
-      board.toggleCell(2, 1);
-      board.saveState(); // Gen 1
-
-      board.toggleCell(3, 1);
-      board.saveState(); // Gen 2
+      buildIncrementalHistory(board, [
+        [[1, 1]], // Gen 0
+        [[2, 1]], // Gen 1
+        [[3, 1]], // Gen 2
+      ]);
 
       // Navigate and modify
-      board.undo(); // Back to gen 1
+      goBackGenerations(board, 1); // Back to gen 1
       board.toggleCell(2, 2);
       board.replaceCurrentState();
 
-      board.undo(); // Back to gen 0
+      goBackGenerations(board, 1); // Back to gen 0
       board.toggleCell(1, 2);
       board.replaceCurrentState();
 
       // Verify gen 0 state
-      let cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(2);
+      expectBoardState(board, [
+        [1, 1],
+        [1, 2],
+      ]);
 
       // Move forward and verify modifications persist
-      board.saveState(); // This shouldn't be needed but let's advance
       board.toggleCell(5, 5);
       board.saveState();
 
-      board.undo(); // Back to modified gen 0
-      cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(2);
-      expect(cells.some(c => c.x === 1 && c.y === 1)).toBe(true);
-      expect(cells.some(c => c.x === 1 && c.y === 2)).toBe(true);
+      goBackGenerations(board, 1); // Back to modified gen 0
+      expectBoardState(board, [
+        [1, 1],
+        [1, 2],
+      ]);
     });
 
-    it('should handle empty board states in history', () => {
+    it("should handle empty board states in history", () => {
       // Start with cells
-      board.toggleCell(1, 1);
-      board.toggleCell(2, 2);
+      setupBoardWithCells(board, [
+        [1, 1],
+        [2, 2],
+      ]);
       board.saveState(); // Gen 0 with cells
 
-      // Clear all cells
+      // Clear all cells for gen 1
       board.toggleCell(1, 1);
       board.toggleCell(2, 2);
       board.saveState(); // Gen 1 empty
 
-      // Add new cells
+      // Add new cells for gen 2
       board.toggleCell(3, 3);
       board.saveState(); // Gen 2 with new cell
 
       // Navigate back through empty state
-      board.undo(); // Gen 1 (empty)
-      expect(board.getAllAliveCells()).toHaveLength(0);
+      goBackGenerations(board, 1); // Gen 1 (empty)
+      expectCellCount(board, 0);
 
-      board.undo(); // Gen 0
-      expect(board.getAllAliveCells()).toHaveLength(2);
+      goBackGenerations(board, 1); // Gen 0
+      expectBoardState(board, [
+        [1, 1],
+        [2, 2],
+      ]);
 
-      // Modify empty state
-      board.undo(); // Can't go further back
+      // Can't go further back
       expect(board.canUndo()).toBe(false);
     });
   });
 
-  describe('State replacement edge cases', () => {
-    it('should handle replaceCurrentState at boundary conditions', () => {
+  describe("State replacement edge cases", () => {
+    it("should handle replaceCurrentState at boundary conditions", () => {
       // Test at history index -1 (no history)
       board.toggleCell(1, 1);
       board.replaceCurrentState();
       expect(board.hasInitialState()).toBe(true);
-      expect(board.getAllAliveCells()).toHaveLength(1);
+      expectCellCount(board, 1);
 
       // Test at history index 0
       board.toggleCell(2, 2);
       board.replaceCurrentState();
-      expect(board.getAllAliveCells()).toHaveLength(2);
+      expectCellCount(board, 2);
 
       // Add more states
       board.toggleCell(3, 3);
@@ -237,11 +230,16 @@ describe('Board - History Management Integration Tests', () => {
       // Test replacement at end of history
       board.toggleCell(4, 4);
       board.replaceCurrentState();
-      expect(board.getAllAliveCells()).toHaveLength(4);
+      expectBoardState(board, [
+        [1, 1],
+        [2, 2],
+        [3, 3],
+        [4, 4],
+      ]);
       expect(board.isAtEndOfHistory()).toBe(true);
     });
 
-    it('should maintain consistency when replacing state multiple times', () => {
+    it("should maintain consistency when replacing state multiple times", () => {
       board.toggleCell(1, 1);
       board.saveState();
 
@@ -256,66 +254,59 @@ describe('Board - History Management Integration Tests', () => {
       board.replaceCurrentState();
 
       // Should have all 4 cells
-      const cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(4);
+      expectBoardState(board, [
+        [1, 1],
+        [2, 2],
+        [3, 3],
+        [4, 4],
+      ]);
 
       // History should still work
       board.saveState();
       board.toggleCell(5, 5);
       board.saveState();
 
-      board.undo();
-      expect(board.getAllAliveCells()).toHaveLength(4);
+      goBackGenerations(board, 1);
+      expectCellCount(board, 4);
     });
   });
 
-  describe('Pattern evolution with history', () => {
-    it('should correctly track blinker pattern through evolution', () => {
-      // Create horizontal blinker
-      board.toggleCell(4, 3);
-      board.toggleCell(4, 4);
-      board.toggleCell(4, 5);
+  describe("Pattern evolution with history", () => {
+    it("should correctly track blinker pattern through evolution", () => {
+      // Create vertical blinker
+      createBlinker(board, 4, 4, false);
       board.saveState(); // Gen 0 - vertical
 
-      // Manually evolve (simulate what GameEngine would do)
+      // Manually evolve to horizontal (simulate what GameEngine would do)
       board.clear();
-      board.toggleCell(3, 4);
-      board.toggleCell(4, 4);
-      board.toggleCell(5, 4);
+      createBlinker(board, 4, 4, true);
       board.saveState(); // Gen 1 - horizontal
 
-      // Evolve again
+      // Evolve back to vertical
       board.clear();
-      board.toggleCell(4, 3);
-      board.toggleCell(4, 4);
-      board.toggleCell(4, 5);
+      createBlinker(board, 4, 4, false);
       board.saveState(); // Gen 2 - vertical again
 
       // Navigate back and verify states
-      board.undo(); // Gen 1
-      let cells = board.getAllAliveCells();
+      goBackGenerations(board, 1); // Gen 1
+      const cells = board.getAllAliveCells();
       expect(cells).toHaveLength(3);
-      // Check horizontal blinker positions
-      const hasHorizontal = cells.some(c => c.x === 3 && c.y === 4) ||
-                           cells.some(c => c.x === 4 && c.y === 4) ||
-                           cells.some(c => c.x === 5 && c.y === 4);
-      expect(hasHorizontal).toBe(true);
+      // Check horizontal blinker
+      expect(hasCellAt(cells, 3, 4) || hasCellAt(cells, 4, 4) || hasCellAt(cells, 5, 4)).toBe(true);
 
-      board.undo(); // Gen 0
-      cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(3);
-      // Check vertical blinker positions
-      const hasVertical = cells.some(c => c.x === 4 && c.y === 3) ||
-                         cells.some(c => c.x === 4 && c.y === 4) ||
-                         cells.some(c => c.x === 4 && c.y === 5);
-      expect(hasVertical).toBe(true);
+      goBackGenerations(board, 1); // Gen 0
+      expectCellCount(board, 3);
+      // Check vertical blinker
+      const cellsGen0 = board.getAllAliveCells();
+      expect(
+        hasCellAt(cellsGen0, 4, 3) || hasCellAt(cellsGen0, 4, 4) || hasCellAt(cellsGen0, 4, 5)
+      ).toBe(true);
 
-      // Modify gen 0 and see if forward computation would work correctly
+      // Modify gen 0 and verify
       board.toggleCell(5, 5); // Add extra cell
       board.replaceCurrentState();
 
-      cells = board.getAllAliveCells();
-      expect(cells).toHaveLength(4);
+      expectCellCount(board, 4);
     });
   });
 });
