@@ -1,6 +1,6 @@
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { lineraAdapter } from "../lib/linera-adapter";
-import { GOL_APP_ID } from "../constants";
+import { LINERA_RPC_URL, GOL_APP_ID, PREVIOUS_GOL_APP_IDS } from "../constants";
 import { Puzzle, LineraBoard, ValidationResult, DifficultyLevel } from "@/lib/types/puzzle.types";
 
 export interface WalletInfo {
@@ -33,9 +33,9 @@ export class LineraService {
     try {
       console.log("Initializing Linera service with Dynamic wallet...");
 
-      const provider = await lineraAdapter.connect(dynamicWallet);
+      const provider = await lineraAdapter.connect(dynamicWallet, LINERA_RPC_URL);
 
-      await lineraAdapter.setApplication(GOL_APP_ID);
+      await lineraAdapter.setApplications(GOL_APP_ID, PREVIOUS_GOL_APP_IDS);
 
       this.walletInfo = {
         chainId: provider.chainId,
@@ -250,23 +250,31 @@ export class LineraService {
         variables: { puzzleId },
       };
 
+      const results = await lineraAdapter.queryPreviousApplications<any>(query);
       const result = await lineraAdapter.queryApplication<any>(query);
-      console.log("[GOL] Check puzzle completion response", result);
+      results.push(result);
+      console.log("[GOL] Check puzzle completion response", results);
 
-      if (result.errors) {
-        // If there's an error, the solution doesn't exist
-        return false;
+      for (const result of results) {
+        if (result.errors) {
+          // If there's an error, skip the reponse.
+          continue
+        }
+
+        // If we have a solution entry, the puzzle is completed
+        if (result.data?.solutions?.entry !== null) {
+          return true;
+        }
       }
 
-      // If we have a solution entry, the puzzle is completed
-      return result.data?.solutions?.entry !== null;
+      return false;
     } catch (error) {
       console.error("Failed to check puzzle completion:", error);
       return false;
     }
   }
 
-  async getCompletedPuzzleIds(): Promise<string[]> {
+  async getCompletedPuzzleIds(): Promise<Set<string>> {
     await this.ensureInitialized();
 
     try {
@@ -281,20 +289,30 @@ export class LineraService {
         variables: {},
       };
 
+      const results = await lineraAdapter.queryPreviousApplications<any>(query);
       const result = await lineraAdapter.queryApplication<any>(query);
-      // console.log("[GOL] Got completed puzzle IDs", result);
+      results.push(result);
       console.log("[GOL] Query sent using address: ", lineraAdapter.getAddress());
 
-      if (result.errors) {
-        console.error("GraphQL errors:", result.errors);
-        return [];
+      const keys = new Set<string>();
+      for (const result of results) {
+        if (result.errors) {
+          continue
+        }
+
+        // If we have a solution entry, the puzzle is completed
+        if (result.data?.solutions?.keys) {
+          for (const key of result.data?.solutions?.keys) {
+              keys.add(key);
+          }
+        }
       }
 
       // The keys field returns an array of DataBlobHash (puzzle IDs)
-      return result.data?.solutions?.keys || [];
+      return keys;
     } catch (error) {
       console.error("Failed to get completed puzzle IDs:", error);
-      return [];
+      return new Set<string>();
     }
   }
 

@@ -1,7 +1,6 @@
 import initLinera, { Faucet, Client, Wallet, Application } from "@linera/client";
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { DynamicSigner } from "./dynamic-signer";
-import { LINERA_RPC_URL, GOL_APP_ID } from "../constants";
 
 export interface LineraProvider {
   client: Client;
@@ -15,6 +14,7 @@ export class LineraAdapter {
   private static instance: LineraAdapter | null = null;
   private provider: LineraProvider | null = null;
   private application: Application | null = null;
+  private previousApplications: Application[] = [];
   private wasmInitPromise: Promise<unknown> | null = null;
   private connectPromise: Promise<LineraProvider> | null = null;
   private onConnectionChange?: () => void;
@@ -27,7 +27,7 @@ export class LineraAdapter {
     return LineraAdapter.instance;
   }
 
-  async connect(dynamicWallet: DynamicWallet, rpcUrl?: string): Promise<LineraProvider> {
+  async connect(dynamicWallet: DynamicWallet, rpcUrl: string): Promise<LineraProvider> {
     if (this.provider) return this.provider;
     if (this.connectPromise) return this.connectPromise;
 
@@ -54,7 +54,7 @@ export class LineraAdapter {
           }
         }
 
-        const faucet = await new Faucet(rpcUrl || LINERA_RPC_URL);
+        const faucet = await new Faucet(rpcUrl);
         const wallet = await faucet.createWallet();
         const chainId = await faucet.claimChain(wallet, address);
 
@@ -102,14 +102,24 @@ export class LineraAdapter {
     }
   }
 
-  async setApplication(appId?: string) {
+  async setApplications(appId: string, previousAppIds: string[]) {
     if (!this.provider) throw new Error("Not connected to Linera");
 
-    const application = await this.provider.client.frontend().application(appId || GOL_APP_ID);
+    const application = await this.provider.client.frontend().application(appId);
 
     if (!application) throw new Error("Failed to get application");
     console.log("✅ Linera application set successfully!");
     this.application = application;
+
+    const applications = []
+    for (const appId of previousAppIds) {
+      const application = await this.provider.client.frontend().application(appId);
+      if (!application) throw new Error("Failed to get previous application");
+      applications.push(application);
+    }
+    this.previousApplications = applications;
+    console.log("✅ Previous Linera application set successfully!");
+
     console.log("🔄 Notifying connection state change (app set)");
     this.onConnectionChange?.();
   }
@@ -122,6 +132,17 @@ export class LineraAdapter {
 
     console.log("✅ Linera application queried successfully!");
     return response as T;
+  }
+
+  async queryPreviousApplications<T>(query: object): Promise<T[]> {
+    const responses = [];
+    for (const application of this.previousApplications) {
+        const result = await application.query(JSON.stringify(query));
+        const response = JSON.parse(result);
+        responses.push(response);
+    }
+    console.log("✅ Previous Linera applications queried successfully!");
+    return responses as T[];
   }
 
   getProvider(): LineraProvider {

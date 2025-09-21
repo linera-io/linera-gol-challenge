@@ -8,7 +8,7 @@ export function useCompletedPuzzles() {
   const queryClient = useQueryClient();
 
   const {
-    data: completedPuzzleIds = [],
+    data: completedPuzzleIds = new Set<string>(),
     refetch,
     isLoading: isLoadingFromBlockchain,
   } = useQuery({
@@ -25,13 +25,13 @@ export function useCompletedPuzzles() {
 
   const isPuzzleCompleted = useCallback(
     (puzzleId: string) => {
-      return completedPuzzleIds.includes(puzzleId);
+      return completedPuzzleIds.has(puzzleId);
     },
     [completedPuzzleIds]
   );
 
   const getCompletionCount = useCallback(() => {
-    return completedPuzzleIds.length;
+    return completedPuzzleIds.size;
   }, [completedPuzzleIds]);
 
   // Refresh the completed puzzles from blockchain
