@@ -43,9 +43,9 @@ CHAIN="${INFO[0]}"
 OWNER="${INFO[1]}"
 ```
 
-### Creating the scoring chain
+### Creating the scoring chains
 
-Let's create another wallet and the scoring chain. The app wallet will be accessible with `linera -w1`.
+Let's create another wallet and two scoring chains. The app wallet will be accessible with `linera -w1`.
 
 ```bash
 export LINERA_WALLET_1="$LINERA_TMP_DIR/wallet_1.json"
@@ -57,6 +57,10 @@ linera -w1 wallet init --faucet $FAUCET_URL
 INFO_1=($(linera -w1 wallet request-chain --faucet $FAUCET_URL))
 CHAIN_1="${INFO_1[0]}"
 OWNER_1="${INFO_1[1]}"
+
+INFO_2=($(linera -w1 wallet request-chain --faucet $FAUCET_URL))
+CHAIN_2="${INFO_1[0]}"
+OWNER_2="${INFO_1[1]}"
 ```
 
 ### Creating the GoL challenge application
@@ -66,8 +70,7 @@ node service.
 
 ```bash
 APP_ID=$(linera --wait-for-outgoing-messages \
-  project publish-and-create backend gol_challenge $CHAIN \
-    --json-parameters "{ \"scoring_chain_id\": \"$CHAIN_1\" }")
+  project publish-and-create backend gol_challenge $CHAIN)
 ```
 
 ### Creating a new puzzle
@@ -80,18 +83,18 @@ BLOB_ID=$(linera publish-data-blob "$LINERA_TMP_DIR/02_beehive_pattern_puzzle.bc
 
 ### Publishing puzzles and running code-generation
 
-Run the node service for the scoring chain.
+Run the node service for the scoring chains.
 ```bash
 linera -w1 service --port 8081 &
 sleep 1
 ```
 
 The following script creates puzzles with the `gol` tool, then it uses the user wallet to
-publish them. At the same time, it also sends GraphQL queries to the scoring chain to register
+publish them. At the same time, it also sends GraphQL queries to the scoring chain(s) to register
 the puzzles.
 
 ```bash
-./publish-puzzles.sh http://localhost:8081/chains/$CHAIN_1/applications/$APP_ID
+./publish-puzzles.sh http://localhost:8081/chains/$CHAIN_1/applications/$APP_ID http://localhost:8081/chains/$CHAIN_2/applications/$APP_ID
 ```
 
 Note that we never unregister puzzles.
@@ -121,7 +124,7 @@ query {
 
 ```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
 mutation {
-    submitSolution(puzzleId: "$BLOB_ID", board: {
+    submitSolution(puzzleId: "$BLOB_ID", scoringChainId: "$CHAIN_1", board: {
         size: 9,
         liveCells: [{x: 3, y: 2}, {x: 4, y: 2}, {x: 2, y: 3}, {x: 5, y: 3}, {x: 3, y: 4}, {x: 4, y: 4}]
     })
@@ -133,6 +136,7 @@ mutation {
 To debug GraphQL APIs, uncomment the line with `read` and run `bash -x -e <(linera extract-script-from-markdown backend/README.md)`.
 ```bash
 echo http://localhost:8081/chains/$CHAIN_1/applications/$APP_ID
+echo http://localhost:8081/chains/$CHAIN_2/applications/$APP_ID
 # read
 ```
 
@@ -161,6 +165,7 @@ Restart the service with the scoring chain followed in read-only:
 kill $PID
 
 linera wallet follow-chain "$CHAIN_1"
+linera wallet follow-chain "$CHAIN_2"
 
 linera service --port 8080 &
 ```

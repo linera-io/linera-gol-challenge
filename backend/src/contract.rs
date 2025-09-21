@@ -8,7 +8,7 @@ mod state;
 use async_graphql::ComplexObject;
 use gol_challenge::{game::Puzzle, GolChallengeAbi, Operation};
 use linera_sdk::{
-    linera_base_types::{AccountOwner, ChainId, DataBlobHash, Timestamp, WithContractAbi},
+    linera_base_types::{AccountOwner, DataBlobHash, Timestamp, WithContractAbi},
     views::{RootView, View},
     Contract, ContractRuntime,
 };
@@ -21,12 +21,6 @@ pub struct GolChallengeContract {
 }
 
 linera_sdk::contract!(GolChallengeContract);
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Parameters {
-    /// Where to report puzzles for scoring.
-    scoring_chain_id: ChainId,
-}
 
 impl WithContractAbi for GolChallengeContract {
     type Abi = GolChallengeAbi;
@@ -45,7 +39,7 @@ pub struct Message {
 impl Contract for GolChallengeContract {
     type Message = Message;
     type InstantiationArgument = ();
-    type Parameters = Parameters;
+    type Parameters = ();
     type EventValue = ();
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
@@ -68,6 +62,7 @@ impl Contract for GolChallengeContract {
                 puzzle_id,
                 board,
                 owner,
+                scoring_chain_id,
             } => {
                 let owner = owner.unwrap_or_else(|| {
                     self.runtime
@@ -88,7 +83,6 @@ impl Contract for GolChallengeContract {
                     .insert(&puzzle_id, solution)
                     .expect("Store solution");
 
-                let Parameters { scoring_chain_id } = self.runtime.application_parameters();
                 let message = Message {
                     puzzle_id,
                     timestamp,
@@ -99,7 +93,7 @@ impl Contract for GolChallengeContract {
                     .send_to(scoring_chain_id);
             }
             Operation::RegisterPuzzle { puzzle_id } => {
-                self.assert_scoring_chain("Puzzles are only registered on the scoring chain.");
+                // Puzzles are only registered on a scoring chain.
                 self.state.registered_puzzles.insert(&puzzle_id).unwrap();
             }
         }
@@ -112,7 +106,6 @@ impl Contract for GolChallengeContract {
             timestamp,
             owner,
         } = message;
-        self.assert_scoring_chain("Messages are sent to the scoring chain.");
         let is_registered = self
             .state
             .registered_puzzles
@@ -131,13 +124,6 @@ impl Contract for GolChallengeContract {
 
     async fn store(mut self) {
         self.state.save().await.expect("Failed to save state");
-    }
-}
-
-impl GolChallengeContract {
-    fn assert_scoring_chain(&mut self, error: &str) {
-        let Parameters { scoring_chain_id } = self.runtime.application_parameters();
-        assert_eq!(self.runtime.chain_id(), scoring_chain_id, "{}", error);
     }
 }
 
