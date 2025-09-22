@@ -62,9 +62,10 @@ CHAIN_1=3e6bdd095d2e4e30f12e8da38ea1409f2442696b01badbda4226577df09479ff
 CHAIN_2=78bfe088e0e6ab2acbb894c7bac4b537650a98ca7337667cef38359b6c590508
 CHAIN_3=d6e2e25987b75a51f9ac1df8851bd0e0d16d858e7e2896b1e9d511bac8e13f92
 
-# Test user
+# Test user and its pinned scoring chain
 MATHIEU_CLI="0x359C1a2203aE35adBFA85bC9C1EAB540bF8797a7"
-CHAIN=$CHAIN_1
+# 2 == 0x359C1a220 % 4
+CHAIN=$CHAIN_2
 
 # Getting a chain and tracking the scores
 FAUCET_URL=https://faucet.testnet-conway.linera.net

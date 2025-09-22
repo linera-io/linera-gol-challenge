@@ -1,11 +1,12 @@
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { lineraAdapter } from "../lib/linera-adapter";
-import { LINERA_RPC_URL, GOL_APP_ID, PREVIOUS_GOL_APP_IDS } from "../constants";
+import { LINERA_RPC_URL, GOL_APP_ID, PREVIOUS_GOL_APP_IDS, GOL_SCORING_CHAIN_IDS } from "../constants";
 import { Puzzle, LineraBoard, ValidationResult, DifficultyLevel } from "@/lib/types/puzzle.types";
 
 export interface WalletInfo {
   chainId: string;
   createdAt: string;
+  scoringChainId: string;
 }
 
 export class LineraService {
@@ -37,13 +38,19 @@ export class LineraService {
 
       await lineraAdapter.setApplications(GOL_APP_ID, PREVIOUS_GOL_APP_IDS);
 
+      const address = lineraAdapter.getAddress();
+      const value = Number(address.substring(0, 10)); // top 8 hex digits including 0x
+      const index = value % GOL_SCORING_CHAIN_IDS.length;
+      const scoringChainId = GOL_SCORING_CHAIN_IDS[index];
+
       this.walletInfo = {
         chainId: provider.chainId,
         createdAt: new Date().toISOString(),
+        scoringChainId: scoringChainId,
       };
 
       this.initialized = true;
-      console.log("Linera service initialized successfully");
+      console.log("✅ Linera service initialized successfully: ", this.walletInfo);
     } catch (error) {
       console.error("Failed to initialize Linera service:", error);
       throw error;
@@ -57,7 +64,7 @@ export class LineraService {
   }
 
   private async ensureInitialized(): Promise<void> {
-    if (!this.initialized || !lineraAdapter.isApplicationSet()) {
+    if (!this.initialized || !lineraAdapter.isApplicationSet() || !this.walletInfo) {
       throw new Error("Linera service not initialized");
     }
   }
@@ -141,15 +148,15 @@ export class LineraService {
 
   async submitSolution(puzzleId: string, board: LineraBoard): Promise<boolean> {
     await this.ensureInitialized();
-
+    const scoringChainId = this.getWalletInfo().scoringChainId;
     try {
       const mutation = {
         query: `
-          mutation SubmitSolution($puzzleId: String!, $board: BoardInput!) {
-            submitSolution(puzzleId: $puzzleId, board: $board)
+          mutation SubmitSolution($puzzleId: String!, $board: BoardInput!, $scoringChainId: String!) {
+            submitSolution(puzzleId: $puzzleId, board: $board, scoringChainId: $scoringChainId)
           }
         `,
-        variables: { puzzleId, board },
+        variables: { puzzleId, board, scoringChainId },
       };
 
       const result = await lineraAdapter.queryApplication<any>(mutation);
@@ -353,7 +360,10 @@ export class LineraService {
     return cells;
   }
 
-  getWalletInfo(): WalletInfo | null {
+  getWalletInfo(): WalletInfo {
+    if (!this.walletInfo) {
+      throw new Error("Linera service not initialized");
+    }
     return this.walletInfo;
   }
 }
