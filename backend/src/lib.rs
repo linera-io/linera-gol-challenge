@@ -32,7 +32,7 @@ pub enum Operation {
         /// Optional owner to credit instead of the current authenticated owner.
         owner: Option<AccountOwner>,
         /// The scoring chain to use.
-        scoring_chain_id: ChainId,
+        scoring_chain_id: Option<ChainId>,
     },
     // Scoring appchain only
     /// Register a puzzle to activate scoring for it.

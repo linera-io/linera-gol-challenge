@@ -83,14 +83,16 @@ impl Contract for GolChallengeContract {
                     .insert(&puzzle_id, solution)
                     .expect("Store solution");
 
-                let message = Message {
-                    puzzle_id,
-                    timestamp,
-                    owner,
-                };
-                self.runtime
-                    .prepare_message(message)
-                    .send_to(scoring_chain_id);
+                if let Some(scoring_chain_id) = scoring_chain_id {
+                    let message = Message {
+                        puzzle_id,
+                        timestamp,
+                        owner,
+                    };
+                    self.runtime
+                        .prepare_message(message)
+                        .send_to(scoring_chain_id);
+                }
             }
             Operation::RegisterPuzzle { puzzle_id } => {
                 // Puzzles are only registered on a scoring chain.
