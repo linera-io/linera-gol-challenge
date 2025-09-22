@@ -114,14 +114,17 @@ impl Contract for GolChallengeContract {
             .contains(&puzzle_id)
             .await
             .unwrap();
-        assert!(is_registered, "Puzzle must be registered");
-        let map = self
-            .state
-            .reported_solutions
-            .load_entry_mut(&owner)
-            .await
-            .unwrap();
-        map.insert(&puzzle_id, timestamp).unwrap();
+        if is_registered {
+            let map = self
+                .state
+                .reported_solutions
+                .load_entry_mut(&owner)
+                .await
+                .unwrap();
+            map.insert(&puzzle_id, timestamp).unwrap();
+        } else {
+            log::trace!("Ignoring unregistered puzzle");
+        }
     }
 
     async fn store(mut self) {
