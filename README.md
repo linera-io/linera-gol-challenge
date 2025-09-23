@@ -18,7 +18,7 @@ flowchart LR
     subgraph "Linera network"
         chain1["user chain"]
         chain2["user chain"]
-        chain3["GoL scoring chain"]
+        chain3["GoL scoring chain x 4"]
         style chain1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
         style chain2 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
     end
