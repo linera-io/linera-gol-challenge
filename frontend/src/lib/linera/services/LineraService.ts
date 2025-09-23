@@ -250,9 +250,7 @@ export class LineraService {
         variables: { puzzleId },
       };
 
-      const results = await lineraAdapter.queryPreviousApplications<any>(query);
-      const result = await lineraAdapter.queryApplication<any>(query);
-      results.push(result);
+      const results = await lineraAdapter.queryCurrentAndPreviousApplications<any>(query);
       console.log("[GOL] Check puzzle completion response", results);
 
       for (const result of results) {
@@ -289,9 +287,7 @@ export class LineraService {
         variables: {},
       };
 
-      const results = await lineraAdapter.queryPreviousApplications<any>(query);
-      const result = await lineraAdapter.queryApplication<any>(query);
-      results.push(result);
+      const results = await lineraAdapter.queryCurrentAndPreviousApplications<any>(query);
       console.log("[GOL] Query sent using address: ", lineraAdapter.getAddress());
 
       const keys = new Set<string>();

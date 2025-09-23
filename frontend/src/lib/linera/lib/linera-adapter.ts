@@ -134,14 +134,21 @@ export class LineraAdapter {
     return response;
   }
 
-  async queryPreviousApplications<T>(query: object): Promise<T[]> {
+  async queryCurrentAndPreviousApplications<T>(query: object): Promise<T[]> {
+    if (!this.application) throw new Error("Application not set");
+
     const responses = [];
+    const result = await this.application.query(JSON.stringify(query));
+    const response = JSON.parse(result);
+    responses.push(response);
+
     for (const application of this.previousApplications) {
         const result = await application.query(JSON.stringify(query));
         const response = JSON.parse(result);
         responses.push(response);
     }
-    console.log("✅ Previous Linera applications queried successfully!");
+
+    console.log("✅ Current and previous Linera applications queried successfully: ", responses);
     return responses;
   }
 
