@@ -15,7 +15,7 @@ export function useCompletedPuzzles() {
     queryKey: ["completedPuzzles"],
     queryFn: async () => {
       const lineraService = LineraService.getInstance();
-      const response = lineraService.getCompletedPuzzleIds();
+      const response = await lineraService.getCompletedPuzzleIds();
       console.log("[GOL] Got completed puzzle IDs", response);
       return response;
     },
