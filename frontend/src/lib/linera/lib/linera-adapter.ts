@@ -60,7 +60,7 @@ export class LineraAdapter {
 
         const signer = await new DynamicSigner(dynamicWallet);
         const client = await new Client(wallet, signer);
-        console.log("✅ Linera wallet created successfully!");
+        console.log("✅ Using Linera chain: ", chainId);
 
         client.onNotification((notification : any) => {
           let newBlock = notification.reason.NewBlock;
@@ -108,8 +108,8 @@ export class LineraAdapter {
     const application = await this.provider.client.frontend().application(appId);
 
     if (!application) throw new Error("Failed to get application");
-    console.log("✅ Linera application set successfully!");
     this.application = application;
+    console.log("✅ Linera application set successfully: ", appId);
 
     const applications = []
     for (const appId of previousAppIds) {
@@ -118,7 +118,7 @@ export class LineraAdapter {
       applications.push(application);
     }
     this.previousApplications = applications;
-    console.log("✅ Previous Linera application set successfully!");
+    console.log("✅ Previous Linera application set successfully: ", previousAppIds);
 
     console.log("🔄 Notifying connection state change (app set)");
     this.onConnectionChange?.();
@@ -130,8 +130,8 @@ export class LineraAdapter {
     const result = await this.application.query(JSON.stringify(query));
     const response = JSON.parse(result);
 
-    console.log("✅ Linera application queried successfully!");
-    return response as T;
+    console.log("✅ Linera application queried successfully: ", response);
+    return response;
   }
 
   async queryPreviousApplications<T>(query: object): Promise<T[]> {
@@ -142,7 +142,7 @@ export class LineraAdapter {
         responses.push(response);
     }
     console.log("✅ Previous Linera applications queried successfully!");
-    return responses as T[];
+    return responses;
   }
 
   getProvider(): LineraProvider {
