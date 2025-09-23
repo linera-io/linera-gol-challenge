@@ -30,7 +30,6 @@ linera_spawn linera net up --policy-config testnet --with-faucet --faucet-port $
 ```
 
 Create the user wallet and add a chain to it:
-
 ```bash
 export LINERA_WALLET="$LINERA_TMP_DIR/wallet.json"
 export LINERA_KEYSTORE="$LINERA_TMP_DIR/keystore.json"

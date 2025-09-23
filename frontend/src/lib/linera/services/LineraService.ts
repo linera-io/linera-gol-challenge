@@ -1,11 +1,12 @@
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { lineraAdapter } from "../lib/linera-adapter";
-import { GOL_APP_ID } from "../constants";
+import { LINERA_RPC_URL, GOL_APP_ID, PREVIOUS_GOL_APP_IDS, GOL_SCORING_CHAIN_IDS } from "../constants";
 import { Puzzle, LineraBoard, ValidationResult, DifficultyLevel } from "@/lib/types/puzzle.types";
 
 export interface WalletInfo {
   chainId: string;
   createdAt: string;
+  scoringChainId: string;
 }
 
 export class LineraService {
@@ -33,17 +34,23 @@ export class LineraService {
     try {
       console.log("Initializing Linera service with Dynamic wallet...");
 
-      const provider = await lineraAdapter.connect(dynamicWallet);
+      const provider = await lineraAdapter.connect(dynamicWallet, LINERA_RPC_URL);
 
-      await lineraAdapter.setApplication(GOL_APP_ID);
+      await lineraAdapter.setApplications(GOL_APP_ID, PREVIOUS_GOL_APP_IDS);
+
+      const address = lineraAdapter.getAddress();
+      const value = Number(address.substring(0, 10)); // top 8 hex digits including 0x
+      const index = value % GOL_SCORING_CHAIN_IDS.length;
+      const scoringChainId = GOL_SCORING_CHAIN_IDS[index];
 
       this.walletInfo = {
         chainId: provider.chainId,
         createdAt: new Date().toISOString(),
+        scoringChainId: scoringChainId,
       };
 
       this.initialized = true;
-      console.log("Linera service initialized successfully");
+      console.log("✅ Linera service initialized successfully: ", this.walletInfo);
     } catch (error) {
       console.error("Failed to initialize Linera service:", error);
       throw error;
@@ -57,7 +64,7 @@ export class LineraService {
   }
 
   private async ensureInitialized(): Promise<void> {
-    if (!this.initialized || !lineraAdapter.isApplicationSet()) {
+    if (!this.initialized || !lineraAdapter.isApplicationSet() || !this.walletInfo) {
       throw new Error("Linera service not initialized");
     }
   }
@@ -141,15 +148,15 @@ export class LineraService {
 
   async submitSolution(puzzleId: string, board: LineraBoard): Promise<boolean> {
     await this.ensureInitialized();
-
+    const scoringChainId = this.getWalletInfo().scoringChainId;
     try {
       const mutation = {
         query: `
-          mutation SubmitSolution($puzzleId: String!, $board: BoardInput!) {
-            submitSolution(puzzleId: $puzzleId, board: $board)
+          mutation SubmitSolution($puzzleId: String!, $board: BoardInput!, $scoringChainId: String!) {
+            submitSolution(puzzleId: $puzzleId, board: $board, scoringChainId: $scoringChainId)
           }
         `,
-        variables: { puzzleId, board },
+        variables: { puzzleId, board, scoringChainId },
       };
 
       const result = await lineraAdapter.queryApplication<any>(mutation);
@@ -250,23 +257,29 @@ export class LineraService {
         variables: { puzzleId },
       };
 
-      const result = await lineraAdapter.queryApplication<any>(query);
-      console.log("[GOL] Check puzzle completion response", result);
+      const results = await lineraAdapter.queryCurrentAndPreviousApplications<any>(query);
+      console.log("[GOL] Check puzzle completion response", results);
 
-      if (result.errors) {
-        // If there's an error, the solution doesn't exist
-        return false;
+      for (const result of results) {
+        if (result.errors) {
+          // If there's an error, skip the reponse.
+          continue
+        }
+
+        // If we have a solution entry, the puzzle is completed
+        if (result.data?.solutions?.entry !== null) {
+          return true;
+        }
       }
 
-      // If we have a solution entry, the puzzle is completed
-      return result.data?.solutions?.entry !== null;
+      return false;
     } catch (error) {
       console.error("Failed to check puzzle completion:", error);
       return false;
     }
   }
 
-  async getCompletedPuzzleIds(): Promise<string[]> {
+  async getCompletedPuzzleIds(): Promise<Set<string>> {
     await this.ensureInitialized();
 
     try {
@@ -281,20 +294,26 @@ export class LineraService {
         variables: {},
       };
 
-      const result = await lineraAdapter.queryApplication<any>(query);
-      // console.log("[GOL] Got completed puzzle IDs", result);
+      const results = await lineraAdapter.queryCurrentAndPreviousApplications<any>(query);
       console.log("[GOL] Query sent using address: ", lineraAdapter.getAddress());
 
-      if (result.errors) {
-        console.error("GraphQL errors:", result.errors);
-        return [];
+      const keys = new Set<string>();
+      for (const result of results) {
+        if (result.errors) {
+          continue
+        }
+
+        // If we have a solution entry, the puzzle is completed
+        if (result.data?.solutions?.keys) {
+          result.data?.solutions?.keys.forEach((item) => keys.add(item));
+        }
       }
 
       // The keys field returns an array of DataBlobHash (puzzle IDs)
-      return result.data?.solutions?.keys || [];
+      return keys;
     } catch (error) {
       console.error("Failed to get completed puzzle IDs:", error);
-      return [];
+      return new Set<string>();
     }
   }
 
@@ -339,7 +358,10 @@ export class LineraService {
     return cells;
   }
 
-  getWalletInfo(): WalletInfo | null {
+  getWalletInfo(): WalletInfo {
+    if (!this.walletInfo) {
+      throw new Error("Linera service not initialized");
+    }
     return this.walletInfo;
   }
 }
