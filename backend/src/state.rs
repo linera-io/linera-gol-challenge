@@ -14,11 +14,12 @@ use serde::{Deserialize, Serialize};
 #[graphql(complex)]
 #[view(context = ViewStorageContext)]
 pub struct GolChallengeState {
+    // User chains only.
     /// The local solutions previously submitted by an owner of the chain. Puzzles do not
     /// need to be registered.
     pub solutions: MapView<DataBlobHash, Solution>,
 
-    // Scoring chain only.
+    // Scoring chains only.
     /// The set of registered puzzles.
     pub registered_puzzles: SetView<DataBlobHash>,
     /// The set of all solutions reported to us, indexed by owner, then by puzzle_id. We only track

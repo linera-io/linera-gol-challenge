@@ -11,7 +11,7 @@ pub mod game;
 use async_graphql::{Request, Response};
 use linera_sdk::{
     graphql::GraphQLMutationRoot,
-    linera_base_types::{AccountOwner, ContractAbi, DataBlobHash, ServiceAbi},
+    linera_base_types::{AccountOwner, ChainId, ContractAbi, DataBlobHash, ServiceAbi},
 };
 use serde::{Deserialize, Serialize};
 
@@ -31,6 +31,8 @@ pub enum Operation {
         board: Board,
         /// Optional owner to credit instead of the current authenticated owner.
         owner: Option<AccountOwner>,
+        /// The scoring chain to use.
+        scoring_chain_id: Option<ChainId>,
     },
     // Scoring appchain only
     /// Register a puzzle to activate scoring for it.

@@ -18,7 +18,7 @@ flowchart LR
     subgraph "Linera network"
         chain1["user chain"]
         chain2["user chain"]
-        chain3["GoL scoring chain"]
+        chain3["GoL scoring chain x 4"]
         style chain1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
         style chain2 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
     end
@@ -54,13 +54,18 @@ Run the commands below using `bash -e -x <(linera extract-script-from-markdown R
 
 ```bash
 # Production app
-APP_ID="27145fa604adf9996647a9a2add1dafe8f80f1a547835edf62ee408cd8903dd3"
+APP_ID=750eb4b947761eeece6c52fd488ec23442dce240fab150b93ea2212b014aaace
 
-# Test user
+# Scoring chains
+CHAIN_0=74b5850ecf6a7389523f7a9748dc6f81fc71533757f617b65e5c9f01fa1430b8
+CHAIN_1=3e6bdd095d2e4e30f12e8da38ea1409f2442696b01badbda4226577df09479ff
+CHAIN_2=78bfe088e0e6ab2acbb894c7bac4b537650a98ca7337667cef38359b6c590508
+CHAIN_3=d6e2e25987b75a51f9ac1df8851bd0e0d16d858e7e2896b1e9d511bac8e13f92
+
+# Test user and its pinned scoring chain
 MATHIEU_CLI="0x359C1a2203aE35adBFA85bC9C1EAB540bF8797a7"
-
-# Scoring chain
-CHAIN="e71636fde3a70cdbfdb7fd9bef6cb1ba632af8b0567b8f76df47b35489972dd3"
+# 2 == 0x359C1a220 % 4
+CHAIN=$CHAIN_2
 
 # Getting a chain and tracking the scores
 FAUCET_URL=https://faucet.testnet-conway.linera.net
