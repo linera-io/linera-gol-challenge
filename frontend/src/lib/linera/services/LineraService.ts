@@ -305,9 +305,7 @@ export class LineraService {
 
         // If we have a solution entry, the puzzle is completed
         if (result.data?.solutions?.keys) {
-          for (const key of result.data?.solutions?.keys) {
-              keys.add(key);
-          }
+          result.data?.solutions?.keys.forEach((item) => keys.add(item));
         }
       }
 
