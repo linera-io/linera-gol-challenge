@@ -62,11 +62,18 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     size: 16,
   },
   {
-    id: "3e77f863561ec8edd35be7bd80cdbb9dd3bb31b917b3f7bd22c28c1d79fb8fce",
+    id: "9b69850af39cbf98b85a85b631d6e1f383352032381fc85584f7363e47c522fe",
     title: "Four Blinkers",
     summary: "Create four blinkers from very few cells (strict variant).",
-    difficulty: "EASY",
+    difficulty: "MEDIUM",
     size: 16,
+  },
+  {
+    id: "766e8beb3b1fa346672cfddc84154564efcc901afde1c1e579b44e4aa0e4a455",
+    title: "Glider Collision",
+    summary: "Make two gliders collide and cancel each other out",
+    difficulty: "MEDIUM",
+    size: 12,
   },
 ];
 

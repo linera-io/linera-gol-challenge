@@ -143,9 +143,9 @@ fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
             Active,
         ),
         (
-            "25_glider_collision",
+            "23_glider_collision",
             create_glider_collision_puzzle_and_solution,
-            Draft,
+            Active,
         ),
         (
             "30_robot_face",
@@ -713,6 +713,7 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
 fn create_four_blinkers_with_initial_conditions_puzzle_and_solution() -> (Puzzle, Board) {
     let (mut puzzle, board) = create_four_blinkers_puzzle_and_solution();
     puzzle.summary = "Create four blinkers from very few cells (strict variant).".to_string();
+    puzzle.difficulty = Difficulty::Medium;
     puzzle.enforce_initial_conditions = true;
     (puzzle, board)
 }
@@ -810,7 +811,7 @@ fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
     let puzzle = Puzzle {
         title: "Glider Collision".to_string(),
         summary: "Make two gliders collide and cancel each other out".to_string(),
-        difficulty: Difficulty::Easy,
+        difficulty: Difficulty::Medium,
         size: 12,
         metadata: String::new(),
         minimal_steps: 16,
