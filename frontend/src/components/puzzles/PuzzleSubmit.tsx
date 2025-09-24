@@ -64,7 +64,7 @@ function PuzzleInstructions({ puzzle }: { puzzle: Puzzle }) {
         <div className="flex items-start gap-2">
           <TriangleAlert size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
           <span className="font-semibold text-red-600">
-            In this puzzle, it is also required the goal is not satisfied too early, i.e. at
+            It is also required the goal is not yet satisfied at
             generation {puzzle.minimalSteps - 1}.
           </span>
         </div>

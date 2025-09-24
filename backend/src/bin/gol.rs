@@ -143,8 +143,13 @@ fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
             Active,
         ),
         (
-            "23_glider_collision",
-            create_glider_collision_puzzle_and_solution,
+            "23_glider_collision_square",
+            create_glider_collision_square_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "24_glider_collision_cancel",
+            create_glider_collision_cancel_puzzle_and_solution,
             Active,
         ),
         (
@@ -694,7 +699,7 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
     let final_conditions = final_board.to_exactly_matching_conditions();
 
     let puzzle = Puzzle {
-        title: "Four Blinkers".to_string(),
+        title: "Four Blinkers 1".to_string(),
         summary: "Create four blinkers from very few cells".to_string(),
         difficulty: Difficulty::Easy,
         size,
@@ -712,6 +717,7 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
 
 fn create_four_blinkers_with_initial_conditions_puzzle_and_solution() -> (Puzzle, Board) {
     let (mut puzzle, board) = create_four_blinkers_puzzle_and_solution();
+    puzzle.title = "Four Blinkers 2".to_string();
     puzzle.summary = "Create four blinkers from very few cells (strict variant).".to_string();
     puzzle.difficulty = Difficulty::Medium;
     puzzle.enforce_initial_conditions = true;
@@ -781,7 +787,66 @@ fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
     (puzzle, initial_board)
 }
 
-fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
+fn create_glider_collision_square_puzzle_and_solution() -> (Puzzle, Board) {
+    // Create two gliders on a collision course that will create a square.
+    // First glider (moving down-right) starting at top-left
+    // Second glider (moving up-left) starting at bottom-right
+    let initial_board = Board::with_live_cells(
+        12,
+        vec![
+            // First glider (top-left, moving down-right)
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 2 },
+            Position { x: 1, y: 3 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 3 },
+            // Second glider (bottom-right, moving up-left)
+            // Glider pattern rotated 180 degrees
+            Position { x: 9, y: 10 },
+            Position { x: 8, y: 9 },
+            Position { x: 10, y: 8 },
+            Position { x: 9, y: 8 },
+            Position { x: 8, y: 8 },
+        ],
+    );
+
+    // After collision, the board should be empty or nearly empty
+    let final_board = initial_board.advance(16);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let puzzle = Puzzle {
+        title: "Glider Collision 1".to_string(),
+        summary: "Make two gliders collide and create a square".to_string(),
+        difficulty: Difficulty::Medium,
+        size: 12,
+        metadata: String::new(),
+        minimal_steps: 14,
+        maximal_steps: 14,
+        enforce_initial_conditions: true,
+        is_strict: true,
+        initial_conditions: vec![
+            // First glider should be in top-left area
+            Condition::TestRectangle {
+                x_range: 0..5,
+                y_range: 0..5,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+            // Second glider should be in bottom-right area
+            Condition::TestRectangle {
+                x_range: 7..12,
+                y_range: 7..12,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+        ],
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_collision_cancel_puzzle_and_solution() -> (Puzzle, Board) {
     // Create two gliders on a collision course that will cancel each other out
     // First glider (moving down-right) starting at top-left
     // Second glider (moving up-left) starting at bottom-right
@@ -809,7 +874,7 @@ fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
     let final_conditions = final_board.to_exactly_matching_conditions();
 
     let puzzle = Puzzle {
-        title: "Glider Collision".to_string(),
+        title: "Glider Collision 2".to_string(),
         summary: "Make two gliders collide and cancel each other out".to_string(),
         difficulty: Difficulty::Medium,
         size: 12,
