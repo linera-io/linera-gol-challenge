@@ -25,9 +25,9 @@ enum Commands {
         /// Optional output directory (defaults to current directory)
         #[arg(short, long)]
         output_dir: Option<PathBuf>,
-        /// Include draft puzzles
+        /// Include all puzzles
         #[arg(long)]
-        draft: bool,
+        all: bool,
     },
     /// Generate TypeScript metadata for puzzles
     GenerateMetadata {
@@ -37,9 +37,9 @@ enum Commands {
         /// Path to JSON file mapping puzzle names to blob IDs
         #[arg(long)]
         blob_map: PathBuf,
-        /// Include draft puzzles
+        /// Include all puzzles
         #[arg(long)]
-        draft: bool,
+        all: bool,
     },
     /// Print the contents of a puzzle file
     PrintPuzzle {
@@ -67,16 +67,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::CreatePuzzles { output_dir, draft } => {
+        Commands::CreatePuzzles { output_dir, all } => {
             let output_path = output_dir.unwrap_or_else(|| PathBuf::from("."));
-            create_puzzles(&output_path, draft)?;
+            create_puzzles(&output_path, all)?;
         }
         Commands::GenerateMetadata {
             output,
             blob_map,
-            draft,
+            all,
         } => {
-            generate_metadata(&output, &blob_map, draft)?;
+            generate_metadata(&output, &blob_map, all)?;
         }
         Commands::PrintPuzzle { path } => {
             print_puzzle(&path)?;
@@ -92,41 +92,91 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+enum PuzzleStatus {
+    Draft,
+    Active,
+    Retired,
+}
+
 #[allow(clippy::type_complexity)]
-fn get_all_puzzles(draft: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
-    let mut puzzles: Vec<(&'static str, fn() -> (Puzzle, Board))> = vec![
-        ("01_block_pattern", create_block_puzzle_and_solution),
-        ("02_beehive_pattern", create_beehive_puzzle_and_solution),
-        ("03_loaf_pattern", create_loaf_puzzle_and_solution),
-        ("04_boat_pattern", create_boat_puzzle_and_solution),
-        ("05_tub_pattern", create_tub_puzzle_and_solution),
-        ("06_blinker_pattern", create_blinker_puzzle_and_solution),
-        ("07_beacon_pattern", create_beacon_puzzle_and_solution),
-        ("10_clock_pattern", create_clock_puzzle_and_solution),
+fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
+    use PuzzleStatus::*;
+
+    let puzzles: Vec<(&'static str, fn() -> (Puzzle, Board), PuzzleStatus)> = vec![
+        (
+            "01_block_pattern",
+            create_block_puzzle_and_solution,
+            Retired,
+        ),
+        (
+            "02_beehive_pattern",
+            create_beehive_puzzle_and_solution,
+            Retired,
+        ),
+        ("03_loaf_pattern", create_loaf_puzzle_and_solution, Retired),
+        ("04_boat_pattern", create_boat_puzzle_and_solution, Active),
+        ("05_tub_pattern", create_tub_puzzle_and_solution, Active),
+        (
+            "06_blinker_pattern",
+            create_blinker_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "07_beacon_pattern",
+            create_beacon_puzzle_and_solution,
+            Active,
+        ),
+        ("10_clock_pattern", create_clock_puzzle_and_solution, Active),
         (
             "20_glider_migration",
             create_glider_migration_puzzle_and_solution,
+            Active,
         ),
-        ("21_four_blinkers", create_four_blinkers_puzzle_and_solution),
+        (
+            "21_four_blinkers",
+            create_four_blinkers_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "22_four_blinkers_with_initial_conditions",
+            create_four_blinkers_with_initial_conditions_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "25_glider_collision",
+            create_glider_collision_puzzle_and_solution,
+            Draft,
+        ),
+        (
+            "30_robot_face",
+            create_robot_face_puzzle_and_solution,
+            Draft,
+        ),
     ];
 
-    if draft {
-        puzzles.push((
-            "21_glider_collision",
-            create_glider_collision_puzzle_and_solution,
-        ));
-        puzzles.push(("22_robot_face", create_robot_face_puzzle_and_solution));
+    if all {
+        puzzles.into_iter().map(|(name, f, _)| (name, f)).collect()
+    } else {
+        puzzles
+            .into_iter()
+            .filter_map(|(name, f, state)| {
+                if matches!(state, Active) {
+                    Some((name, f))
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
-    puzzles
 }
 
 fn generate_metadata(
     output_path: &PathBuf,
     blob_map_path: &PathBuf,
-    draft: bool,
+    all: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get all puzzle and solution creators
-    let puzzles_info = get_all_puzzles(draft);
+    let puzzles_info = get_puzzles(all);
 
     // Load blob mapping if provided
     let blob_map: HashMap<String, String> = {
@@ -239,12 +289,12 @@ fn generate_metadata(
     Ok(())
 }
 
-fn create_puzzles(output_dir: &PathBuf, draft: bool) -> Result<(), Box<dyn std::error::Error>> {
+fn create_puzzles(output_dir: &PathBuf, all: bool) -> Result<(), Box<dyn std::error::Error>> {
     // Create output directory if it doesn't exist.
     fs::create_dir_all(output_dir)?;
 
     // Generate puzzles.
-    let puzzles = get_all_puzzles(draft);
+    let puzzles = get_puzzles(all);
 
     for (name, puzzle_and_solution_creator) in puzzles {
         let (mut puzzle, solution) = puzzle_and_solution_creator();
@@ -658,6 +708,13 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
     };
 
     (puzzle, initial_board)
+}
+
+fn create_four_blinkers_with_initial_conditions_puzzle_and_solution() -> (Puzzle, Board) {
+    let (mut puzzle, board) = create_four_blinkers_puzzle_and_solution();
+    puzzle.summary = "Create four blinkers from very few cells (strict variant).".to_string();
+    puzzle.enforce_initial_conditions = true;
+    (puzzle, board)
 }
 
 #[allow(clippy::identity_op)]
