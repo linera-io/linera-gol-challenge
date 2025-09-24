@@ -38,6 +38,8 @@ export interface Puzzle {
   size: number;
   minimalSteps: number;
   maximalSteps: number;
+  enforceInitialConditions: boolean,
+  isStrict: boolean,
   initialConditions?: Condition[];
   finalConditions?: Condition[];
 }

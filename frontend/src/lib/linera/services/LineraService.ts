@@ -198,6 +198,8 @@ export class LineraService {
               size
               minimalSteps
               maximalSteps
+              enforceInitialConditions
+              isStrict
               initialConditions
               finalConditions
             }
@@ -240,6 +242,8 @@ export class LineraService {
         size: puzzleData.size || 7,
         minimalSteps: puzzleData.minimalSteps || 0,
         maximalSteps: puzzleData.maximalSteps || 100,
+        enforceInitialConditions: puzzleData.enforceInitialConditions || false,
+        isStrict: puzzleData.isStrict || false,
         initialConditions: puzzleData.initialConditions || [],
         finalConditions: puzzleData.finalConditions || [],
       };
