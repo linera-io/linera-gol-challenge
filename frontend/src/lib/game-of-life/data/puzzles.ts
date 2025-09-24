@@ -13,27 +13,6 @@ export type { PuzzleMetadata } from "@/lib/types/puzzle.types";
 
 export const KNOWN_PUZZLES: PuzzleMetadata[] = [
   {
-    id: "3c1b58d04aad8558ead0efef23b0e0d5e1ab765cb165839cdd416e3cb00b73ef",
-    title: "Block",
-    summary: "Create a stable 2x2 block pattern in the center of the board",
-    difficulty: "TUTORIAL",
-    size: 8,
-  },
-  {
-    id: "1def66a6cfd77674d11c19444c09c36cbdd033da818bb34731fed1807ea6bcb1",
-    title: "Beehive",
-    summary: "Create a stable beehive pattern (6-cell hexagonal shape)",
-    difficulty: "TUTORIAL",
-    size: 9,
-  },
-  {
-    id: "e0a695e714e2d3261116139d0c82bd45ded5cddfbbb6a5e378d5708840da95bd",
-    title: "Loaf",
-    summary: "Create a stable loaf pattern (7-cell bread loaf shape)",
-    difficulty: "TUTORIAL",
-    size: 10,
-  },
-  {
     id: "23cf5bcd537a69ac864e8cf48ebc5f8983f5c198c0684edcbc0124fffdb200e2",
     title: "Boat",
     summary: "Create a stable boat pattern (5-cell boat shape)",
@@ -79,6 +58,13 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     id: "29e4dc41863a3e68dfe6ad0a5744b22fed0b0a2fce6e568329e7de1bf7daaa6a",
     title: "Four Blinkers",
     summary: "Create four blinkers from very few cells",
+    difficulty: "EASY",
+    size: 16,
+  },
+  {
+    id: "3e77f863561ec8edd35be7bd80cdbb9dd3bb31b917b3f7bd22c28c1d79fb8fce",
+    title: "Four Blinkers",
+    summary: "Create four blinkers from very few cells (strict variant).",
     difficulty: "EASY",
     size: 16,
   },
