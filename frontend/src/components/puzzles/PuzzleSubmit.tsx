@@ -1,6 +1,6 @@
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { CheckCircle, AlertCircle, Lightbulb, Target } from "lucide-react";
+import { CheckCircle, AlertCircle, Lightbulb, Target, TriangleAlert } from "lucide-react";
 import { Puzzle } from "@/lib/types/puzzle.types";
 
 interface PuzzleSubmitProps {
@@ -33,23 +33,44 @@ function PuzzleInstructions({ puzzle }: { puzzle: Puzzle }) {
 
   const generationText = hasStepRequirement
     ? puzzle.minimalSteps === puzzle.maximalSteps
-      ? `${puzzle.minimalSteps} generation${puzzle.minimalSteps !== 1 ? "s" : ""}`
-      : `${puzzle.minimalSteps}-${puzzle.maximalSteps} generations`
-    : "N generations";
+      ? `at generation ${puzzle.minimalSteps}`
+      : `between generation ${puzzle.minimalSteps} and ${puzzle.maximalSteps}`
+    : "N&nbsp;generations";
 
   return (
     <div className="text-sm text-gray-600 space-y-2">
       <div className="flex items-start gap-2">
         <Lightbulb size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
-        <span>Use the hint to create an initial pattern.</span>
+        <span>Use the hints to position cells at generation 0.</span>
       </div>
+      {puzzle.enforceInitialConditions ? (
+        <div className="flex items-start gap-2">
+          <TriangleAlert size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
+          <span className="font-semibold text-red-600">
+            In this puzzle, hints must be followed for a solution to be valid.
+          </span>
+        </div>
+      ) : (
+        <span></span>
+      )}
       <div className="flex items-start gap-2">
         <Target size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
         <span>
-          Submit your initial pattern when the goal is satisfied after{" "}
+          Submit your solution when the goal is satisfied{" "}
           <span className="font-semibold text-red-600">{generationText}</span>.
         </span>
       </div>
+      {puzzle.isStrict ? (
+        <div className="flex items-start gap-2">
+          <TriangleAlert size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
+          <span className="font-semibold text-red-600">
+            It is also required that the goal is not yet satisfied at
+            generation {puzzle.minimalSteps - 1}.
+          </span>
+        </div>
+      ) : (
+        <span></span>
+      )}
     </div>
   );
 }

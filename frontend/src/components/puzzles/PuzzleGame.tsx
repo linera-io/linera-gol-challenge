@@ -16,7 +16,9 @@ export function PuzzleGame() {
 
 
   const handleCellClick = (x: number, y: number) => {
-    game.toggleCell(x, y);
+    if (game.generation == 0) {
+      game.toggleCell(x, y);
+    }
   };
 
   const handleSelectPuzzle = (puzzleId: string) => {

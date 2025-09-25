@@ -1,7 +1,19 @@
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { lineraAdapter } from "../lib/linera-adapter";
-import { LINERA_RPC_URL, GOL_APP_ID, PREVIOUS_GOL_APP_IDS, GOL_SCORING_CHAIN_IDS } from "../constants";
-import { Puzzle, LineraBoard, ValidationResult, DifficultyLevel } from "@/lib/types/puzzle.types";
+import { KNOWN_PUZZLES } from "../../game-of-life/data/puzzles";
+import {
+  LINERA_RPC_URL,
+  GOL_APP_ID,
+  PREVIOUS_GOL_APP_IDS,
+  GOL_SCORING_CHAIN_IDS,
+} from "../constants";
+import {
+  Puzzle,
+  PuzzleMetadata,
+  LineraBoard,
+  ValidationResult,
+  DifficultyLevel,
+} from "@/lib/types/puzzle.types";
 
 export interface WalletInfo {
   chainId: string;
@@ -186,6 +198,8 @@ export class LineraService {
               size
               minimalSteps
               maximalSteps
+              enforceInitialConditions
+              isStrict
               initialConditions
               finalConditions
             }
@@ -228,6 +242,8 @@ export class LineraService {
         size: puzzleData.size || 7,
         minimalSteps: puzzleData.minimalSteps || 0,
         maximalSteps: puzzleData.maximalSteps || 100,
+        enforceInitialConditions: puzzleData.enforceInitialConditions || false,
+        isStrict: puzzleData.isStrict || false,
         initialConditions: puzzleData.initialConditions || [],
         finalConditions: puzzleData.finalConditions || [],
       };
@@ -263,7 +279,7 @@ export class LineraService {
       for (const result of results) {
         if (result.errors) {
           // If there's an error, skip the reponse.
-          continue
+          continue;
         }
 
         // If we have a solution entry, the puzzle is completed
@@ -298,14 +314,21 @@ export class LineraService {
       console.log("[GOL] Query sent using address: ", lineraAdapter.getAddress());
 
       const keys = new Set<string>();
+      const validKeys = new Set<string>();
+      KNOWN_PUZZLES.forEach((puzzle: PuzzleMetadata) => validKeys.add(puzzle.id));
+
       for (const result of results) {
         if (result.errors) {
-          continue
+          continue;
         }
 
         // If we have a solution entry, the puzzle is completed
         if (result.data?.solutions?.keys) {
-          result.data?.solutions?.keys.forEach((item: any) => keys.add(item));
+          result.data?.solutions?.keys.forEach((key: string) => {
+            if (validKeys.has(key)) {
+              keys.add(key);
+            }
+          });
         }
       }
 
@@ -327,7 +350,7 @@ export class LineraService {
       this.notificationUnsubscribe();
       this.notificationUnsubscribe = null;
     }
-    
+
     lineraAdapter.reset();
     this.initialized = false;
     this.isInitializing = false;

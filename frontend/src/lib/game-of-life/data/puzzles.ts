@@ -13,27 +13,6 @@ export type { PuzzleMetadata } from "@/lib/types/puzzle.types";
 
 export const KNOWN_PUZZLES: PuzzleMetadata[] = [
   {
-    id: "3c1b58d04aad8558ead0efef23b0e0d5e1ab765cb165839cdd416e3cb00b73ef",
-    title: "Block",
-    summary: "Create a stable 2x2 block pattern in the center of the board",
-    difficulty: "TUTORIAL",
-    size: 8,
-  },
-  {
-    id: "1def66a6cfd77674d11c19444c09c36cbdd033da818bb34731fed1807ea6bcb1",
-    title: "Beehive",
-    summary: "Create a stable beehive pattern (6-cell hexagonal shape)",
-    difficulty: "TUTORIAL",
-    size: 9,
-  },
-  {
-    id: "e0a695e714e2d3261116139d0c82bd45ded5cddfbbb6a5e378d5708840da95bd",
-    title: "Loaf",
-    summary: "Create a stable loaf pattern (7-cell bread loaf shape)",
-    difficulty: "TUTORIAL",
-    size: 10,
-  },
-  {
     id: "23cf5bcd537a69ac864e8cf48ebc5f8983f5c198c0684edcbc0124fffdb200e2",
     title: "Boat",
     summary: "Create a stable boat pattern (5-cell boat shape)",
@@ -76,11 +55,32 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     size: 16,
   },
   {
-    id: "29e4dc41863a3e68dfe6ad0a5744b22fed0b0a2fce6e568329e7de1bf7daaa6a",
-    title: "Four Blinkers",
+    id: "af418a349070e153a9d8933ce8be985ee5f9b4730905c7cc81c700499434cc0c",
+    title: "Four Blinkers 1",
     summary: "Create four blinkers from very few cells",
     difficulty: "EASY",
     size: 16,
+  },
+  {
+    id: "60306c927ff2259a48a03a72846441bed3166163deb0eb52069dfa98d811162b",
+    title: "Four Blinkers 2",
+    summary: "Create four blinkers from very few cells (strict variant).",
+    difficulty: "MEDIUM",
+    size: 16,
+  },
+  {
+    id: "60fa6f76411591694d706524527e3898907960436df6ffbf7062e4ed85c17e9f",
+    title: "Glider Collision 1",
+    summary: "Make two gliders collide and create a square",
+    difficulty: "MEDIUM",
+    size: 12,
+  },
+  {
+    id: "268adb09f32f4c284fc8e93a6fe70afdf358a5f8bbd7c104ce18732aec303f27",
+    title: "Glider Collision 2",
+    summary: "Make two gliders collide and cancel each other out",
+    difficulty: "MEDIUM",
+    size: 12,
   },
 ];
 

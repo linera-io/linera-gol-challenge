@@ -77,7 +77,7 @@ APP_ID=$(linera --wait-for-outgoing-messages \
 ```bash
 cargo run --bin gol -- create-puzzles -o $LINERA_TMP_DIR
 
-BLOB_ID=$(linera publish-data-blob "$LINERA_TMP_DIR/02_beehive_pattern_puzzle.bcs")
+BLOB_ID=$(linera publish-data-blob "$LINERA_TMP_DIR/04_boat_puzzle.bcs")
 ```
 
 ### Publishing puzzles and running code-generation
@@ -124,8 +124,8 @@ query {
 ```gql,uri=http://localhost:8080/chains/$CHAIN/applications/$APP_ID
 mutation {
     submitSolution(puzzleId: "$BLOB_ID", scoringChainId: "$CHAIN_1", board: {
-        size: 9,
-        liveCells: [{x: 3, y: 2}, {x: 4, y: 2}, {x: 2, y: 3}, {x: 5, y: 3}, {x: 3, y: 4}, {x: 4, y: 4}]
+        size: 8,
+        liveCells: [{x: 2, y: 2}, {x: 3, y: 2}, {x: 2, y: 3}, {x: 4, y: 3}, {x: 3, y: 4}]
     })
 }
 ```

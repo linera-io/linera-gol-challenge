@@ -25,9 +25,9 @@ enum Commands {
         /// Optional output directory (defaults to current directory)
         #[arg(short, long)]
         output_dir: Option<PathBuf>,
-        /// Include draft puzzles
+        /// Include all puzzles
         #[arg(long)]
-        draft: bool,
+        all: bool,
     },
     /// Generate TypeScript metadata for puzzles
     GenerateMetadata {
@@ -37,9 +37,9 @@ enum Commands {
         /// Path to JSON file mapping puzzle names to blob IDs
         #[arg(long)]
         blob_map: PathBuf,
-        /// Include draft puzzles
+        /// Include all puzzles
         #[arg(long)]
-        draft: bool,
+        all: bool,
     },
     /// Print the contents of a puzzle file
     PrintPuzzle {
@@ -67,16 +67,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::CreatePuzzles { output_dir, draft } => {
+        Commands::CreatePuzzles { output_dir, all } => {
             let output_path = output_dir.unwrap_or_else(|| PathBuf::from("."));
-            create_puzzles(&output_path, draft)?;
+            create_puzzles(&output_path, all)?;
         }
         Commands::GenerateMetadata {
             output,
             blob_map,
-            draft,
+            all,
         } => {
-            generate_metadata(&output, &blob_map, draft)?;
+            generate_metadata(&output, &blob_map, all)?;
         }
         Commands::PrintPuzzle { path } => {
             print_puzzle(&path)?;
@@ -92,41 +92,80 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+enum PuzzleStatus {
+    Draft,
+    Active,
+    Retired,
+}
+
 #[allow(clippy::type_complexity)]
-fn get_all_puzzles(draft: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
-    let mut puzzles: Vec<(&'static str, fn() -> (Puzzle, Board))> = vec![
-        ("01_block_pattern", create_block_puzzle_and_solution),
-        ("02_beehive_pattern", create_beehive_puzzle_and_solution),
-        ("03_loaf_pattern", create_loaf_puzzle_and_solution),
-        ("04_boat_pattern", create_boat_puzzle_and_solution),
-        ("05_tub_pattern", create_tub_puzzle_and_solution),
-        ("06_blinker_pattern", create_blinker_puzzle_and_solution),
-        ("07_beacon_pattern", create_beacon_puzzle_and_solution),
-        ("10_clock_pattern", create_clock_puzzle_and_solution),
+fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
+    use PuzzleStatus::*;
+
+    let puzzles: Vec<(&'static str, fn() -> (Puzzle, Board), PuzzleStatus)> = vec![
+        ("01_block", create_block_puzzle_and_solution, Retired),
+        ("02_beehive", create_beehive_puzzle_and_solution, Retired),
+        ("03_loaf", create_loaf_puzzle_and_solution, Retired),
+        ("04_boat", create_boat_puzzle_and_solution, Active),
+        ("05_tub", create_tub_puzzle_and_solution, Active),
+        ("06_blinker", create_blinker_puzzle_and_solution, Active),
+        ("07_beacon", create_beacon_puzzle_and_solution, Active),
+        ("10_clock", create_clock_puzzle_and_solution, Active),
         (
             "20_glider_migration",
             create_glider_migration_puzzle_and_solution,
+            Active,
         ),
-        ("21_four_blinkers", create_four_blinkers_puzzle_and_solution),
+        (
+            "21_four_blinkers",
+            create_four_blinkers_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "22_four_blinkers_with_initial_conditions",
+            create_four_blinkers_with_initial_conditions_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "23_glider_collision_square",
+            create_glider_collision_square_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "24_glider_collision_cancel",
+            create_glider_collision_cancel_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "30_robot_face",
+            create_robot_face_puzzle_and_solution,
+            Draft,
+        ),
     ];
 
-    if draft {
-        puzzles.push((
-            "21_glider_collision",
-            create_glider_collision_puzzle_and_solution,
-        ));
-        puzzles.push(("22_robot_face", create_robot_face_puzzle_and_solution));
+    if all {
+        puzzles.into_iter().map(|(name, f, _)| (name, f)).collect()
+    } else {
+        puzzles
+            .into_iter()
+            .filter_map(|(name, f, state)| {
+                if matches!(state, Active) {
+                    Some((name, f))
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
-    puzzles
 }
 
 fn generate_metadata(
     output_path: &PathBuf,
     blob_map_path: &PathBuf,
-    draft: bool,
+    all: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get all puzzle and solution creators
-    let puzzles_info = get_all_puzzles(draft);
+    let puzzles_info = get_puzzles(all);
 
     // Load blob mapping if provided
     let blob_map: HashMap<String, String> = {
@@ -239,12 +278,12 @@ fn generate_metadata(
     Ok(())
 }
 
-fn create_puzzles(output_dir: &PathBuf, draft: bool) -> Result<(), Box<dyn std::error::Error>> {
+fn create_puzzles(output_dir: &PathBuf, all: bool) -> Result<(), Box<dyn std::error::Error>> {
     // Create output directory if it doesn't exist.
     fs::create_dir_all(output_dir)?;
 
     // Generate puzzles.
-    let puzzles = get_all_puzzles(draft);
+    let puzzles = get_puzzles(all);
 
     for (name, puzzle_and_solution_creator) in puzzles {
         let (mut puzzle, solution) = puzzle_and_solution_creator();
@@ -644,7 +683,7 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
     let final_conditions = final_board.to_exactly_matching_conditions();
 
     let puzzle = Puzzle {
-        title: "Four Blinkers".to_string(),
+        title: "Four Blinkers 1".to_string(),
         summary: "Create four blinkers from very few cells".to_string(),
         difficulty: Difficulty::Easy,
         size,
@@ -658,6 +697,15 @@ fn create_four_blinkers_puzzle_and_solution() -> (Puzzle, Board) {
     };
 
     (puzzle, initial_board)
+}
+
+fn create_four_blinkers_with_initial_conditions_puzzle_and_solution() -> (Puzzle, Board) {
+    let (mut puzzle, board) = create_four_blinkers_puzzle_and_solution();
+    puzzle.title = "Four Blinkers 2".to_string();
+    puzzle.summary = "Create four blinkers from very few cells (strict variant).".to_string();
+    puzzle.difficulty = Difficulty::Medium;
+    puzzle.enforce_initial_conditions = true;
+    (puzzle, board)
 }
 
 #[allow(clippy::identity_op)]
@@ -712,9 +760,9 @@ fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
         difficulty: Difficulty::Easy,
         size,
         metadata: String::new(),
-        minimal_steps: 170,
-        maximal_steps: 200,
-        enforce_initial_conditions: false,
+        minimal_steps: 174,
+        maximal_steps: 174,
+        enforce_initial_conditions: true,
         is_strict: false,
         initial_conditions,
         final_conditions,
@@ -723,7 +771,66 @@ fn create_robot_face_puzzle_and_solution() -> (Puzzle, Board) {
     (puzzle, initial_board)
 }
 
-fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
+fn create_glider_collision_square_puzzle_and_solution() -> (Puzzle, Board) {
+    // Create two gliders on a collision course that will create a square.
+    // First glider (moving down-right) starting at top-left
+    // Second glider (moving up-left) starting at bottom-right
+    let initial_board = Board::with_live_cells(
+        12,
+        vec![
+            // First glider (top-left, moving down-right)
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 2 },
+            Position { x: 1, y: 3 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 3 },
+            // Second glider (bottom-right, moving up-left)
+            // Glider pattern rotated 180 degrees
+            Position { x: 9, y: 10 },
+            Position { x: 8, y: 9 },
+            Position { x: 10, y: 8 },
+            Position { x: 9, y: 8 },
+            Position { x: 8, y: 8 },
+        ],
+    );
+
+    // After collision, the board should be empty or nearly empty
+    let final_board = initial_board.advance(16);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let puzzle = Puzzle {
+        title: "Glider Collision 1".to_string(),
+        summary: "Make two gliders collide and create a square".to_string(),
+        difficulty: Difficulty::Medium,
+        size: 12,
+        metadata: String::new(),
+        minimal_steps: 14,
+        maximal_steps: 14,
+        enforce_initial_conditions: true,
+        is_strict: true,
+        initial_conditions: vec![
+            // First glider should be in top-left area
+            Condition::TestRectangle {
+                x_range: 0..5,
+                y_range: 0..5,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+            // Second glider should be in bottom-right area
+            Condition::TestRectangle {
+                x_range: 7..12,
+                y_range: 7..12,
+                min_live_count: 5,
+                max_live_count: 5,
+            },
+        ],
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_collision_cancel_puzzle_and_solution() -> (Puzzle, Board) {
     // Create two gliders on a collision course that will cancel each other out
     // First glider (moving down-right) starting at top-left
     // Second glider (moving up-left) starting at bottom-right
@@ -751,9 +858,9 @@ fn create_glider_collision_puzzle_and_solution() -> (Puzzle, Board) {
     let final_conditions = final_board.to_exactly_matching_conditions();
 
     let puzzle = Puzzle {
-        title: "Glider Collision".to_string(),
+        title: "Glider Collision 2".to_string(),
         summary: "Make two gliders collide and cancel each other out".to_string(),
-        difficulty: Difficulty::Easy,
+        difficulty: Difficulty::Medium,
         size: 12,
         metadata: String::new(),
         minimal_steps: 16,

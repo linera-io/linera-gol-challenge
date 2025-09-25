@@ -178,6 +178,7 @@ export function usePuzzleGame() {
   });
 
   const submitSolution = useCallback(() => {
+    resetToInitial();
     return submitMutation.mutate();
   }, [submitMutation]);
 
