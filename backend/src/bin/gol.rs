@@ -103,30 +103,14 @@ fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
     use PuzzleStatus::*;
 
     let puzzles: Vec<(&'static str, fn() -> (Puzzle, Board), PuzzleStatus)> = vec![
-        (
-            "01_block_pattern",
-            create_block_puzzle_and_solution,
-            Retired,
-        ),
-        (
-            "02_beehive_pattern",
-            create_beehive_puzzle_and_solution,
-            Retired,
-        ),
-        ("03_loaf_pattern", create_loaf_puzzle_and_solution, Retired),
-        ("04_boat_pattern", create_boat_puzzle_and_solution, Active),
-        ("05_tub_pattern", create_tub_puzzle_and_solution, Active),
-        (
-            "06_blinker_pattern",
-            create_blinker_puzzle_and_solution,
-            Active,
-        ),
-        (
-            "07_beacon_pattern",
-            create_beacon_puzzle_and_solution,
-            Active,
-        ),
-        ("10_clock_pattern", create_clock_puzzle_and_solution, Active),
+        ("01_block", create_block_puzzle_and_solution, Retired),
+        ("02_beehive", create_beehive_puzzle_and_solution, Retired),
+        ("03_loaf", create_loaf_puzzle_and_solution, Retired),
+        ("04_boat", create_boat_puzzle_and_solution, Active),
+        ("05_tub", create_tub_puzzle_and_solution, Active),
+        ("06_blinker", create_blinker_puzzle_and_solution, Active),
+        ("07_beacon", create_beacon_puzzle_and_solution, Active),
+        ("10_clock", create_clock_puzzle_and_solution, Active),
         (
             "20_glider_migration",
             create_glider_migration_puzzle_and_solution,
