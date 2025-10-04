@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Script to publish all puzzles and generate metadata
-# Usage: ./publish-puzzles.sh
+# Script to publish all puzzles, register them in the "scoring chains", and generate
+# metadata in typescript for the frontend.
+# Usage: ./publish-puzzles.sh [URI_1 URI_2 ..]
 
 set -e
 
@@ -25,7 +26,7 @@ trap cleanup EXIT
 echo "Step 1: Creating puzzle files..."
 cargo run --bin gol -- create-puzzles -o "$TEMP_DIR"
 
-echo "Step 2: Publishing puzzles to blockchain..."
+echo "Step 2: Publishing puzzles to the blockchain..."
 echo "Note: Make sure your Linera wallet is configured and you have sufficient tokens"
 echo ""
 

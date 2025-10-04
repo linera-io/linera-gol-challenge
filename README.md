@@ -57,10 +57,10 @@ Run the commands below using `bash -e -x <(linera extract-script-from-markdown R
 APP_ID=750eb4b947761eeece6c52fd488ec23442dce240fab150b93ea2212b014aaace
 
 # Scoring chains
-CHAIN_0=74b5850ecf6a7389523f7a9748dc6f81fc71533757f617b65e5c9f01fa1430b8
-CHAIN_1=3e6bdd095d2e4e30f12e8da38ea1409f2442696b01badbda4226577df09479ff
-CHAIN_2=78bfe088e0e6ab2acbb894c7bac4b537650a98ca7337667cef38359b6c590508
-CHAIN_3=d6e2e25987b75a51f9ac1df8851bd0e0d16d858e7e2896b1e9d511bac8e13f92
+CHAIN_0=b4b3575bf33fc466b925b250812bb53147e4013d2be1d629efb7acb172d3c97b
+CHAIN_1=ad6dbf944468255c573b4ad36daddbfe03c2de255c471cf8a0bca74e6c044ffd
+CHAIN_2=35e0742d9f2171abd0758a334d3f3dbbe2c97567f5d455f0c4fca64a7c6ea3d3
+CHAIN_3=0325662e35fb81d180b532af3083c303878ac60d63d850229c5eddc535dfbb9d
 
 # Test user and its pinned scoring chain
 MATHIEU_CLI="0x359C1a2203aE35adBFA85bC9C1EAB540bF8797a7"
@@ -95,4 +95,17 @@ query {
         }
     }
 }
+```
+
+## Previous scoring chains
+
+The following chains were used previously and may contain valid scoring information from early users.
+
+```
+CHAIN_V1=e71636fde3a70cdbfdb7fd9bef6cb1ba632af8b0567b8f76df47b35489972dd3
+
+CHAIN_V2_0=74b5850ecf6a7389523f7a9748dc6f81fc71533757f617b65e5c9f01fa1430b8
+CHAIN_V2_1=3e6bdd095d2e4e30f12e8da38ea1409f2442696b01badbda4226577df09479ff
+CHAIN_V2_2=78bfe088e0e6ab2acbb894c7bac4b537650a98ca7337667cef38359b6c590508
+CHAIN_V2_3=d6e2e25987b75a51f9ac1df8851bd0e0d16d858e7e2896b1e9d511bac8e13f92
 ```
