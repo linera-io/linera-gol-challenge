@@ -75,7 +75,7 @@ export function GameControls({
           </button>
         </Tooltip>
         <div className="w-px h-8 bg-gray-300 mx-2" /> {/* Divider */}
-        <Tooltip content="Reset to generation 0">
+        <Tooltip content="Rewind back to generation 0">
           <button
             onClick={onResetToInitial}
             className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
