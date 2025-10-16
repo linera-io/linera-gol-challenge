@@ -92,6 +92,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[allow(dead_code)]
 enum PuzzleStatus {
     Draft,
     Active,
@@ -103,9 +104,9 @@ fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
     use PuzzleStatus::*;
 
     let puzzles: Vec<(&'static str, fn() -> (Puzzle, Board), PuzzleStatus)> = vec![
-        ("01_block", create_block_puzzle_and_solution, Retired),
-        ("02_beehive", create_beehive_puzzle_and_solution, Retired),
-        ("03_loaf", create_loaf_puzzle_and_solution, Retired),
+        ("01_block", create_block_puzzle_and_solution, Active),
+        ("02_beehive", create_beehive_puzzle_and_solution, Active),
+        ("03_loaf", create_loaf_puzzle_and_solution, Active),
         ("04_boat", create_boat_puzzle_and_solution, Active),
         ("05_tub", create_tub_puzzle_and_solution, Active),
         ("06_blinker", create_blinker_puzzle_and_solution, Active),
