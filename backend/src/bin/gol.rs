@@ -9,6 +9,7 @@ use std::{collections::HashMap, fs, io::Write, path::PathBuf};
 use async_graphql::InputType as _;
 use clap::{Parser, Subcommand};
 use gol_challenge::game::{Board, Condition, Difficulty, Position, Puzzle};
+use linera_sdk::linera_base_types::{AccountOwner, ChainId, DataBlobHash};
 
 #[derive(Parser)]
 #[command(name = "gol")]
@@ -61,6 +62,21 @@ enum Commands {
         /// Path to the board file
         board: PathBuf,
     },
+    /// Generate a GraphQL mutation containing all submitSolution blocks
+    GenerateSubmitMutation {
+        /// Path to JSON file mapping puzzle names to blob IDs
+        #[arg(long)]
+        blob_map: PathBuf,
+        /// Scoring chain ID to use in the mutation
+        #[arg(long)]
+        scoring_chain_id: ChainId,
+        /// Optional account owner to credit for the solutions
+        #[arg(long)]
+        owner: Option<AccountOwner>,
+        /// Include all puzzles
+        #[arg(long)]
+        all: bool,
+    },
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -86,6 +102,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Commands::CheckSolution { puzzle, board } => {
             check_solution(&puzzle, &board)?;
+        }
+        Commands::GenerateSubmitMutation {
+            blob_map,
+            scoring_chain_id,
+            owner,
+            all,
+        } => {
+            generate_submit_mutation(&blob_map, scoring_chain_id, owner, all)?;
         }
     }
 
@@ -995,6 +1019,86 @@ fn check_solution(
             println!("   Error: {}", error);
         }
     }
+
+    Ok(())
+}
+
+fn generate_submit_mutation(
+    blob_map_path: &PathBuf,
+    scoring_chain_id: ChainId,
+    owner: Option<AccountOwner>,
+    all: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Get all puzzle and solution creators
+    let puzzles_info = get_puzzles(all);
+
+    // Load blob mapping
+    let blob_map: HashMap<String, DataBlobHash> = {
+        if blob_map_path.exists() {
+            let blob_map_content = fs::read_to_string(blob_map_path)?;
+            serde_json::from_str(&blob_map_content)?
+        } else {
+            panic!(
+                "Error: Blob map file not found: {}",
+                blob_map_path.display()
+            );
+        }
+    };
+
+    // Start building the mutation
+    println!("mutation {{");
+
+    for (index, (name, puzzle_creator)) in puzzles_info.iter().enumerate() {
+        let (_, solution_board) = puzzle_creator();
+
+        let puzzle_id = if let Some(blob_id) = blob_map.get(*name) {
+            blob_id
+        } else {
+            eprintln!("Warning: Puzzle ID for name {} is missing, skipping", name);
+            continue;
+        };
+
+        // Convert Board to JSON to access its fields
+        let board_json = serde_json::to_value(&solution_board)?;
+
+        // Extract size and liveCells from the JSON value
+        let size = board_json["size"]
+            .as_u64()
+            .ok_or("Failed to get size from board")?;
+
+        let live_cells_array = board_json["live_cells"]
+            .as_array()
+            .ok_or("Failed to get live_cells from board")?;
+
+        // Convert live cells to GraphQL format
+        let live_cells = live_cells_array
+            .iter()
+            .filter_map(|cell| {
+                let x = cell["x"].as_u64()?;
+                let y = cell["y"].as_u64()?;
+                Some(format!("{{ x: {}, y: {} }}", x, y))
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        // Generate alias for this mutation
+        let alias = format!("puzzle{}", index);
+
+        // Write the submitSolution mutation block
+        println!("  {}: submitSolution(", alias);
+        println!("    puzzleId: {}", puzzle_id.to_value());
+        println!(
+            "    board: {{ size: {}, liveCells: [{}] }}",
+            size, live_cells
+        );
+        if let Some(owner) = owner {
+            println!("    owner: {}", owner.to_value());
+        }
+        println!("    scoringChainId: {}", scoring_chain_id.to_value());
+        println!("  )");
+    }
+
+    println!("}}");
 
     Ok(())
 }
