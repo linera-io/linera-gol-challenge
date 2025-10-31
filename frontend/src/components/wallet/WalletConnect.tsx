@@ -29,7 +29,7 @@ export function WalletConnect() {
         startContent={<Wallet size={16} />}
         className="bg-linera-primary text-white hover:bg-linera-primary-dark"
       >
-        Connect Wallet
+        Log In
       </Button>
     );
   }

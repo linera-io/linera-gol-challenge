@@ -71,7 +71,7 @@ export function LoadingScreen({
               startContent={<Wallet size={20} />}
               className="bg-linera-primary text-white hover:bg-linera-primary-dark px-8"
             >
-              Connect Wallet
+              Log In
             </Button>
           </div>
         ) : (

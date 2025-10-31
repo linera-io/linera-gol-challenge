@@ -21,7 +21,7 @@ function AppContent() {
     return <LoadingScreen message="Connecting to wallet..." />;
   }
 
-  // Show connect wallet screen if not logged in
+  // Show Log In screen if not logged in
   if (!isLoggedIn) {
     return (
       <LoadingScreen
