@@ -102,10 +102,13 @@ query {
 The following chains were used previously and may contain valid scoring information from early users.
 
 ```
-CHAIN_V1=e71636fde3a70cdbfdb7fd9bef6cb1ba632af8b0567b8f76df47b35489972dd3
-
+# APP_ID=750eb4b947761eeece6c52fd488ec23442dce240fab150b93ea2212b014aaace
 CHAIN_V2_0=74b5850ecf6a7389523f7a9748dc6f81fc71533757f617b65e5c9f01fa1430b8
 CHAIN_V2_1=3e6bdd095d2e4e30f12e8da38ea1409f2442696b01badbda4226577df09479ff
 CHAIN_V2_2=78bfe088e0e6ab2acbb894c7bac4b537650a98ca7337667cef38359b6c590508
 CHAIN_V2_3=d6e2e25987b75a51f9ac1df8851bd0e0d16d858e7e2896b1e9d511bac8e13f92
+
+# /!\ APP_ID=27145fa604adf9996647a9a2add1dafe8f80f1a547835edf62ee408cd8903dd3
+CHAIN_V1=e71636fde3a70cdbfdb7fd9bef6cb1ba632af8b0567b8f76df47b35489972dd3
+
 ```
