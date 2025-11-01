@@ -188,6 +188,22 @@ fn get_puzzles(all: bool, filter: Option<&str>) -> Vec<(&'static str, fn() -> (P
             create_robot_face_puzzle_and_solution,
             Draft,
         ),
+        ("40_eater", create_eater_puzzle_and_solution, Active),
+        (
+            "41_glider_reflector_1",
+            create_glider_reflector_1_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "42_glider_reflector_2",
+            create_glider_reflector_2_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "43_glider_double_reflector",
+            create_glider_double_reflector_puzzle_and_solution,
+            Active,
+        ),
     ];
 
     let puzzles: Vec<_> = if all {
@@ -1009,6 +1025,347 @@ fn create_glider_migration_puzzle_and_solution() -> (Puzzle, Board) {
                 max_live_count: 0,
             },
         ],
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_eater_puzzle_and_solution() -> (Puzzle, Board) {
+    // An eater is a stable pattern that can consume gliders
+    // Pattern looks like:
+    // ●●
+    // ● ●
+    //   ●
+    //   ●●
+
+    // We'll have a glider approaching from the left, and the player needs to place an eater
+    // to consume it, leaving just the eater behind
+
+    let size = 16;
+
+    // Place glider on the left side, approaching the eater position
+    // Place eater in the middle-right area
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            // Glider moving right and down, starting at left
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 2 },
+            Position { x: 1, y: 3 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 3 },
+            // Eater pattern in middle-right area
+            Position { x: 10, y: 10 },
+            Position { x: 11, y: 10 },
+            Position { x: 10, y: 11 },
+            Position { x: 12, y: 11 },
+            Position { x: 12, y: 12 },
+            Position { x: 12, y: 13 },
+            Position { x: 13, y: 13 },
+        ],
+    );
+
+    // After the glider is eaten, only the eater remains (it's stable)
+    let final_board = Board::with_live_cells(
+        size,
+        vec![
+            // Eater pattern in middle-right area
+            Position { x: 10, y: 10 },
+            Position { x: 11, y: 10 },
+            Position { x: 10, y: 11 },
+            Position { x: 12, y: 11 },
+            Position { x: 12, y: 12 },
+            Position { x: 12, y: 13 },
+            Position { x: 13, y: 13 },
+        ],
+    );
+    let final_conditions = final_board.to_exactly_matching_conditions();
+    let mut initial_conditions = final_conditions.clone();
+    // Remove default TestRectangle
+    initial_conditions.pop().unwrap();
+    initial_conditions.push(
+        // Glider should be on the top-left corner
+        Condition::TestRectangle {
+            x_range: 0..6,
+            y_range: 0..6,
+            min_live_count: 5,
+            max_live_count: 5,
+        },
+    );
+    // Set total count.
+    initial_conditions.push(Condition::TestRectangle {
+        x_range: 0..size,
+        y_range: 0..size,
+        min_live_count: 12,
+        max_live_count: 12,
+    });
+    let puzzle = Puzzle {
+        title: "Eater".to_string(),
+        summary: "Place an eater pattern to consume an approaching glider".to_string(),
+        difficulty: Difficulty::Medium,
+        size,
+        metadata: String::new(),
+        minimal_steps: 26,
+        maximal_steps: 26,
+        enforce_initial_conditions: true,
+        is_strict: true,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_reflector_1_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 24;
+
+    // Initial glider moving up-right
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            // Glider starting top-left, moving down-right
+            Position { x: 2, y: 10 },
+            Position { x: 3, y: 10 },
+            Position { x: 3, y: 11 },
+            Position { x: 4, y: 11 },
+            Position { x: 2, y: 12 },
+            // The pentadecathlon
+            Position { x: 11, y: 10 },
+            Position { x: 12, y: 10 },
+            Position { x: 13, y: 9 },
+            Position { x: 13, y: 11 },
+            Position { x: 14, y: 10 },
+            Position { x: 15, y: 10 },
+            Position { x: 16, y: 10 },
+            Position { x: 17, y: 10 },
+            Position { x: 18, y: 9 },
+            Position { x: 18, y: 11 },
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+        ],
+    );
+    // Advancing one step to keep the glider in a familiar shape.
+    let initial_board = initial_board.advance(1);
+
+    // After reflection, glider should be moving in different direction
+    let final_board = initial_board.advance(30);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let mut initial_conditions = Board::with_live_cells(
+        size,
+        vec![
+            Position { x: 11, y: 10 },
+            Position { x: 12, y: 10 },
+            Position { x: 13, y: 9 },
+            Position { x: 13, y: 11 },
+            Position { x: 14, y: 10 },
+            Position { x: 15, y: 10 },
+            Position { x: 16, y: 10 },
+            Position { x: 17, y: 10 },
+            Position { x: 18, y: 9 },
+            Position { x: 18, y: 11 },
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+        ],
+    )
+    .advance(1)
+    .to_exactly_matching_conditions();
+    initial_conditions.pop().unwrap();
+    initial_conditions.push(
+        // Glider should be on the left
+        Condition::TestRectangle {
+            x_range: 1..5,
+            y_range: 10..14,
+            min_live_count: 5,
+            max_live_count: 5,
+        },
+    );
+    // Set total count.
+    initial_conditions.push(Condition::TestRectangle {
+        x_range: 0..size,
+        y_range: 0..size,
+        min_live_count: 27,
+        max_live_count: 27,
+    });
+    let puzzle = Puzzle {
+        title: "Glider Reflector 1".to_string(),
+        summary: "Reflect a glider by 180 degrees".to_string(),
+        difficulty: Difficulty::Medium,
+        size,
+        metadata: String::new(),
+        minimal_steps: 30,
+        maximal_steps: 30,
+        enforce_initial_conditions: true,
+        is_strict: true,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_reflector_2_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 24;
+
+    // Initial glider moving up-right
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            // Glider starting top-left, moving down-right
+            Position { x: 2, y: 10 },
+            Position { x: 3, y: 10 },
+            Position { x: 3, y: 11 },
+            Position { x: 4, y: 11 },
+            Position { x: 2, y: 12 },
+            // The pentadecathlon
+            Position { x: 11, y: 10 },
+            Position { x: 12, y: 10 },
+            Position { x: 13, y: 9 },
+            Position { x: 13, y: 11 },
+            Position { x: 14, y: 10 },
+            Position { x: 15, y: 10 },
+            Position { x: 16, y: 10 },
+            Position { x: 17, y: 10 },
+            Position { x: 18, y: 9 },
+            Position { x: 18, y: 11 },
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+        ],
+    );
+    // Not advancing one step, so the glider is in non-standard shape.
+    // After reflection, glider should be moving in different direction
+    let final_board = initial_board.advance(30);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let mut initial_conditions = Board::with_live_cells(
+        size,
+        vec![
+            Position { x: 11, y: 10 },
+            Position { x: 12, y: 10 },
+            Position { x: 13, y: 9 },
+            Position { x: 13, y: 11 },
+            Position { x: 14, y: 10 },
+            Position { x: 15, y: 10 },
+            Position { x: 16, y: 10 },
+            Position { x: 17, y: 10 },
+            Position { x: 18, y: 9 },
+            Position { x: 18, y: 11 },
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+        ],
+    )
+    .to_exactly_matching_conditions();
+    initial_conditions.pop().unwrap();
+    initial_conditions.push(
+        // Glider should be on the left
+        Condition::TestRectangle {
+            x_range: 1..5,
+            y_range: 10..14,
+            min_live_count: 5,
+            max_live_count: 5,
+        },
+    );
+    // Set total count.
+    initial_conditions.push(Condition::TestRectangle {
+        x_range: 0..size,
+        y_range: 0..size,
+        min_live_count: 17,
+        max_live_count: 17,
+    });
+    let puzzle = Puzzle {
+        title: "Glider Reflector 2".to_string(),
+        summary: "Reflect a glider by 180 degrees".to_string(),
+        difficulty: Difficulty::Hard,
+        size,
+        metadata: String::new(),
+        minimal_steps: 30,
+        maximal_steps: 30,
+        enforce_initial_conditions: true,
+        is_strict: false,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_double_reflector_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 41;
+
+    // Initial glider moving up-right
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            // Glider starting top-left, moving down-right
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+            Position { x: 20, y: 11 },
+            Position { x: 21, y: 11 },
+            Position { x: 19, y: 12 },
+            // The first pentadecathlon
+            Position { x: 28, y: 10 },
+            Position { x: 29, y: 10 },
+            Position { x: 30, y: 9 },
+            Position { x: 30, y: 11 },
+            Position { x: 31, y: 10 },
+            Position { x: 32, y: 10 },
+            Position { x: 33, y: 10 },
+            Position { x: 34, y: 10 },
+            Position { x: 35, y: 9 },
+            Position { x: 35, y: 11 },
+            Position { x: 36, y: 10 },
+            Position { x: 37, y: 10 },
+            // The second pentadecathlon
+            Position { x: 3, y: 14 },
+            Position { x: 4, y: 14 },
+            Position { x: 5, y: 13 },
+            Position { x: 5, y: 15 },
+            Position { x: 6, y: 14 },
+            Position { x: 7, y: 14 },
+            Position { x: 8, y: 14 },
+            Position { x: 9, y: 14 },
+            Position { x: 10, y: 13 },
+            Position { x: 10, y: 15 },
+            Position { x: 11, y: 14 },
+            Position { x: 12, y: 14 },
+        ],
+    );
+    // We should do a round-trip in 60 steps.
+    let mut initial_conditions = initial_board.to_exactly_matching_conditions();
+    // Do not force the glider.
+    initial_conditions.drain(12..17);
+    initial_conditions.insert(
+        0,
+        // Glider should be at the center.
+        Condition::TestRectangle {
+            x_range: 19..22,
+            y_range: 10..13,
+            min_live_count: 5,
+            max_live_count: 5,
+        },
+    );
+    initial_conditions.insert(
+        0,
+        // The center of a glider is alive (unlike a boat).
+        Condition::TestPosition {
+            position: Position { x: 20, y: 11 },
+            is_live: true,
+        },
+    );
+    let final_conditions = initial_conditions.clone();
+
+    let puzzle = Puzzle {
+        title: "Glider Double Reflector".to_string(),
+        summary: "Use two reflectors to bounce a glider indefinitely".to_string(),
+        difficulty: Difficulty::Hard,
+        size,
+        metadata: String::new(),
+        minimal_steps: 60,
+        maximal_steps: 60,
+        enforce_initial_conditions: true,
+        is_strict: false,
+        initial_conditions,
         final_conditions,
     };
 
