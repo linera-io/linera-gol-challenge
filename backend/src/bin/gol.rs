@@ -26,9 +26,12 @@ enum Commands {
         /// Optional output directory (defaults to current directory)
         #[arg(short, long)]
         output_dir: Option<PathBuf>,
-        /// Include all puzzles
+        /// Include inactive puzzles as well
         #[arg(long)]
         all: bool,
+        /// Only include puzzles containing the given string in their name
+        #[arg(long)]
+        name: Option<String>,
     },
     /// Generate TypeScript metadata for puzzles
     GenerateMetadata {
@@ -38,9 +41,12 @@ enum Commands {
         /// Path to JSON file mapping puzzle names to blob IDs
         #[arg(long)]
         blob_map: PathBuf,
-        /// Include all puzzles
+        /// Include inactive puzzles as well
         #[arg(long)]
         all: bool,
+        /// Only include puzzles containing the given string in their name
+        #[arg(long)]
+        name: Option<String>,
     },
     /// Print the contents of a puzzle file
     PrintPuzzle {
@@ -73,9 +79,12 @@ enum Commands {
         /// Optional account owner to credit for the solutions
         #[arg(long)]
         owner: Option<AccountOwner>,
-        /// Include all puzzles
+        /// Include inactive puzzles as well
         #[arg(long)]
         all: bool,
+        /// Only include puzzles containing the given string in their name
+        #[arg(long)]
+        name: Option<String>,
     },
 }
 
@@ -83,16 +92,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::CreatePuzzles { output_dir, all } => {
+        Commands::CreatePuzzles {
+            output_dir,
+            all,
+            name,
+        } => {
             let output_path = output_dir.unwrap_or_else(|| PathBuf::from("."));
-            create_puzzles(&output_path, all)?;
+            create_puzzles(&output_path, all, name.as_deref())?;
         }
         Commands::GenerateMetadata {
             output,
             blob_map,
             all,
+            name,
         } => {
-            generate_metadata(&output, &blob_map, all)?;
+            generate_metadata(&output, &blob_map, all, name.as_deref())?;
         }
         Commands::PrintPuzzle { path } => {
             print_puzzle(&path)?;
@@ -108,8 +122,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             scoring_chain_id,
             owner,
             all,
+            name,
         } => {
-            generate_submit_mutation(&blob_map, scoring_chain_id, owner, all)?;
+            generate_submit_mutation(&blob_map, scoring_chain_id, owner, all, name.as_deref())?;
         }
     }
 
@@ -117,14 +132,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[allow(dead_code)]
+#[derive(Clone, Copy, Debug)]
 enum PuzzleStatus {
     Draft,
     Active,
     Retired,
 }
 
+impl PuzzleStatus {
+    fn is_active(self) -> bool {
+        matches!(self, Self::Active)
+    }
+}
+
 #[allow(clippy::type_complexity)]
-fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
+fn get_puzzles(all: bool, filter: Option<&str>) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
     use PuzzleStatus::*;
 
     let puzzles: Vec<(&'static str, fn() -> (Puzzle, Board), PuzzleStatus)> = vec![
@@ -168,19 +190,34 @@ fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
         ),
     ];
 
-    if all {
+    let puzzles: Vec<_> = if all {
         puzzles.into_iter().map(|(name, f, _)| (name, f)).collect()
     } else {
         puzzles
             .into_iter()
             .filter_map(|(name, f, state)| {
-                if matches!(state, Active) {
+                if state.is_active() {
                     Some((name, f))
                 } else {
                     None
                 }
             })
             .collect()
+    };
+
+    if let Some(s) = filter {
+        puzzles
+            .into_iter()
+            .filter_map(|(name, f)| {
+                if name.contains(s) {
+                    Some((name, f))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    } else {
+        puzzles
     }
 }
 
@@ -188,9 +225,10 @@ fn generate_metadata(
     output_path: &PathBuf,
     blob_map_path: &PathBuf,
     all: bool,
+    name: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get all puzzle and solution creators
-    let puzzles_info = get_puzzles(all);
+    let puzzles_info = get_puzzles(all, name);
 
     // Load blob mapping if provided
     let blob_map: HashMap<String, String> = {
@@ -303,12 +341,16 @@ fn generate_metadata(
     Ok(())
 }
 
-fn create_puzzles(output_dir: &PathBuf, all: bool) -> Result<(), Box<dyn std::error::Error>> {
+fn create_puzzles(
+    output_dir: &PathBuf,
+    all: bool,
+    name: Option<&str>,
+) -> Result<(), Box<dyn std::error::Error>> {
     // Create output directory if it doesn't exist.
     fs::create_dir_all(output_dir)?;
 
     // Generate puzzles.
-    let puzzles = get_puzzles(all);
+    let puzzles = get_puzzles(all, name);
 
     for (name, puzzle_and_solution_creator) in puzzles {
         let (mut puzzle, solution) = puzzle_and_solution_creator();
@@ -1028,9 +1070,10 @@ fn generate_submit_mutation(
     scoring_chain_id: ChainId,
     owner: Option<AccountOwner>,
     all: bool,
+    name: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get all puzzle and solution creators
-    let puzzles_info = get_puzzles(all);
+    let puzzles_info = get_puzzles(all, name);
 
     // Load blob mapping
     let blob_map: HashMap<String, DataBlobHash> = {
