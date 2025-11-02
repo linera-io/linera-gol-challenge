@@ -103,6 +103,41 @@ export const KNOWN_PUZZLES: PuzzleMetadata[] = [
     difficulty: "MEDIUM",
     size: 12,
   },
+  {
+    id: "3982539f5da0742bbd0de02cfb98b761a042cdd6508677d095cf0fe78a119e2f",
+    title: "Eater",
+    summary: "Place an eater pattern to consume an approaching glider",
+    difficulty: "MEDIUM",
+    size: 16,
+  },
+  {
+    id: "ce5310773d82a2050799ef1a2d329ac43528f9ac27359a5aba8dea10d14de202",
+    title: "Glider Reflector 1",
+    summary: "Reflect a glider by 180 degrees",
+    difficulty: "MEDIUM",
+    size: 24,
+  },
+  {
+    id: "e9d946a6b885efce0f13bbd91235aa3ba6f9a7b6d52c3bee2e3fbf289dff8197",
+    title: "Glider Reflector 2",
+    summary: "Reflect a glider by 180 degrees",
+    difficulty: "HARD",
+    size: 24,
+  },
+  {
+    id: "2cbcaa59359be60c02375f8c1b5896f7625992845fe43ee4611ab3b292402759",
+    title: "Glider Double Reflector",
+    summary: "Use two reflectors to bounce a glider indefinitely",
+    difficulty: "HARD",
+    size: 41,
+  },
+  {
+    id: "9f0c8fcf4477301b8e9f6236a9827f6a2eb1efad5017c54787a57a76c675172d",
+    title: "High Density",
+    summary: "Create a high-density stable pattern with given cell count",
+    difficulty: "EXPERT",
+    size: 13,
+  },
 ];
 
 // Helper to get puzzle by ID
