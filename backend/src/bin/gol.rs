@@ -204,6 +204,11 @@ fn get_puzzles(all: bool, filter: Option<&str>) -> Vec<(&'static str, fn() -> (P
             create_glider_double_reflector_puzzle_and_solution,
             Active,
         ),
+        (
+            "50_high_density",
+            create_high_density_puzzle_and_solution,
+            Active,
+        ),
     ];
 
     let puzzles: Vec<_> = if all {
@@ -1369,6 +1374,77 @@ fn create_glider_double_reflector_puzzle_and_solution() -> (Puzzle, Board) {
         final_conditions,
     };
 
+    (puzzle, initial_board)
+}
+
+fn create_high_density_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 13;
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            Position { x: 6, y: 2 },
+            Position { x: 4, y: 3 },
+            Position { x: 5, y: 3 },
+            Position { x: 6, y: 3 },
+            Position { x: 7, y: 3 },
+            Position { x: 8, y: 3 },
+            Position { x: 3, y: 4 },
+            Position { x: 9, y: 4 },
+            Position { x: 3, y: 5 },
+            Position { x: 4, y: 5 },
+            Position { x: 5, y: 5 },
+            Position { x: 6, y: 5 },
+            Position { x: 7, y: 5 },
+            Position { x: 8, y: 5 },
+            Position { x: 9, y: 5 },
+            Position { x: 3, y: 7 },
+            Position { x: 4, y: 7 },
+            Position { x: 5, y: 7 },
+            Position { x: 6, y: 7 },
+            Position { x: 7, y: 7 },
+            Position { x: 8, y: 7 },
+            Position { x: 9, y: 7 },
+            Position { x: 3, y: 8 },
+            Position { x: 9, y: 8 },
+            Position { x: 5, y: 9 },
+            Position { x: 6, y: 9 },
+            Position { x: 7, y: 9 },
+            Position { x: 8, y: 9 },
+            Position { x: 4, y: 9 },
+            Position { x: 6, y: 10 },
+        ],
+    );
+    let initial_conditions = vec![
+        Condition::TestRectangle {
+            x_range: 3..10,
+            y_range: 2..11,
+            min_live_count: 30,
+            max_live_count: 30,
+        },
+        Condition::TestRectangle {
+            x_range: 0..size,
+            y_range: 0..size,
+            min_live_count: 30,
+            max_live_count: 30,
+        },
+    ];
+    let final_conditions = initial_conditions.clone();
+
+    let puzzle = Puzzle {
+        title: "High Density".to_string(),
+        summary: "Create a high-density stable pattern with given cell count".to_string(),
+        difficulty: Difficulty::Expert,
+        size,
+        metadata: String::new(),
+        minimal_steps: 3,
+        maximal_steps: 3,
+        enforce_initial_conditions: true,
+        is_strict: false,
+        initial_conditions,
+        final_conditions,
+    };
+
+    // Solution is the target pattern itself (stable)
     (puzzle, initial_board)
 }
 
