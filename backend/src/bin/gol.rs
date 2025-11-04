@@ -26,9 +26,12 @@ enum Commands {
         /// Optional output directory (defaults to current directory)
         #[arg(short, long)]
         output_dir: Option<PathBuf>,
-        /// Include all puzzles
+        /// Include inactive puzzles as well
         #[arg(long)]
         all: bool,
+        /// Only include puzzles containing the given string in their name
+        #[arg(long)]
+        name: Option<String>,
     },
     /// Generate TypeScript metadata for puzzles
     GenerateMetadata {
@@ -38,9 +41,12 @@ enum Commands {
         /// Path to JSON file mapping puzzle names to blob IDs
         #[arg(long)]
         blob_map: PathBuf,
-        /// Include all puzzles
+        /// Include inactive puzzles as well
         #[arg(long)]
         all: bool,
+        /// Only include puzzles containing the given string in their name
+        #[arg(long)]
+        name: Option<String>,
     },
     /// Print the contents of a puzzle file
     PrintPuzzle {
@@ -73,9 +79,12 @@ enum Commands {
         /// Optional account owner to credit for the solutions
         #[arg(long)]
         owner: Option<AccountOwner>,
-        /// Include all puzzles
+        /// Include inactive puzzles as well
         #[arg(long)]
         all: bool,
+        /// Only include puzzles containing the given string in their name
+        #[arg(long)]
+        name: Option<String>,
     },
 }
 
@@ -83,16 +92,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::CreatePuzzles { output_dir, all } => {
+        Commands::CreatePuzzles {
+            output_dir,
+            all,
+            name,
+        } => {
             let output_path = output_dir.unwrap_or_else(|| PathBuf::from("."));
-            create_puzzles(&output_path, all)?;
+            create_puzzles(&output_path, all, name.as_deref())?;
         }
         Commands::GenerateMetadata {
             output,
             blob_map,
             all,
+            name,
         } => {
-            generate_metadata(&output, &blob_map, all)?;
+            generate_metadata(&output, &blob_map, all, name.as_deref())?;
         }
         Commands::PrintPuzzle { path } => {
             print_puzzle(&path)?;
@@ -108,8 +122,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             scoring_chain_id,
             owner,
             all,
+            name,
         } => {
-            generate_submit_mutation(&blob_map, scoring_chain_id, owner, all)?;
+            generate_submit_mutation(&blob_map, scoring_chain_id, owner, all, name.as_deref())?;
         }
     }
 
@@ -117,14 +132,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[allow(dead_code)]
+#[derive(Clone, Copy, Debug)]
 enum PuzzleStatus {
     Draft,
     Active,
     Retired,
 }
 
+impl PuzzleStatus {
+    fn is_active(self) -> bool {
+        matches!(self, Self::Active)
+    }
+}
+
 #[allow(clippy::type_complexity)]
-fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
+fn get_puzzles(all: bool, filter: Option<&str>) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
     use PuzzleStatus::*;
 
     let puzzles: Vec<(&'static str, fn() -> (Puzzle, Board), PuzzleStatus)> = vec![
@@ -166,21 +188,57 @@ fn get_puzzles(all: bool) -> Vec<(&'static str, fn() -> (Puzzle, Board))> {
             create_robot_face_puzzle_and_solution,
             Draft,
         ),
+        ("40_eater", create_eater_puzzle_and_solution, Active),
+        (
+            "41_glider_reflector_1",
+            create_glider_reflector_1_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "42_glider_reflector_2",
+            create_glider_reflector_2_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "43_glider_double_reflector",
+            create_glider_double_reflector_puzzle_and_solution,
+            Active,
+        ),
+        (
+            "50_high_density",
+            create_high_density_puzzle_and_solution,
+            Active,
+        ),
     ];
 
-    if all {
+    let puzzles: Vec<_> = if all {
         puzzles.into_iter().map(|(name, f, _)| (name, f)).collect()
     } else {
         puzzles
             .into_iter()
             .filter_map(|(name, f, state)| {
-                if matches!(state, Active) {
+                if state.is_active() {
                     Some((name, f))
                 } else {
                     None
                 }
             })
             .collect()
+    };
+
+    if let Some(s) = filter {
+        puzzles
+            .into_iter()
+            .filter_map(|(name, f)| {
+                if name.contains(s) {
+                    Some((name, f))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    } else {
+        puzzles
     }
 }
 
@@ -188,9 +246,10 @@ fn generate_metadata(
     output_path: &PathBuf,
     blob_map_path: &PathBuf,
     all: bool,
+    name: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get all puzzle and solution creators
-    let puzzles_info = get_puzzles(all);
+    let puzzles_info = get_puzzles(all, name);
 
     // Load blob mapping if provided
     let blob_map: HashMap<String, String> = {
@@ -303,12 +362,16 @@ fn generate_metadata(
     Ok(())
 }
 
-fn create_puzzles(output_dir: &PathBuf, all: bool) -> Result<(), Box<dyn std::error::Error>> {
+fn create_puzzles(
+    output_dir: &PathBuf,
+    all: bool,
+    name: Option<&str>,
+) -> Result<(), Box<dyn std::error::Error>> {
     // Create output directory if it doesn't exist.
     fs::create_dir_all(output_dir)?;
 
     // Generate puzzles.
-    let puzzles = get_puzzles(all);
+    let puzzles = get_puzzles(all, name);
 
     for (name, puzzle_and_solution_creator) in puzzles {
         let (mut puzzle, solution) = puzzle_and_solution_creator();
@@ -973,6 +1036,418 @@ fn create_glider_migration_puzzle_and_solution() -> (Puzzle, Board) {
     (puzzle, initial_board)
 }
 
+fn create_eater_puzzle_and_solution() -> (Puzzle, Board) {
+    // An eater is a stable pattern that can consume gliders
+    // Pattern looks like:
+    // ●●
+    // ● ●
+    //   ●
+    //   ●●
+
+    // We'll have a glider approaching from the left, and the player needs to place an eater
+    // to consume it, leaving just the eater behind
+
+    let size = 16;
+
+    // Place glider on the left side, approaching the eater position
+    // Place eater in the middle-right area
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            // Glider moving right and down, starting at left
+            Position { x: 2, y: 1 },
+            Position { x: 3, y: 2 },
+            Position { x: 1, y: 3 },
+            Position { x: 2, y: 3 },
+            Position { x: 3, y: 3 },
+            // Eater pattern in middle-right area
+            Position { x: 10, y: 10 },
+            Position { x: 11, y: 10 },
+            Position { x: 10, y: 11 },
+            Position { x: 12, y: 11 },
+            Position { x: 12, y: 12 },
+            Position { x: 12, y: 13 },
+            Position { x: 13, y: 13 },
+        ],
+    );
+
+    // After the glider is eaten, only the eater remains (it's stable)
+    let final_board = Board::with_live_cells(
+        size,
+        vec![
+            // Eater pattern in middle-right area
+            Position { x: 10, y: 10 },
+            Position { x: 11, y: 10 },
+            Position { x: 10, y: 11 },
+            Position { x: 12, y: 11 },
+            Position { x: 12, y: 12 },
+            Position { x: 12, y: 13 },
+            Position { x: 13, y: 13 },
+        ],
+    );
+    let final_conditions = final_board.to_exactly_matching_conditions();
+    let mut initial_conditions = final_conditions.clone();
+    // Remove default TestRectangle
+    initial_conditions.pop().unwrap();
+    initial_conditions.push(
+        // Glider should be on the top-left corner
+        Condition::TestRectangle {
+            x_range: 0..6,
+            y_range: 0..6,
+            min_live_count: 5,
+            max_live_count: 5,
+        },
+    );
+    // Set total count.
+    initial_conditions.push(Condition::TestRectangle {
+        x_range: 0..size,
+        y_range: 0..size,
+        min_live_count: 12,
+        max_live_count: 12,
+    });
+    let puzzle = Puzzle {
+        title: "Eater".to_string(),
+        summary: "Place an eater pattern to consume an approaching glider".to_string(),
+        difficulty: Difficulty::Medium,
+        size,
+        metadata: String::new(),
+        minimal_steps: 26,
+        maximal_steps: 26,
+        enforce_initial_conditions: true,
+        is_strict: true,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_reflector_1_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 24;
+
+    // Initial glider moving up-right
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            // Glider starting top-left, moving down-right
+            Position { x: 2, y: 10 },
+            Position { x: 3, y: 10 },
+            Position { x: 3, y: 11 },
+            Position { x: 4, y: 11 },
+            Position { x: 2, y: 12 },
+            // The pentadecathlon
+            Position { x: 11, y: 10 },
+            Position { x: 12, y: 10 },
+            Position { x: 13, y: 9 },
+            Position { x: 13, y: 11 },
+            Position { x: 14, y: 10 },
+            Position { x: 15, y: 10 },
+            Position { x: 16, y: 10 },
+            Position { x: 17, y: 10 },
+            Position { x: 18, y: 9 },
+            Position { x: 18, y: 11 },
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+        ],
+    );
+    // Advancing one step to keep the glider in a familiar shape.
+    let initial_board = initial_board.advance(1);
+
+    // After reflection, glider should be moving in different direction
+    let final_board = initial_board.advance(30);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let mut initial_conditions = Board::with_live_cells(
+        size,
+        vec![
+            Position { x: 11, y: 10 },
+            Position { x: 12, y: 10 },
+            Position { x: 13, y: 9 },
+            Position { x: 13, y: 11 },
+            Position { x: 14, y: 10 },
+            Position { x: 15, y: 10 },
+            Position { x: 16, y: 10 },
+            Position { x: 17, y: 10 },
+            Position { x: 18, y: 9 },
+            Position { x: 18, y: 11 },
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+        ],
+    )
+    .advance(1)
+    .to_exactly_matching_conditions();
+    initial_conditions.pop().unwrap();
+    initial_conditions.push(
+        // Glider should be on the left
+        Condition::TestRectangle {
+            x_range: 1..5,
+            y_range: 10..14,
+            min_live_count: 5,
+            max_live_count: 5,
+        },
+    );
+    // Set total count.
+    initial_conditions.push(Condition::TestRectangle {
+        x_range: 0..size,
+        y_range: 0..size,
+        min_live_count: 27,
+        max_live_count: 27,
+    });
+    let puzzle = Puzzle {
+        title: "Glider Reflector 1".to_string(),
+        summary: "Reflect a glider by 180 degrees".to_string(),
+        difficulty: Difficulty::Medium,
+        size,
+        metadata: String::new(),
+        minimal_steps: 30,
+        maximal_steps: 30,
+        enforce_initial_conditions: true,
+        is_strict: true,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_reflector_2_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 24;
+
+    // Initial glider moving up-right
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            // Glider starting top-left, moving down-right
+            Position { x: 2, y: 10 },
+            Position { x: 3, y: 10 },
+            Position { x: 3, y: 11 },
+            Position { x: 4, y: 11 },
+            Position { x: 2, y: 12 },
+            // The pentadecathlon
+            Position { x: 11, y: 10 },
+            Position { x: 12, y: 10 },
+            Position { x: 13, y: 9 },
+            Position { x: 13, y: 11 },
+            Position { x: 14, y: 10 },
+            Position { x: 15, y: 10 },
+            Position { x: 16, y: 10 },
+            Position { x: 17, y: 10 },
+            Position { x: 18, y: 9 },
+            Position { x: 18, y: 11 },
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+        ],
+    );
+    // Not advancing one step, so the glider is in non-standard shape.
+    // After reflection, glider should be moving in different direction
+    let final_board = initial_board.advance(30);
+    let final_conditions = final_board.to_exactly_matching_conditions();
+
+    let mut initial_conditions = Board::with_live_cells(
+        size,
+        vec![
+            Position { x: 11, y: 10 },
+            Position { x: 12, y: 10 },
+            Position { x: 13, y: 9 },
+            Position { x: 13, y: 11 },
+            Position { x: 14, y: 10 },
+            Position { x: 15, y: 10 },
+            Position { x: 16, y: 10 },
+            Position { x: 17, y: 10 },
+            Position { x: 18, y: 9 },
+            Position { x: 18, y: 11 },
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+        ],
+    )
+    .to_exactly_matching_conditions();
+    initial_conditions.pop().unwrap();
+    initial_conditions.push(
+        // Glider should be on the left
+        Condition::TestRectangle {
+            x_range: 1..5,
+            y_range: 10..14,
+            min_live_count: 5,
+            max_live_count: 5,
+        },
+    );
+    // Set total count.
+    initial_conditions.push(Condition::TestRectangle {
+        x_range: 0..size,
+        y_range: 0..size,
+        min_live_count: 17,
+        max_live_count: 17,
+    });
+    let puzzle = Puzzle {
+        title: "Glider Reflector 2".to_string(),
+        summary: "Reflect a glider by 180 degrees".to_string(),
+        difficulty: Difficulty::Hard,
+        size,
+        metadata: String::new(),
+        minimal_steps: 30,
+        maximal_steps: 30,
+        enforce_initial_conditions: true,
+        is_strict: false,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_glider_double_reflector_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 41;
+
+    // Initial glider moving up-right
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            // Glider starting top-left, moving down-right
+            Position { x: 19, y: 10 },
+            Position { x: 20, y: 10 },
+            Position { x: 20, y: 11 },
+            Position { x: 21, y: 11 },
+            Position { x: 19, y: 12 },
+            // The first pentadecathlon
+            Position { x: 28, y: 10 },
+            Position { x: 29, y: 10 },
+            Position { x: 30, y: 9 },
+            Position { x: 30, y: 11 },
+            Position { x: 31, y: 10 },
+            Position { x: 32, y: 10 },
+            Position { x: 33, y: 10 },
+            Position { x: 34, y: 10 },
+            Position { x: 35, y: 9 },
+            Position { x: 35, y: 11 },
+            Position { x: 36, y: 10 },
+            Position { x: 37, y: 10 },
+            // The second pentadecathlon
+            Position { x: 3, y: 14 },
+            Position { x: 4, y: 14 },
+            Position { x: 5, y: 13 },
+            Position { x: 5, y: 15 },
+            Position { x: 6, y: 14 },
+            Position { x: 7, y: 14 },
+            Position { x: 8, y: 14 },
+            Position { x: 9, y: 14 },
+            Position { x: 10, y: 13 },
+            Position { x: 10, y: 15 },
+            Position { x: 11, y: 14 },
+            Position { x: 12, y: 14 },
+        ],
+    );
+    // We should do a round-trip in 60 steps.
+    let mut initial_conditions = initial_board.to_exactly_matching_conditions();
+    // Do not force the glider.
+    initial_conditions.drain(12..17);
+    initial_conditions.insert(
+        0,
+        // Glider should be at the center.
+        Condition::TestRectangle {
+            x_range: 19..22,
+            y_range: 10..13,
+            min_live_count: 5,
+            max_live_count: 5,
+        },
+    );
+    initial_conditions.insert(
+        0,
+        // The center of a glider is alive (unlike a boat).
+        Condition::TestPosition {
+            position: Position { x: 20, y: 11 },
+            is_live: true,
+        },
+    );
+    let final_conditions = initial_conditions.clone();
+
+    let puzzle = Puzzle {
+        title: "Glider Double Reflector".to_string(),
+        summary: "Use two reflectors to bounce a glider indefinitely".to_string(),
+        difficulty: Difficulty::Hard,
+        size,
+        metadata: String::new(),
+        minimal_steps: 60,
+        maximal_steps: 60,
+        enforce_initial_conditions: true,
+        is_strict: false,
+        initial_conditions,
+        final_conditions,
+    };
+
+    (puzzle, initial_board)
+}
+
+fn create_high_density_puzzle_and_solution() -> (Puzzle, Board) {
+    let size = 13;
+    let initial_board = Board::with_live_cells(
+        size,
+        vec![
+            Position { x: 6, y: 2 },
+            Position { x: 4, y: 3 },
+            Position { x: 5, y: 3 },
+            Position { x: 6, y: 3 },
+            Position { x: 7, y: 3 },
+            Position { x: 8, y: 3 },
+            Position { x: 3, y: 4 },
+            Position { x: 9, y: 4 },
+            Position { x: 3, y: 5 },
+            Position { x: 4, y: 5 },
+            Position { x: 5, y: 5 },
+            Position { x: 6, y: 5 },
+            Position { x: 7, y: 5 },
+            Position { x: 8, y: 5 },
+            Position { x: 9, y: 5 },
+            Position { x: 3, y: 7 },
+            Position { x: 4, y: 7 },
+            Position { x: 5, y: 7 },
+            Position { x: 6, y: 7 },
+            Position { x: 7, y: 7 },
+            Position { x: 8, y: 7 },
+            Position { x: 9, y: 7 },
+            Position { x: 3, y: 8 },
+            Position { x: 9, y: 8 },
+            Position { x: 5, y: 9 },
+            Position { x: 6, y: 9 },
+            Position { x: 7, y: 9 },
+            Position { x: 8, y: 9 },
+            Position { x: 4, y: 9 },
+            Position { x: 6, y: 10 },
+        ],
+    );
+    let initial_conditions = vec![
+        Condition::TestRectangle {
+            x_range: 3..10,
+            y_range: 2..11,
+            min_live_count: 30,
+            max_live_count: 30,
+        },
+        Condition::TestRectangle {
+            x_range: 0..size,
+            y_range: 0..size,
+            min_live_count: 30,
+            max_live_count: 30,
+        },
+    ];
+    let final_conditions = initial_conditions.clone();
+
+    let puzzle = Puzzle {
+        title: "High Density".to_string(),
+        summary: "Create a high-density stable pattern with given cell count".to_string(),
+        difficulty: Difficulty::Expert,
+        size,
+        metadata: String::new(),
+        minimal_steps: 3,
+        maximal_steps: 3,
+        enforce_initial_conditions: true,
+        is_strict: false,
+        initial_conditions,
+        final_conditions,
+    };
+
+    // Solution is the target pattern itself (stable)
+    (puzzle, initial_board)
+}
+
 fn print_puzzle(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let puzzle_bytes = fs::read(path)?;
     let puzzle: Puzzle = bcs::from_bytes(&puzzle_bytes)?;
@@ -1028,9 +1503,10 @@ fn generate_submit_mutation(
     scoring_chain_id: ChainId,
     owner: Option<AccountOwner>,
     all: bool,
+    name: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get all puzzle and solution creators
-    let puzzles_info = get_puzzles(all);
+    let puzzles_info = get_puzzles(all, name);
 
     // Load blob mapping
     let blob_map: HashMap<String, DataBlobHash> = {
