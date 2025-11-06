@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v31
       - uses: nicknovitski/nix-develop@v1
 
       - name: 'Install linera-storage-service'
@@ -51,6 +52,19 @@ jobs:
 
       - name: 'Verify that code-generated files are unchanged'
         run: git diff --exit-code
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v31
+      - uses: nicknovitski/nix-develop@v1
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          pnpm install
+          pnpm build
 
   lint-cargo-fmt:
     runs-on: ubuntu-latest
