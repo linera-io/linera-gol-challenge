@@ -951,19 +951,6 @@ dependencies = [
 
 [[package]]
 name = "dashmap"
-version = "5.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "978747c1d849a7d2ee5e8adc0159961c48fb7e5db2f06af6723b80123bb53856"
-dependencies = [
- "cfg-if",
- "hashbrown 0.14.5",
- "lock_api",
- "once_cell",
- "parking_lot_core",
-]
-
-[[package]]
-name = "dashmap"
 version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5041cc499144891f3790297212f32a74fb938e5136a14943f338ef9e0ae276cf"
@@ -2177,9 +2164,9 @@ checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
 
 [[package]]
 name = "linera-base"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78847af597a0dada4a5265ade93941a2f575a48b82c54b3c4ea1388762ad1bbe"
+checksum = "d189b7a332ce1b9f8e582870a4cdc990e1d1621ae1358bb97b16966654dcdef5"
 dependencies = [
  "alloy-primitives",
  "anyhow",
@@ -2198,6 +2185,8 @@ dependencies = [
  "is-terminal",
  "k256",
  "linera-witty",
+ "opentelemetry",
+ "opentelemetry_sdk",
  "port-selector",
  "prometheus",
  "proptest",
@@ -2215,6 +2204,8 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "tracing",
+ "tracing-chrome",
+ "tracing-opentelemetry",
  "tracing-subscriber",
  "trait-variant",
  "zstd",
@@ -2222,9 +2213,9 @@ dependencies = [
 
 [[package]]
 name = "linera-chain"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa94cad6c5ed2af1eaf15fe186de6047e061e3a82e7132ea0350bba69c7e7c06"
+checksum = "aef48e71e81d477168448cec434cfc88a31cf6d6030faa765952a73f0822156d"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2240,6 +2231,7 @@ dependencies = [
  "rand_distr",
  "serde",
  "serde_bytes",
+ "serde_json",
  "thiserror 1.0.69",
  "tokio",
  "tracing",
@@ -2247,9 +2239,9 @@ dependencies = [
 
 [[package]]
 name = "linera-core"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2eb4d84f7a8c97bf024ee3ba5674d4e8a3fd4648e9fa7b96349ccbb092e0a47f"
+checksum = "0fa51ae76c03b66f454636dd2b9589e68f7714e1768dc192c6ceeacb131586d1"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2259,7 +2251,6 @@ dependencies = [
  "cfg_aliases",
  "clap",
  "custom_debug_derive",
- "dashmap 5.5.3",
  "futures",
  "linera-base",
  "linera-chain",
@@ -2269,6 +2260,7 @@ dependencies = [
  "linera-version",
  "linera-views",
  "lru",
+ "papaya",
  "prometheus",
  "proptest",
  "rand 0.8.5",
@@ -2279,6 +2271,7 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tokio-stream",
+ "tokio-util",
  "tonic",
  "tracing",
  "trait-set",
@@ -2287,9 +2280,9 @@ dependencies = [
 
 [[package]]
 name = "linera-execution"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d6eba1aa19b010e9e5ab92476fe423eb3d82e513fdd6600e4c2985e22e78585"
+checksum = "3b8f7e1806ff3106ef03d6ffb6d2f21031c260feee25e295745466fb76d2d224"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2299,7 +2292,6 @@ dependencies = [
  "cfg_aliases",
  "clap",
  "custom_debug_derive",
- "dashmap 5.5.3",
  "derive_more 1.0.0",
  "dyn-clone",
  "futures",
@@ -2312,6 +2304,7 @@ dependencies = [
  "linera-witty",
  "lru",
  "oneshot",
+ "papaya",
  "prometheus",
  "proptest",
  "reqwest",
@@ -2332,9 +2325,9 @@ checksum = "c9198100e9ce61acd3c714a2e61eb19fc5b8e2178dd645e2d9061e61e6e1feef"
 
 [[package]]
 name = "linera-sdk"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ad606fdf4a820c579a95fe1de4e2c0b045b5d6105bb51bb7111193d493a468c"
+checksum = "3a9471cdb733847ea24779b6998487a5f4f03bd38ca9e06b379d0c20daaa04de"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2342,7 +2335,6 @@ dependencies = [
  "bcs",
  "cargo_toml",
  "cfg_aliases",
- "dashmap 5.5.3",
  "futures",
  "linera-base",
  "linera-chain",
@@ -2352,6 +2344,7 @@ dependencies = [
  "linera-storage",
  "linera-views",
  "log",
+ "papaya",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
@@ -2361,9 +2354,9 @@ dependencies = [
 
 [[package]]
 name = "linera-sdk-derive"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1f30d9c2da0c0d1bd31a4b6a21934fc533c1605146aeabed0c664df6986b808"
+checksum = "4d6989faf90b58a3be7df028e93e2714c837085edf3d877c6ec9706620c1cd8f"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -2372,30 +2365,32 @@ dependencies = [
 
 [[package]]
 name = "linera-storage"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41fd2b1f29733862a199e88ad34f6235502f2e9083b59a97f2a9c77b4422bf3a"
+checksum = "f38289a564b1b74cd21503a3d3a30063c2eff1701a66435ee7e5ee29a3ff0a4d"
 dependencies = [
  "async-trait",
  "bcs",
  "cfg-if",
  "cfg_aliases",
- "dashmap 5.5.3",
  "futures",
  "itertools",
  "linera-base",
  "linera-chain",
  "linera-execution",
  "linera-views",
+ "papaya",
  "prometheus",
  "serde",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
 name = "linera-storage-service"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05205ed30712b6816afe7e8ead2eff7a3d0a3e6e2a4f33f2b6802116241dfbe8"
+checksum = "fdb565dc4ac6023f31e805a77af67e0f096db99e0e1133fd1dc4416dd0e2f74f"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -2418,9 +2413,9 @@ dependencies = [
 
 [[package]]
 name = "linera-version"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1210696e6356086231c938d50ec856bc54910aebfdcb14a14f09c3d389c20b12"
+checksum = "84565c3e3d713afc6b9858951c39f0bfe397e19855cd728074e3f3ad3ec7c76d"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2440,9 +2435,9 @@ dependencies = [
 
 [[package]]
 name = "linera-views"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf00c141ddf6a1e1b9deb1955ad1e147e2c565bdfd25276ff69e7232485cb49c"
+checksum = "5ba4ebc7c9922e8ae6c7d4f022d47d062898a091e23519983eb281045038d182"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2450,7 +2445,6 @@ dependencies = [
  "bcs",
  "cfg_aliases",
  "convert_case",
- "dashmap 5.5.3",
  "derive_more 1.0.0",
  "futures",
  "generic-array",
@@ -2459,6 +2453,7 @@ dependencies = [
  "linera-views-derive",
  "linera-witty",
  "linked-hash-map",
+ "papaya",
  "prometheus",
  "rand 0.8.5",
  "serde",
@@ -2476,9 +2471,9 @@ dependencies = [
 
 [[package]]
 name = "linera-views-derive"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2149478c16dd387490b12618b9f9d6a6f06145d6726998068f91e11656dd36cd"
+checksum = "31cfa81d33d052c10536b558c9ffe01fc00404b8d449721ef82102e1e31a85f1"
 dependencies = [
  "cfg_aliases",
  "deluxe",
@@ -2606,7 +2601,7 @@ dependencies = [
  "cfg-if",
  "corosensei",
  "crossbeam-queue",
- "dashmap 6.1.0",
+ "dashmap",
  "derivative",
  "enum-iterator",
  "fnv",
@@ -2626,9 +2621,9 @@ dependencies = [
 
 [[package]]
 name = "linera-witty"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f1312ffe51bb5d32949ac4889d2bcf8590e25bb47aec2223c7ce989d9306fb0"
+checksum = "cc4dc4032ab7c948d9b84265ddaed314e25af8fb85867a9e9d699bbeb817e140"
 dependencies = [
  "anyhow",
  "cfg_aliases",
@@ -2642,9 +2637,9 @@ dependencies = [
 
 [[package]]
 name = "linera-witty-macros"
-version = "0.15.0"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed904da646aab6a1ece937378c31d27928be5727dc6ad640000e9dab31082933"
+checksum = "5bbf881ffdff677fb8313050fa77a76d3ee24700a77f8f1a82b003666dbf2a68"
 dependencies = [
  "cfg_aliases",
  "heck 0.4.1",
@@ -2887,6 +2882,48 @@ name = "oneshot"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4ce411919553d3f9fa53a0880544cda985a112117a0444d5ff1e870a893d6ea"
+
+[[package]]
+name = "opentelemetry"
+version = "0.30.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aaf416e4cb72756655126f7dd7bb0af49c674f4c1b9903e80c009e0c37e552e6"
+dependencies = [
+ "futures-core",
+ "futures-sink",
+ "js-sys",
+ "pin-project-lite",
+ "thiserror 2.0.16",
+ "tracing",
+]
+
+[[package]]
+name = "opentelemetry_sdk"
+version = "0.30.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11f644aa9e5e31d11896e024305d7e3c98a88884d9f8919dbf37a9991bc47a4b"
+dependencies = [
+ "futures-channel",
+ "futures-executor",
+ "futures-util",
+ "opentelemetry",
+ "percent-encoding",
+ "rand 0.9.2",
+ "serde_json",
+ "thiserror 2.0.16",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
+name = "papaya"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aeb8b9616002a83f9779ea70a2a44364fe804f8b532b96989d0790a34ad76479"
+dependencies = [
+ "equivalent",
+ "seize",
+]
 
 [[package]]
 name = "parking"
@@ -3281,6 +3318,7 @@ version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6db2770f06117d490610c7488547d543617b21bfa07796d7a12f6f1bd53850d1"
 dependencies = [
+ "rand_chacha 0.9.0",
  "rand_core 0.9.3",
  "serde",
 ]
@@ -3669,6 +3707,16 @@ dependencies = [
  "serdect",
  "subtle",
  "zeroize",
+]
+
+[[package]]
+name = "seize"
+version = "0.4.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d84b0c858bdd30cb56f5597f8b3bf702ec23829e652cc636a1e5a7b9de46ae93"
+dependencies = [
+ "libc",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4508,6 +4556,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tracing-chrome"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf0a738ed5d6450a9fb96e86a23ad808de2b727fd1394585da5cdd6788ffe724"
+dependencies = [
+ "serde_json",
+ "tracing-core",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "tracing-core"
 version = "0.1.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4515,6 +4574,35 @@ checksum = "b9d12581f227e93f094d3af2ae690a574abb8a2b9b7a96e7cfe9647b2b617678"
 dependencies = [
  "once_cell",
  "valuable",
+]
+
+[[package]]
+name = "tracing-log"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
+dependencies = [
+ "log",
+ "once_cell",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-opentelemetry"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ddcf5959f39507d0d04d6413119c04f33b623f4f951ebcbdddddfad2d0623a9c"
+dependencies = [
+ "js-sys",
+ "once_cell",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "smallvec",
+ "tracing",
+ "tracing-core",
+ "tracing-log",
+ "tracing-subscriber",
+ "web-time",
 ]
 
 [[package]]
@@ -4540,9 +4628,11 @@ dependencies = [
  "serde",
  "serde_json",
  "sharded-slab",
+ "smallvec",
  "thread_local",
  "tracing",
  "tracing-core",
+ "tracing-log",
  "tracing-serde",
 ]
 
@@ -4862,6 +4952,16 @@ name = "web-sys"
 version = "0.3.77"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33b6dd2ef9186f1f2072e409e99cd22a975331a6b3591b12c764e0e55c60d5d2"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "web-time"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a6580f308b1fad9207618087a65c04e7a10bc77e02c8e84e9b00dd4b12fa0bb"
 dependencies = [
  "js-sys",
  "wasm-bindgen",

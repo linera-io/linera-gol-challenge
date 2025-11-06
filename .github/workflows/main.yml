@@ -29,12 +29,12 @@ jobs:
       - name: 'Install linera-storage-service'
         uses: taiki-e/cache-cargo-install-action@v2
         with:
-          tool: linera-storage-service@0.15.3
+          tool: linera-storage-service@0.15.5
 
       - name: 'Install linera-service'
         uses: taiki-e/cache-cargo-install-action@v2
         with:
-          tool: linera-service@0.15.3
+          tool: linera-service@0.15.5
 
       - run: |
           ln -sf /opt/hostedtoolcache/linera-storage-service/bin/linera-storage-server /opt/hostedtoolcache/linera-service/bin/
