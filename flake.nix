@@ -28,29 +28,33 @@
         inputsFrom = [
           config.treefmt.build.devShell
         ];
-        
+
         buildInputs = with pkgs; [
           # Frontend dependencies
           nodejs
           pnpm
-          
+
           # Rust toolchain from rust-toolchain.toml
           (rust-bin.fromRustupToolchainFile ./rust-toolchain.toml)
-          
-          # Build tools
+
+          # Linera dependencies
           pkg-config
           openssl
           protobuf
-          
+          clang
+          clang.cc.lib
+          libiconv
+
           # Deployment tools
           google-cloud-sdk
-          
+
           # Development tools
           jq
         ];
-        
+
         shellHook = ''
           export PATH=$PWD/target/debug:$PATH
+          export LIBCLANG_PATH="${pkgs.clang.cc.lib}/lib"
           echo "Game of Life Challenge development environment"
           echo "- Frontend: cd frontend && pnpm install && pnpm build"
           echo "- Backend: cargo build"
