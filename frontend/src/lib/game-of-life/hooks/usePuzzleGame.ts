@@ -155,13 +155,15 @@ export function usePuzzleGame() {
         throw new Error(validationResult.errorMessage || "Solution is not valid");
       }
 
-      return lineraService.submitSolution(currentPuzzle.id, board);
+      const result = lineraService.submitSolution(currentPuzzle.id, board);
+      if (!result) {
+        setValidationResult({ isValid: false, message: "Incorrect solution, try again" });
+      }
+
+      setValidationResult({ isValid: true, message: "Solution submitted successfully!" });
+      return result;
     },
     onSuccess: () => {
-      setValidationResult({
-        isValid: true,
-        message: "Solution submitted successfully!",
-      });
       // Invalidate queries to refresh completion status from blockchain
       queryClient.invalidateQueries({ queryKey: ["completedPuzzles"] });
       queryClient.invalidateQueries({
@@ -222,7 +224,7 @@ export function usePuzzleGame() {
   const loadNextPuzzle = useCallback(() => {
     if (!currentPuzzleId) return false;
 
-    const currentIndex = KNOWN_PUZZLES.findIndex(p => p.id === currentPuzzleId);
+    const currentIndex = KNOWN_PUZZLES.findIndex((p) => p.id === currentPuzzleId);
     if (currentIndex === -1) return false;
 
     // Get next puzzle (cycle to beginning if at end)
@@ -239,7 +241,7 @@ export function usePuzzleGame() {
   const loadPreviousPuzzle = useCallback(() => {
     if (!currentPuzzleId) return false;
 
-    const currentIndex = KNOWN_PUZZLES.findIndex(p => p.id === currentPuzzleId);
+    const currentIndex = KNOWN_PUZZLES.findIndex((p) => p.id === currentPuzzleId);
     if (currentIndex === -1) return false;
 
     // Get previous puzzle (cycle to end if at beginning)
