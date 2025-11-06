@@ -59,7 +59,7 @@ export class LineraAdapter {
         const chainId = await faucet.claimChain(wallet, address);
 
         const signer = await new DynamicSigner(dynamicWallet);
-        const client = await new Client(wallet, signer);
+        const client = await new Client(wallet, signer, false);
         console.log("✅ Using Linera chain: ", chainId);
 
         client.onNotification((notification : any) => {
