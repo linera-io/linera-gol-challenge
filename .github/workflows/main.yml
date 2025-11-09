@@ -15,16 +15,10 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-
-      - name: 'Install Rust toolchain'
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: 'Install Protoc'
-        uses: arduino/setup-protoc@v3
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1
 
       - name: 'Install linera-storage-service'
         uses: taiki-e/cache-cargo-install-action@v2
@@ -59,6 +53,20 @@ jobs:
 
       - name: 'Verify that code-generated files are unchanged'
         run: git diff --exit-code
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          pnpm install
+          pnpm build
 
   lint-cargo-fmt:
     runs-on: ubuntu-latest
