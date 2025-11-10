@@ -150,6 +150,16 @@ export function PuzzleSubmit({
 
   const buttonText = isPuzzleCompleted ? "Already Completed" : "Submit Solution";
 
+  const handleShareClick = () => {
+    if (!puzzle) return;
+
+    const puzzleUrl = `${window.location.origin}/?puzzle=${puzzle.id}`;
+    const tweetText = `I just solved "${puzzle.title}" on Linera Game of Life! \n\nTry it yourself: ${puzzleUrl}`;
+    const twitterIntentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+
+    window.open(twitterIntentUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <Card className="bg-white shadow-lg">
       <CardBody className="p-6">
@@ -158,15 +168,25 @@ export function PuzzleSubmit({
 
           {validationResult && <ValidationMessage result={validationResult} />}
 
-          <Button
-            onPress={onSubmit}
-            isLoading={isSubmitting}
-            isDisabled={isPuzzleCompleted}
-            className={`w-full font-medium ${buttonClassName}`}
-            size="lg"
-          >
-            {buttonText}
-          </Button>
+          {isPuzzleCompleted ? (
+            <Button
+              onPress={handleShareClick}
+              className="w-full font-medium bg-linera-primary hover:bg-linera-primary-dark text-white"
+              size="lg"
+              endContent={<img src="/x-logo.png" alt="X" className="w-5 h-5" />}
+            >
+              Share on
+            </Button>
+          ) : (
+            <Button
+              onPress={onSubmit}
+              isLoading={isSubmitting}
+              className={`w-full font-medium ${buttonClassName}`}
+              size="lg"
+            >
+              {buttonText}
+            </Button>
+          )}
         </div>
       </CardBody>
     </Card>

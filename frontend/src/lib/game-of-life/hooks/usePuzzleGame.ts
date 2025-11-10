@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LineraService } from "@/lib/linera/services/LineraService";
 import { LineraBoard } from "@/lib/types/puzzle.types";
@@ -12,6 +13,7 @@ const QUERY_KEYS = {
 };
 
 export function usePuzzleGame() {
+  const [searchParams] = useSearchParams();
   const [currentPuzzleId, setCurrentPuzzleId] = useState<string | null>(null);
   const [stepCount, setStepCount] = useState(0);
   const [validationResult, setValidationResult] = useState<{
@@ -221,6 +223,20 @@ export function usePuzzleGame() {
     setValidationResult(null);
     game.clear();
   }, [game]);
+
+  // Handle puzzle query parameter on mount
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const puzzleIdFromUrl = searchParams.get('puzzle');
+    if (puzzleIdFromUrl) {
+      // Check if the puzzle ID exists in KNOWN_PUZZLES
+      const puzzleExists = KNOWN_PUZZLES.some(p => p.id === puzzleIdFromUrl);
+      if (puzzleExists && !currentPuzzleId) {
+        loadPuzzle(puzzleIdFromUrl);
+      }
+    }
+  }, [isInitialized, searchParams, currentPuzzleId, loadPuzzle]);
 
   // Navigation functions
   const loadNextPuzzle = useCallback(() => {
