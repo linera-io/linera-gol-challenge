@@ -144,11 +144,9 @@ export function PuzzleSubmit({
     return <p className="text-sm text-gray-500">Place your cells and press submit when ready.</p>;
   };
 
-  const buttonClassName = isPuzzleCompleted
-    ? "bg-gray-400 cursor-not-allowed text-white"
-    : "bg-linera-primary hover:bg-linera-primary-dark text-white";
+  const buttonClassName = "bg-linera-primary hover:bg-linera-primary-dark text-white";
 
-  const buttonText = isPuzzleCompleted ? "Already Completed" : "Submit Solution";
+  const buttonText = isPuzzleCompleted ? "Resubmit Solution" : "Submit Solution";
 
   return (
     <Card className="bg-white shadow-lg">
@@ -161,7 +159,6 @@ export function PuzzleSubmit({
           <Button
             onPress={onSubmit}
             isLoading={isSubmitting}
-            isDisabled={isPuzzleCompleted}
             className={`w-full font-medium ${buttonClassName}`}
             size="lg"
           >
