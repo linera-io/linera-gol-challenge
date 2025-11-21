@@ -24,12 +24,15 @@ function createCombinedRectangleOverlay(
 ): JSX.Element {
   const width = (initialRect.x_range.end - initialRect.x_range.start) * cellSize;
   const height = (initialRect.y_range.end - initialRect.y_range.start) * cellSize;
-  const fontSize = Math.max(11, Math.min(14, Math.min(width, height) / 10));
+  const fontSize = Math.max(11, Math.min(16, Math.min(width, height) / 8));
+
+  // Determine if the area is too small for text inside
+  const isSmallArea = width < 100 || height < 40;
 
   return (
     <div
       key="combined-rect"
-      className="absolute pointer-events-none flex flex-col items-end justify-end"
+      className="absolute pointer-events-none"
       style={{
         left: initialRect.x_range.start * cellSize,
         top: initialRect.y_range.start * cellSize,
@@ -40,13 +43,29 @@ function createCombinedRectangleOverlay(
         border: "2px solid",
         borderImage: "linear-gradient(135deg, rgba(34, 197, 94, 0.6), rgba(59, 130, 246, 0.6)) 1",
         borderRadius: "6px",
-        zIndex: 10,
-        padding: "8px",
+        zIndex: 1000,
       }}
     >
-      <div className="flex flex-col gap-1">
+      <div
+        className="flex flex-col gap-1"
+        style={{
+          position: "absolute",
+          ...(isSmallArea
+            ? {
+                // Position above the box when small
+                bottom: "100%",
+                left: "0",
+                marginBottom: "4px",
+              }
+            : {
+                // Position inside the box when large enough
+                bottom: "8px",
+                right: "8px",
+              }),
+        }}
+      >
         <div
-          className="font-medium px-2 py-1 rounded"
+          className="font-medium px-2 py-1 rounded whitespace-nowrap"
           style={{
             fontSize: `${fontSize}px`,
             color: "rgb(34, 197, 94)",
@@ -57,7 +76,7 @@ function createCombinedRectangleOverlay(
           {getRectangleLabel(initialRect, "initial")}
         </div>
         <div
-          className="font-medium px-2 py-1 rounded"
+          className="font-medium px-2 py-1 rounded whitespace-nowrap"
           style={{
             fontSize: `${fontSize}px`,
             color: "rgb(59, 130, 246)",
@@ -91,13 +110,16 @@ function createSingleRectangleOverlay(
 
   const width = (rect.x_range.end - rect.x_range.start) * cellSize;
   const height = (rect.y_range.end - rect.y_range.start) * cellSize;
-  const fontSize = Math.max(11, Math.min(14, Math.min(width, height) / 10));
+  const fontSize = Math.max(11, Math.min(16, Math.min(width, height) / 8));
   const label = getRectangleLabel(rect, type);
+
+  // Determine if the area is too small for text inside
+  const isSmallArea = width < 100 || height < 40;
 
   return (
     <div
       key={`${type}-rect-${index}`}
-      className="absolute pointer-events-none flex items-end justify-end"
+      className="absolute pointer-events-none"
       style={{
         left: rect.x_range.start * cellSize,
         top: rect.y_range.start * cellSize,
@@ -106,13 +128,26 @@ function createSingleRectangleOverlay(
         border: `2px dashed rgba(${color}, 0.5)`,
         backgroundColor: `rgba(${color}, 0.06)`,
         borderRadius: "6px",
-        zIndex: 10,
-        padding: "8px",
+        zIndex: 1000,
       }}
     >
+      {/* Text label */}
       <div
-        className="font-medium px-2 py-1 rounded"
+        className="font-medium px-2 py-1 rounded whitespace-nowrap"
         style={{
+          position: "absolute",
+          ...(isSmallArea
+            ? {
+                // Position above the box when small
+                bottom: "100%",
+                left: "0",
+                marginBottom: "4px",
+              }
+            : {
+                // Position inside the box when large enough
+                bottom: "8px",
+                right: "8px",
+              }),
           fontSize: `${fontSize}px`,
           color: `rgb(${color})`,
           backgroundColor: "rgba(255, 255, 255, 0.95)",
@@ -178,7 +213,10 @@ export function RectangleOverlays({
   }, [initialConditions, finalConditions, cellSize]);
 
   return (
-    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 100 }}>
+    <div
+      className="absolute inset-0 pointer-events-none overflow-visible"
+      style={{ zIndex: 1000 }}
+    >
       {rectangleOverlays}
     </div>
   );
