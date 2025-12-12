@@ -1,4 +1,4 @@
-import initLinera, { Faucet, Client, Wallet, Application } from "@linera/client";
+import { initialize, Faucet, Client, Wallet, Application } from "@linera/client";
 import type { Wallet as DynamicWallet } from "@dynamic-labs/sdk-react-core";
 import { DynamicSigner } from "./dynamic-signer";
 
@@ -41,7 +41,7 @@ export class LineraAdapter {
         console.log("🔗 Connecting with Dynamic wallet:", address);
 
         try {
-          if (!this.wasmInitPromise) this.wasmInitPromise = initLinera();
+          if (!this.wasmInitPromise) this.wasmInitPromise = initialize();
           await this.wasmInitPromise;
           console.log("✅ Linera WASM modules initialized successfully");
         } catch (e) {
@@ -105,7 +105,7 @@ export class LineraAdapter {
   async setApplications(appId: string, previousAppIds: string[]) {
     if (!this.provider) throw new Error("Not connected to Linera");
 
-    const application = await this.provider.client.frontend().application(appId);
+    const application = await this.provider.client.application(appId);
 
     if (!application) throw new Error("Failed to get application");
     this.application = application;
@@ -113,7 +113,7 @@ export class LineraAdapter {
 
     const applications = []
     for (const appId of previousAppIds) {
-      const application = await this.provider.client.frontend().application(appId);
+      const application = await this.provider.client.application(appId);
       if (!application) throw new Error("Failed to get previous application");
       applications.push(application);
     }
