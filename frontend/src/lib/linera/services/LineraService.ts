@@ -18,7 +18,7 @@ import {
 export interface WalletInfo {
   chainId: string;
   createdAt: string;
-  scoringChainId: string;
+  scoringChainId: string | null;
 }
 
 export class LineraService {
@@ -50,10 +50,13 @@ export class LineraService {
 
       await lineraAdapter.setApplications(GOL_APP_ID, PREVIOUS_GOL_APP_IDS);
 
-      const address = lineraAdapter.getAddress();
-      const value = Number(address.substring(0, 10)); // top 8 hex digits including 0x
-      const index = value % GOL_SCORING_CHAIN_IDS.length;
-      const scoringChainId = GOL_SCORING_CHAIN_IDS[index];
+      var scoringChainId = null;
+      if (GOL_SCORING_CHAIN_IDS.length > 0) {
+        const address = lineraAdapter.getAddress();
+        const value = Number(address.substring(0, 10)); // top 8 hex digits including 0x
+        const index = value % GOL_SCORING_CHAIN_IDS.length;
+        scoringChainId = GOL_SCORING_CHAIN_IDS[index];
+      }
 
       this.walletInfo = {
         chainId: provider.chainId,
@@ -164,7 +167,7 @@ export class LineraService {
     try {
       const mutation = {
         query: `
-          mutation SubmitSolution($puzzleId: String!, $board: BoardInput!, $scoringChainId: String!) {
+          mutation SubmitSolution($puzzleId: String!, $board: BoardInput!, $scoringChainId: String) {
             submitSolution(puzzleId: $puzzleId, board: $board, scoringChainId: $scoringChainId)
           }
         `,
