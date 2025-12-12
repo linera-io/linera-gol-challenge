@@ -80,13 +80,6 @@ export function PuzzleTutorial() {
                   Submit when you've solved the puzzle to record it on the blockchain!
                 </p>
               </div>
-              <div className="flex gap-3">
-                <div className="h-4 w-4 bg-gray-300 flex-shrink-0" />
-                <p className="text-sm text-gray-500">
-                  When you've successfully solved the puzzle, return to the Portal to claim your
-                  points.
-                </p>
-              </div>
             </div>
           </div>
         </div>
