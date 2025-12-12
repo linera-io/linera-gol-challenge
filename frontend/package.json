@@ -46,9 +46,9 @@
     "intl-messageformat": "10.7.16",
     "lucide-react": "^0.539.0",
     "next-themes": "0.4.6",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-router-dom": "^6.30.0"
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
     "@react-types/shared": "3.30.0",
