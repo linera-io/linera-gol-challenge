@@ -1,8 +1,9 @@
-# Game-of-Life challenge
+# Linera's Game-of-Life challenge
+
+This repository contains the source code of the Game-of-Life challenge running on Linera's
+testnet "Conway": https://apps.linera.net/gol
 
 ## Architecture overview
-
-See also https://www.notion.so/Game-of-Life-Challenge-24ebf4cdba9c80c98a1ccb9fabf0db04
 
 ```mermaid
 flowchart LR
@@ -39,7 +40,7 @@ flowchart LR
 ## Quickstart (backend)
 
 ```ignore
-cargo install linera-storage-service@0.15.3 linera-service@0.15.3
+cargo install linera-storage-service@0.15.7 linera-service@0.15.7
 
 cargo build --release --target wasm32-unknown-unknown
 
