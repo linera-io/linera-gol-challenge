@@ -2,12 +2,7 @@
 export const LINERA_RPC_URL = "https://faucet.testnet-conway.linera.net/";
 
 // Game of Life scoring chain IDs
-export const GOL_SCORING_CHAIN_IDS = [
-  "1b2a5089b0b8cd0971aca985f1819ebb2f23088aca5f864cc99a2666585226ad",
-  "f30e18278e8cf01ff39d44b856782805b5b22ca5c5dec19ca4694a724cdbf1cd",
-  "7cc367a5baebdb26f82c4d1753736319cb9bfe1aa920d6a894e93bfc597e2377",
-  "e3747adab559105a41e361bc52c141a284b31bc5eb0ef738f37c4f3f8651cb39",
-]
+export const GOL_SCORING_CHAIN_IDS = []
 
 // Game of Life application ID
 export const GOL_APP_ID = "750eb4b947761eeece6c52fd488ec23442dce240fab150b93ea2212b014aaace";
