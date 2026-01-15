@@ -14,8 +14,8 @@
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,md,json}\""
   },
   "dependencies": {
-    "@dynamic-labs/ethereum": "^4.29.4",
-    "@dynamic-labs/sdk-react-core": "^4.29.4",
+    "@dynamic-labs/ethereum": "^4.52.2",
+    "@dynamic-labs/sdk-react-core": "^4.52.2",
     "@heroui/badge": "^2.2.15",
     "@heroui/button": "2.2.24",
     "@heroui/card": "^2.2.23",
